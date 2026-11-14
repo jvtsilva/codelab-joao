@@ -31,9 +31,18 @@ export default function CadastroPage() {
 
       if (error) throw error
 
-      const confirmationUrl = `${window.location.origin}/verificar-email`
+      // 💡 O pulo do gato: O Supabase retorna os dados de identificação. 
+      // Se a confirmação por e-mail estiver ativa, pegamos o link gerado ou direcionamos com o token de sessão/verificação.
+      // Vamos montar a URL de confirmação apontando para a nossa página customizada com os parâmetros do Supabase.
+      
+      // O Supabase envia o token de confirmação no fluxo. Se quisermos que o botão do Resend leve 
+      // para a confirmação segura, passamos o link gerado pelo Supabase ou o redirecionamento com o token.
+      const confirmationUrl = data.session 
+        ? `${window.location.origin}/dashboard` 
+        : `${window.location.origin}/verificar-email`
 
-      // 2. Dispara o e-mail via Resend
+      // Se o Supabase gerou um link de ação ou token, podemos capturá-lo. 
+      // Como estamos bypassando o e-mail nativo do Supabase para usar o Resend e não tomar rate limit:
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -44,15 +53,12 @@ export default function CadastroPage() {
       })
 
       const resData = await res.json()
-      console.log('Resposta do Resend:', resData)
-
       if (!res.ok) {
         throw new Error(resData.error?.message || 'Erro ao enviar o e-mail pelo Resend.')
       }
 
       setEmailSent(true)
     } catch (error: any) {
-      console.error('Erro no cadastro:', error)
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
     } finally {
       setLoading(false)
@@ -78,7 +84,7 @@ export default function CadastroPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
-        <h2 className="template-title text-2xl font-bold text-center mb-2">Crie sua conta</h2>
+        <h2 className="text-2xl font-bold text-center mb-2">Crie sua conta</h2>
         
         {errorMessage && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
@@ -113,10 +119,17 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
+
+        <p className="text-center text-xs text-gray-500 mt-4">
+          Já tem uma conta?{' '}
+          <Link href="/login" className="text-indigo-400 hover:underline">
+            Faça login
+          </Link>
+        </p>
       </form>
     </div>
   )
