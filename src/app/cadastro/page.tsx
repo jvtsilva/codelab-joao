@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase' // Usando o cliente único
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -12,11 +12,6 @@ export default function CadastroPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-  
   const router = useRouter()
 
   const handleCadastro = async (e: React.FormEvent) => {
@@ -25,7 +20,7 @@ export default function CadastroPage() {
     setErrorMessage('')
 
     try {
-      // 1. Cadastra o usuário no Supabase
+      // 1. Cadastra no Supabase
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -35,12 +30,12 @@ export default function CadastroPage() {
       })
 
       if (error) throw error
+      console.log('✅ Usuário cadastrado no Supabase com sucesso!')
 
-      // 2. Monta o link de confirmação dinâmico baseado na rota de callback ou verificação do Supabase
-      // Quando o Supabase faz o signUp, se ele retorna uma sessão ou user, podemos extrair ou direcionar para a verificação com o token
       const confirmationUrl = `${window.location.origin}/verificar-email`
 
-      // 3. Dispara o e-mail via Resend enviando o link correto para o botão
+      // 2. Dispara o e-mail via Resend
+      console.log('📧 Tentando disparar e-mail via Resend para:', email)
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,12 +45,16 @@ export default function CadastroPage() {
         }),
       })
 
+      const resData = await res.json()
+      console.log('📬 Resposta da API do Resend:', resData)
+
       if (!res.ok) {
-        console.warn('Aviso: O cadastro foi feito, mas houve falha ao disparar o e-mail pelo Resend.')
+        throw new Error(resData.error?.message || 'Erro ao enviar o e-mail pelo Resend.')
       }
 
       setEmailSent(true)
     } catch (error: any) {
+      console.error('❌ Erro no fluxo de cadastro:', error)
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
     } finally {
       setLoading(false)
@@ -74,7 +73,7 @@ export default function CadastroPage() {
             Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no botão do e-mail.
           </p>
           <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300 text-left">
-            💡 O link do e-mail abrirá a página de ativação onde você clicará em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso sem estourar limites!
+            💡 Abra o seu e-mail (`codelab.joao@gmail.com`), clique no botão de confirmação e você será direcionado para ativar a conta.
           </div>
         </div>
       </div>
@@ -119,7 +118,7 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
