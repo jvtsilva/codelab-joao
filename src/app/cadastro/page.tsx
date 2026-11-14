@@ -17,8 +17,7 @@ export default function CadastroPage() {
     setErrorMessage('')
 
     try {
-      // 1. Cria o usuário no Supabase
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -28,11 +27,9 @@ export default function CadastroPage() {
 
       if (error) throw error
 
-      // 🛡️ SEGURANÇA: Como o Supabase loga automaticamente, deslogamos imediatamente 
-      // para impedir que o usuário fure a fila sem confirmar o e-mail!
+      // 🛡️ Segurança: Desloga na hora para barrar acesso sem confirmar e-mail
       await supabase.auth.signOut()
 
-      // 2. Dispara o e-mail customizado via Resend
       const confirmationUrl = `${window.location.origin}/dashboard`
 
       const res = await window.fetch('/api/send-email', {
@@ -55,14 +52,14 @@ export default function CadastroPage() {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl space-y-4">
           <div className="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl">
             ✉️
           </div>
           <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
           <p className="text-gray-400 text-sm">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Você precisa clicar nele para ativar sua conta antes de acessar o sistema.
+            Enviamos um link de confirmação para <strong>{email}</strong>. Confirme sua conta para liberar o acesso ao sistema.
           </p>
         </div>
       </div>
@@ -70,7 +67,7 @@ export default function CadastroPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
         <h2 className="text-2xl font-bold text-center mb-2">Crie sua conta</h2>
         
@@ -107,7 +104,7 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20 cursor-pointer"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
