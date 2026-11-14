@@ -18,13 +18,23 @@ export default function LoginPage() {
     setErrorMessage('')
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1. Tenta fazer o login com e-mail e senha
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
 
+      // 🛡️ 2. TRAVA DE SEGURANÇA: Verifica se o e-mail foi confirmado
+      const user = data.session?.user
+      if (user && !user.email_confirmed_at) {
+        // Se não confirmou, desloga imediatamente para barrar o acesso
+        await supabase.auth.signOut()
+        throw new Error('Você precisa confirmar seu e-mail antes de fazer login. Verifique sua caixa de entrada.')
+      }
+
+      // Se passou pela validação, vai para o dashboard
       router.push('/dashboard')
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao fazer login. Verifique suas credenciais.')
