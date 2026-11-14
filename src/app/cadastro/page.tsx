@@ -54,7 +54,7 @@ export default function CadastroPage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl space-y-4">
-          <div className="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl">
+          <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
             ✉️
           </div>
           <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
@@ -84,7 +84,7 @@ export default function CadastroPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 text-sm"
+            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
             placeholder="seu@email.com"
           />
         </div>
@@ -96,7 +96,7 @@ export default function CadastroPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 text-sm"
+            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
             placeholder="••••••••"
           />
         </div>
@@ -104,14 +104,14 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20 cursor-pointer"
+          className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-emerald-500/20 cursor-pointer"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
 
         <p className="text-center text-xs text-gray-500 mt-4">
           Já tem uma conta?{' '}
-          <Link href="/login" className="text-indigo-400 hover:underline">
+          <Link href="/login" className="text-emerald-400 hover:underline">
             Faça login
           </Link>
         </p>
