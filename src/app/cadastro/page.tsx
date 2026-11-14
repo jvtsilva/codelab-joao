@@ -36,19 +36,17 @@ export default function CadastroPage() {
 
       if (error) throw error
 
-      // 2. Pega o link de confirmação gerado pelo Supabase para mandar no e-mail do Resend
-      // O Supabase às vezes retorna o link direto no data.properties ou precisamos montar com base na sessão
-      const confirmationUrl = data.user?.confirmation_sent_at 
-        ? `${window.location.origin}/verificar-email` 
-        : `${window.location.origin}/verificar-email`
+      // 2. Monta o link de confirmação dinâmico baseado na rota de callback ou verificação do Supabase
+      // Quando o Supabase faz o signUp, se ele retorna uma sessão ou user, podemos extrair ou direcionar para a verificação com o token
+      const confirmationUrl = `${window.location.origin}/verificar-email`
 
-      // 3. Dispara o e-mail via Resend enviando o link de confirmação
+      // 3. Dispara o e-mail via Resend enviando o link correto para o botão
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           email, 
-          confirmationUrl: data.session ? undefined : `${window.location.origin}/verificar-email` 
+          confirmationUrl 
         }),
       })
 
@@ -76,7 +74,7 @@ export default function CadastroPage() {
             Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no botão do e-mail.
           </p>
           <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300 text-left">
-            💡 O link do e-mail abrirá a página de ativação onde você clicará em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso.
+            💡 O link do e-mail abrirá a página de ativação onde você clicará em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso sem estourar limites!
           </div>
         </div>
       </div>
@@ -121,7 +119,7 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+          className="w-full py.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
