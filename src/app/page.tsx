@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { JAVASCRIPT_MODULES } from '@/data/courses'
 import { supabase } from '@/lib/supabase'
 
@@ -10,8 +11,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isAuthOpen, setIsAuthOpen] = useState(false)
-  const [isSignUp, setIsSignUp] = useState(false)
+  const [isAuthOpen, setIsAuthOpen] = useState(false) // Usado agora apenas para o Login
   const [authError, setAuthError] = useState('')
   const [statusMessage, setStatusMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -65,7 +65,8 @@ export default function DashboardPage() {
     }
   }
 
-  const handleAuth = async (e: React.FormEvent) => {
+  // Função dedicada apenas para o Login via Modal na página principal
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setAuthError('')
 
@@ -75,49 +76,24 @@ export default function DashboardPage() {
       return
     }
 
-    if (isSignUp && password.length < 8) {
-      setAuthError('A senha precisa ter pelo menos 8 caracteres.')
-      return
-    }
-
     setIsLoading(true)
 
     try {
-      if (isSignUp) {
-        setStatusMessage('Fazendo cadastro...')
-        const { error } = await supabase.auth.signUp({ email, password })
-        await new Promise(resolve => setTimeout(resolve, 1500))
+      setStatusMessage('Verificando credenciais...')
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
-        if (error) {
-          setAuthError(error.message)
-          setStatusMessage('')
-          setIsLoading(false)
-        } else {
-          setStatusMessage('✨ Conta criada com sucesso!')
-          setPassword('')
-          await new Promise(resolve => setTimeout(resolve, 1500))
-          setIsSignUp(false)
-          setIsLoading(false)
-          setIsAuthOpen(false)
-          triggerWelcome("Bem-vindo ao Codelab! Sua jornada rumo à excelência em programação começa agora.")
-        }
+      if (error) {
+        setAuthError('E-mail ou senha incorretos.')
+        setStatusMessage('')
+        setIsLoading(false)
       } else {
-        setStatusMessage('Verificando credenciais...')
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        setStatusMessage('✨ Login efetuado com sucesso!')
         await new Promise(resolve => setTimeout(resolve, 1500))
-
-        if (error) {
-          setAuthError('E-mail ou senha incorretos.')
-          setStatusMessage('')
-          setIsLoading(false)
-        } else {
-          setStatusMessage('✨ Login efetuado com sucesso!')
-          await new Promise(resolve => setTimeout(resolve, 1500))
-          setIsAuthOpen(false)
-          setIsLoading(false)
-          const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
-          triggerWelcome(randomQuote)
-        }
+        setIsAuthOpen(false)
+        setIsLoading(false)
+        const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+        triggerWelcome(randomQuote)
       }
     } catch (err) {
       setStatusMessage('')
@@ -138,13 +114,8 @@ export default function DashboardPage() {
 
   const currentModule = JAVASCRIPT_MODULES.find(m => m.id === selectedModuleId) || JAVASCRIPT_MODULES[0]
 
-  // Libera exatamente as 3 primeiras lições ativas
   const isFirstModule = currentModule.id === JAVASCRIPT_MODULES[0]?.id
   const activeLessons = isFirstModule ? currentModule.lessons.slice(0, 3) : currentModule.lessons
-
-  const allLessonsCompleted = activeLessons.every(
-    lesson => lessonStatuses[lesson.id] === 'completed'
-  )
 
   const totalCompletedLessons = Object.values(lessonStatuses).filter(s => s === 'completed').length
 
@@ -180,7 +151,6 @@ export default function DashboardPage() {
                 <button 
                   type="button"
                   onClick={() => {
-                    setIsSignUp(false)
                     setAuthError('')
                     setStatusMessage('')
                     setIsAuthOpen(true)
@@ -190,18 +160,13 @@ export default function DashboardPage() {
                   Entrar
                 </button>
 
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(true)
-                    setAuthError('')
-                    setStatusMessage('')
-                    setIsAuthOpen(true)
-                  }}
-                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer active:scale-95 transition-transform"
+                {/* BOTÃO DE CADASTRAR DIRECIONANDO PARA A NOVA PÁGINA */}
+                <Link 
+                  href="/cadastro"
+                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer active:scale-95 transition-transform inline-flex items-center justify-center no-underline"
                 >
                   Cadastrar
-                </button>
+                </Link>
               </div>
             )}
           </div>
@@ -255,7 +220,6 @@ export default function DashboardPage() {
           <div className="space-y-2.5 w-full">
             <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 block mb-2">Tópicos e Avaliação</span>
             
-            {/* Lições Ativas (As 3 primeiras) */}
             {activeLessons.map((lesson, idx) => {
               const status = lessonStatuses[lesson.id]
               
@@ -293,7 +257,6 @@ export default function DashboardPage() {
               )
             })}
 
-            {/* Bloco Genérico: Novos tópicos em breve e Prova Final bloqueada */}
             {isFirstModule && (
               <>
                 <div className="w-full text-left flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-900/20 border border-slate-900 opacity-60 cursor-not-allowed box-border">
@@ -441,7 +404,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Modal de Auth Responsivo */}
+      {/* Modal de Login (Apenas para Entrar) */}
       {isAuthOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 z-50 overflow-y-auto overflow-x-hidden">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 space-y-4 shadow-2xl relative my-auto box-border">
@@ -449,10 +412,10 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
               <div>
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {isSignUp ? 'Criar sua conta' : 'Acessar plataforma'}
+                  Acessar plataforma
                 </h3>
                 <p className="text-[11px] text-slate-400 mt-0.5">
-                  {isSignUp ? 'Jornada do zero absoluto.' : 'Entre para salvar seu progresso.'}
+                  Entre para salvar seu progresso.
                 </p>
               </div>
               {!isLoading && (
@@ -477,7 +440,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleAuth} className="space-y-3.5">
+              <form onSubmit={handleLogin} className="space-y-3.5">
                 {authError && (
                   <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs leading-relaxed">
                     {authError}
@@ -497,10 +460,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-semibold text-slate-300">Senha</label>
-                    {isSignUp && <span className="text-[10px] text-slate-500 font-mono">Mín. 8 caracteres</span>}
-                  </div>
+                  <label className="text-[11px] font-semibold text-slate-300">Senha</label>
                   <input 
                     type="password" 
                     value={password}
@@ -515,23 +475,19 @@ export default function DashboardPage() {
                   type="submit"
                   className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/10 mt-1 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
                 >
-                  <span>{isSignUp ? 'Concluir Cadastro →' : 'Entrar na Trilha →'}</span>
+                  <span>Entrar na Trilha →</span>
                 </button>
               </form>
             )}
 
             {!isLoading && (
               <div className="text-center pt-2 border-t border-slate-800/80">
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setIsSignUp(!isSignUp)
-                    setAuthError('')
-                  }}
-                  className="text-[11px] text-slate-400 hover:text-emerald-400 font-medium px-2 py-1 cursor-pointer"
+                <Link 
+                  href="/cadastro"
+                  className="text-[11px] text-slate-400 hover:text-emerald-400 font-medium px-2 py-1 inline-block no-underline"
                 >
-                  {isSignUp ? 'Já tem uma conta? Faça login' : 'Não tem conta? Cadastre-se'}
-                </button>
+                  Não tem conta? Cadastre-se
+                </Link>
               </div>
             )}
 
