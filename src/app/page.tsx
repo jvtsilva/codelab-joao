@@ -7,28 +7,10 @@ import { supabase } from '@/lib/supabase'
 
 export default function DashboardPage() {
   const [lessonStatuses, setLessonStatuses] = useState<Record<string, 'completed' | 'reviewing'>>({})
-  
   const [user, setUser] = useState<any>(null)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [isAuthOpen, setIsAuthOpen] = useState(false) // Usado agora apenas para o Login
-  const [authError, setAuthError] = useState('')
-  const [statusMessage, setStatusMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false)
-  const [welcomeMessage, setWelcomeMessage] = useState('')
-
   const [selectedModuleId, setSelectedModuleId] = useState(JAVASCRIPT_MODULES[0]?.id || '')
-
-  const motivationalQuotes = [
-    "🚀 Programar é a arte de transformar café em código limpo!",
-    "💡 Cada bug resolvido é um nível a mais na sua carreira de dev.",
-    "🔥 O código de hoje é o sistema incrível de amanhã. Não pare!",
-    "⭐ Persistência é o superpoder do programador de sucesso.",
-    "💻 Pequenos commits diários constroem grandes softwares."
-  ]
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -65,47 +47,6 @@ export default function DashboardPage() {
     }
   }
 
-  // Função dedicada apenas para o Login via Modal na página principal
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthError('')
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
-      setAuthError('Por favor, digite um e-mail válido.')
-      return
-    }
-
-    setIsLoading(true)
-
-    try {
-      setStatusMessage('Verificando credenciais...')
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
-      if (error) {
-        setAuthError('E-mail ou senha incorretos.')
-        setStatusMessage('')
-        setIsLoading(false)
-      } else {
-        setStatusMessage('✨ Login efetuado com sucesso!')
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        setIsAuthOpen(false)
-        setIsLoading(false)
-        const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
-        triggerWelcome(randomQuote)
-      }
-    } catch (err) {
-      setStatusMessage('')
-      setIsLoading(false)
-    }
-  }
-
-  const triggerWelcome = (msg: string) => {
-    setWelcomeMessage(msg)
-    setShowWelcomeModal(true)
-  }
-
   const handleLogout = async () => {
     await supabase.auth.signOut()
     setLessonStatuses({})
@@ -113,10 +54,8 @@ export default function DashboardPage() {
   }
 
   const currentModule = JAVASCRIPT_MODULES.find(m => m.id === selectedModuleId) || JAVASCRIPT_MODULES[0]
-
   const isFirstModule = currentModule.id === JAVASCRIPT_MODULES[0]?.id
   const activeLessons = isFirstModule ? currentModule.lessons.slice(0, 3) : currentModule.lessons
-
   const totalCompletedLessons = Object.values(lessonStatuses).filter(s => s === 'completed').length
 
   return (
@@ -148,19 +87,15 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="flex items-center gap-1.5">
-                <button 
-                  type="button"
-                  onClick={() => {
-                    setAuthError('')
-                    setStatusMessage('')
-                    setIsAuthOpen(true)
-                  }}
-                  className="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-2 rounded-xl cursor-pointer active:scale-95 transition-transform"
+                {/* BOTÃO DE ENTRAR DIRECIONANDO PARA /login */}
+                <Link 
+                  href="/login"
+                  className="text-xs font-semibold text-slate-300 hover:text-white px-2.5 py-2 rounded-xl cursor-pointer active:scale-95 transition-transform inline-flex items-center justify-center no-underline"
                 >
                   Entrar
-                </button>
+                </Link>
 
-                {/* BOTÃO DE CADASTRAR DIRECIONANDO PARA A NOVA PÁGINA */}
+                {/* BOTÃO DE CADASTRAR DIRECIONANDO PARA /cadastro */}
                 <Link 
                   href="/cadastro"
                   className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow-lg shadow-emerald-500/10 cursor-pointer active:scale-95 transition-transform inline-flex items-center justify-center no-underline"
@@ -369,127 +304,6 @@ export default function DashboardPage() {
                 Sair da Conta
               </button>
             </div>
-
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Boas-Vindas e Motivação */}
-      {showWelcomeModal && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-slate-900 border border-emerald-500/30 rounded-3xl w-full max-w-sm sm:max-w-md p-6 space-y-5 text-center shadow-2xl relative my-auto box-border animate-in fade-in zoom-in duration-200">
-            
-            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl mx-auto shadow-inner">
-              ⚡
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
-                Bons Estudos, Dev! 🚀
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed px-2">
-                {welcomeMessage}
-              </p>
-            </div>
-
-            <button 
-              type="button"
-              onClick={() => setShowWelcomeModal(false)}
-              className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/10 cursor-pointer active:scale-95 transition-transform"
-            >
-              Começar a Praticar →
-            </button>
-
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Login (Apenas para Entrar) */}
-      {isAuthOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 z-50 overflow-y-auto overflow-x-hidden">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 space-y-4 shadow-2xl relative my-auto box-border">
-            
-            <div className="flex justify-between items-center border-b border-slate-800/80 pb-3">
-              <div>
-                <h3 className="text-base font-bold text-white tracking-tight">
-                  Acessar plataforma
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Entre para salvar seu progresso.
-                </p>
-              </div>
-              {!isLoading && (
-                <button 
-                  type="button"
-                  onClick={() => setIsAuthOpen(false)} 
-                  className="w-7 h-7 rounded-full bg-slate-800/60 hover:bg-slate-800 text-slate-400 hover:text-white font-bold flex items-center justify-center shrink-0 cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-
-            {isLoading ? (
-              <div className="py-8 text-center space-y-3">
-                <div className="w-10 h-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center text-lg font-bold animate-spin">
-                  ⏳
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-white font-bold text-sm px-2">{statusMessage}</h4>
-                  <p className="text-[11px] text-slate-400">Aguarde um instante...</p>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleLogin} className="space-y-3.5">
-                {authError && (
-                  <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs leading-relaxed">
-                    {authError}
-                  </div>
-                )}
-                
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300">E-mail</label>
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="seu@email.com"
-                    required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 box-border"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300">Senha</label>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500 box-border"
-                  />
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/10 mt-1 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
-                >
-                  <span>Entrar na Trilha →</span>
-                </button>
-              </form>
-            )}
-
-            {!isLoading && (
-              <div className="text-center pt-2 border-t border-slate-800/80">
-                <Link 
-                  href="/cadastro"
-                  className="text-[11px] text-slate-400 hover:text-emerald-400 font-medium px-2 py-1 inline-block no-underline"
-                >
-                  Não tem conta? Cadastre-se
-                </Link>
-              </div>
-            )}
 
           </div>
         </div>
