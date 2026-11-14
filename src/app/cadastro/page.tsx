@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase' // Usando o cliente único
+import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -30,12 +30,10 @@ export default function CadastroPage() {
       })
 
       if (error) throw error
-      console.log('✅ Usuário cadastrado no Supabase com sucesso!')
 
       const confirmationUrl = `${window.location.origin}/verificar-email`
 
       // 2. Dispara o e-mail via Resend
-      console.log('📧 Tentando disparar e-mail via Resend para:', email)
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -46,7 +44,7 @@ export default function CadastroPage() {
       })
 
       const resData = await res.json()
-      console.log('📬 Resposta da API do Resend:', resData)
+      console.log('Resposta do Resend:', resData)
 
       if (!res.ok) {
         throw new Error(resData.error?.message || 'Erro ao enviar o e-mail pelo Resend.')
@@ -54,7 +52,7 @@ export default function CadastroPage() {
 
       setEmailSent(true)
     } catch (error: any) {
-      console.error('❌ Erro no fluxo de cadastro:', error)
+      console.error('Erro no cadastro:', error)
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
     } finally {
       setLoading(false)
@@ -70,11 +68,8 @@ export default function CadastroPage() {
           </div>
           <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
           <p className="text-gray-400 text-sm">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no botão do e-mail.
+            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada.
           </p>
-          <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300 text-left">
-            💡 Abra o seu e-mail (`codelab.joao@gmail.com`), clique no botão de confirmação e você será direcionado para ativar a conta.
-          </div>
         </div>
       </div>
     )
@@ -83,7 +78,7 @@ export default function CadastroPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
-        <h2 className="text-2xl font-bold text-center mb-2">Crie sua conta</h2>
+        <h2 className="template-title text-2xl font-bold text-center mb-2">Crie sua conta</h2>
         
         {errorMessage && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
@@ -118,17 +113,10 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
-
-        <p className="text-center text-xs text-gray-500 mt-4">
-          Já tem uma conta?{' '}
-          <Link href="/login" className="text-indigo-400 hover:underline">
-            Faça login
-          </Link>
-        </p>
       </form>
     </div>
   )

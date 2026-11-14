@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const linkParaConfirmar = confirmationUrl || '#'
 
     const { data, error } = await resend.emails.send({
-      from: 'Codelab <onboarding@resend.dev>',
+      from: 'Codelab <onboarding@resend.dev>', // No plano gratuito, use onboarding@resend.dev
       to: [email],
       subject: 'Confirme sua conta no Codelab',
       html: `
@@ -36,11 +36,13 @@ export async function POST(request: Request) {
     })
 
     if (error) {
+      console.error('Erro retornado pela Resend API:', error)
       return NextResponse.json({ error }, { status: 400 })
     }
 
     return NextResponse.json({ success: true, data })
   } catch (err) {
+    console.error('Erro interno na API de e-mail:', err)
     return NextResponse.json({ error: 'Erro interno ao enviar e-mail' }, { status: 500 })
   }
 }
