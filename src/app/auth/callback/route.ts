@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -7,10 +7,30 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get('code')
 
   if (code) {
-    const supabase = createRouteHandlerClient({ cookies })
+    // 1. Aguarda a Promise dos cookies (essencial no Next.js atual)
+    const cookieStore = await cookies()
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set({ name, value, ...options })
+          },
+          remove(name: string, options: any) {
+            cookieStore.set({ name, value: '', ...options })
+          },
+        },
+      }
+    )
+    
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // Redireciona para o dashboard ou página principal após confirmar o e-mail com sucesso
+  // Redireciona para o dashboard ou página principal após confirmar o e-mail
   return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
 }

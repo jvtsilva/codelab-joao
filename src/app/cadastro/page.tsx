@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 
 export default function CadastroPage() {
@@ -11,7 +11,12 @@ export default function CadastroPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
-  const supabase = createClientComponentClient()
+  // Cliente Supabase para o lado do cliente (Browser)
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  
   const router = useRouter()
 
   const handleCadastro = async (e: React.FormEvent) => {
@@ -25,7 +30,6 @@ export default function CadastroPage() {
         email,
         password,
         options: {
-          // URL para onde o usuário será redirecionado ao clicar no link do e-mail
           emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
@@ -43,7 +47,7 @@ export default function CadastroPage() {
         console.warn('Aviso: O cadastro foi feito, mas houve falha ao disparar o e-mail pelo Resend.')
       }
 
-      // 3. Altera o estado para mostrar a tela de aviso de verificação
+      // 3. Mostra a tela de aviso de verificação
       setEmailSent(true)
     } catch (error: any) {
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
@@ -58,10 +62,10 @@ export default function CadastroPage() {
         <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl">
           <h2 className="text-2xl font-bold mb-3">Verifique seu e-mail</h2>
           <p className="text-gray-400 text-sm mb-6">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada para ativar sua conta e acessar a plataforma.
+            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada para ativar sua conta.
           </p>
           <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300">
-            💡 Assim que clicar no link do e-mail, sua conta será ativada automaticamente e você será logado.
+            💡 Assim que clicar no link do e-mail, sua conta será ativada automaticamente.
           </div>
         </div>
       </div>
