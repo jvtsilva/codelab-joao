@@ -33,6 +33,8 @@ export default function CadastroPage() {
 
     try {
       setStatusMessage('Criando sua conta...')
+      
+      // 1. Cria o usuário no Supabase (com o Custom SMTP desativado no painel)
       const { error } = await supabase.auth.signUp({ 
         email, 
         password,
@@ -41,17 +43,30 @@ export default function CadastroPage() {
         }
       })
       
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
       if (error) {
         setAuthError(error.message)
         setStatusMessage('')
         setIsLoading(false)
-      } else {
-        setStatusMessage('✨ Conta criada com sucesso!')
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        router.push('/verificar-email')
+        return
       }
+
+      // 2. Dispara o e-mail profissional via Resend pela nossa API Route
+      setStatusMessage('Enviando e-mail de confirmação...')
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+
+      if (!emailResponse.ok) {
+        console.error('Aviso: O cadastro foi feito, mas houve falha ao disparar o e-mail pelo Resend.')
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setStatusMessage('✨ Conta criada com sucesso!')
+      await new Promise(resolve => setTimeout(resolve, 800))
+      router.push('/verificar-email')
+
     } catch (err) {
       setAuthError('Ocorreu um erro inesperado.')
       setStatusMessage('')
