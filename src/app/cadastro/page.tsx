@@ -12,7 +12,6 @@ export default function CadastroPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
-  // Cliente Supabase para o navegador (utilizando @supabase/ssr)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -26,7 +25,7 @@ export default function CadastroPage() {
     setErrorMessage('')
 
     try {
-      // 1. Cadastra o usuário no Supabase e define o redirecionamento para a tela de verificação
+      // 1. Cadastra o usuário no Supabase
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -37,18 +36,26 @@ export default function CadastroPage() {
 
       if (error) throw error
 
-      // 2. Dispara o e-mail via Resend através da nossa API Route segura
+      // 2. Pega o link de confirmação gerado pelo Supabase para mandar no e-mail do Resend
+      // O Supabase às vezes retorna o link direto no data.properties ou precisamos montar com base na sessão
+      const confirmationUrl = data.user?.confirmation_sent_at 
+        ? `${window.location.origin}/verificar-email` 
+        : `${window.location.origin}/verificar-email`
+
+      // 3. Dispara o e-mail via Resend enviando o link de confirmação
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ 
+          email, 
+          confirmationUrl: data.session ? undefined : `${window.location.origin}/verificar-email` 
+        }),
       })
 
       if (!res.ok) {
         console.warn('Aviso: O cadastro foi feito, mas houve falha ao disparar o e-mail pelo Resend.')
       }
 
-      // 3. Exibe o aviso na tela informando que o link foi enviado
       setEmailSent(true)
     } catch (error: any) {
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
@@ -57,7 +64,6 @@ export default function CadastroPage() {
     }
   }
 
-  // Se o e-mail foi disparado, mostra a tela de instrução
   if (emailSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
@@ -67,17 +73,16 @@ export default function CadastroPage() {
           </div>
           <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
           <p className="text-gray-400 text-sm">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no link para ativar sua conta.
+            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no botão do e-mail.
           </p>
           <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300 text-left">
-            💡 O link do e-mail abrirá a página de ativação onde você deverá clicar em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso à plataforma.
+            💡 O link do e-mail abrirá a página de ativação onde você clicará em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso.
           </div>
         </div>
       </div>
     )
   }
 
-  // Formulário padrão de cadastro
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
