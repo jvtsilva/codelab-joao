@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function CadastroPage() {
   const [email, setEmail] = useState('')
@@ -11,7 +12,7 @@ export default function CadastroPage() {
   const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   
-  // Cliente Supabase para o lado do cliente (Browser)
+  // Cliente Supabase para o navegador (utilizando @supabase/ssr)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -25,12 +26,12 @@ export default function CadastroPage() {
     setErrorMessage('')
 
     try {
-      // 1. Cadastra o usuário no Supabase
+      // 1. Cadastra o usuário no Supabase e define o redirecionamento para a tela de verificação
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/verificar-email`,
         },
       })
 
@@ -47,7 +48,7 @@ export default function CadastroPage() {
         console.warn('Aviso: O cadastro foi feito, mas houve falha ao disparar o e-mail pelo Resend.')
       }
 
-      // 3. Mostra a tela de aviso de verificação
+      // 3. Exibe o aviso na tela informando que o link foi enviado
       setEmailSent(true)
     } catch (error: any) {
       setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
@@ -56,22 +57,27 @@ export default function CadastroPage() {
     }
   }
 
+  // Se o e-mail foi disparado, mostra a tela de instrução
   if (emailSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
-        <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl">
-          <h2 className="text-2xl font-bold mb-3">Verifique seu e-mail</h2>
-          <p className="text-gray-400 text-sm mb-6">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada para ativar sua conta.
+        <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl space-y-4">
+          <div className="w-12 h-12 bg-indigo-600/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto text-xl">
+            ✉️
+          </div>
+          <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
+          <p className="text-gray-400 text-sm">
+            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada e clique no link para ativar sua conta.
           </p>
-          <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300">
-            💡 Assim que clicar no link do e-mail, sua conta será ativada automaticamente.
+          <div className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-xl text-xs text-gray-300 text-left">
+            💡 O link do e-mail abrirá a página de ativação onde você deverá clicar em <strong>"Confirmar e acessar"</strong> para liberar o seu acesso à plataforma.
           </div>
         </div>
       </div>
     )
   }
 
+  // Formulário padrão de cadastro
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-4">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
@@ -91,7 +97,7 @@ export default function CadastroPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 text-sm"
-            placeholder="seu@email.com"
+            placeholder="codelab.joao@gmail.com"
           />
         </div>
 
@@ -110,10 +116,17 @@ export default function CadastroPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50"
+          className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 transition font-medium rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-indigo-600/20"
         >
           {loading ? 'Cadastrando...' : 'Criar conta'}
         </button>
+
+        <p className="text-center text-xs text-gray-500 mt-4">
+          Já tem uma conta?{' '}
+          <Link href="/login" className="text-indigo-400 hover:underline">
+            Faça login
+          </Link>
+        </p>
       </form>
     </div>
   )
