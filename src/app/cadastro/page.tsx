@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function CadastroPage() {
@@ -11,8 +10,6 @@ export default function CadastroPage() {
   const [loading, setLoading] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
-  
-  const router = useRouter()
 
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,41 +17,32 @@ export default function CadastroPage() {
     setErrorMessage('')
 
     try {
-      // 1. Cadastra no Supabase
+      // 1. Cria o usuário no Supabase
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/verificar-email`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       })
 
       if (error) throw error
 
-      // 💡 O pulo do gato: O Supabase retorna os dados de identificação. 
-      // Se a confirmação por e-mail estiver ativa, pegamos o link gerado ou direcionamos com o token de sessão/verificação.
-      // Vamos montar a URL de confirmação apontando para a nossa página customizada com os parâmetros do Supabase.
-      
-      // O Supabase envia o token de confirmação no fluxo. Se quisermos que o botão do Resend leve 
-      // para a confirmação segura, passamos o link gerado pelo Supabase ou o redirecionamento com o token.
-      const confirmationUrl = data.session 
-        ? `${window.location.origin}/dashboard` 
-        : `${window.location.origin}/verificar-email`
+      // 🛡️ SEGURANÇA: Como o Supabase loga automaticamente, deslogamos imediatamente 
+      // para impedir que o usuário fure a fila sem confirmar o e-mail!
+      await supabase.auth.signOut()
 
-      // Se o Supabase gerou um link de ação ou token, podemos capturá-lo. 
-      // Como estamos bypassando o e-mail nativo do Supabase para usar o Resend e não tomar rate limit:
+      // 2. Dispara o e-mail customizado via Resend
+      const confirmationUrl = `${window.location.origin}/dashboard`
+
       const res = await window.fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email, 
-          confirmationUrl 
-        }),
+        body: JSON.stringify({ email, confirmationUrl }),
       })
 
-      const resData = await res.json()
       if (!res.ok) {
-        throw new Error(resData.error?.message || 'Erro ao enviar o e-mail pelo Resend.')
+        throw new Error('Erro ao enviar o e-mail pelo Resend.')
       }
 
       setEmailSent(true)
@@ -74,7 +62,7 @@ export default function CadastroPage() {
           </div>
           <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
           <p className="text-gray-400 text-sm">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Acesse sua caixa de entrada.
+            Enviamos um link de confirmação para <strong>{email}</strong>. Você precisa clicar nele para ativar sua conta antes de acessar o sistema.
           </p>
         </div>
       </div>
@@ -100,7 +88,7 @@ export default function CadastroPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-indigo-500 text-sm"
-            placeholder="codelab.joao@gmail.com"
+            placeholder="seu@email.com"
           />
         </div>
 
