@@ -24,6 +24,7 @@ export async function POST(request: Request) {
       `,
     })
 
+    //erro
     if (error) {
       return NextResponse.json({ error }, { status: 400 })
     }
