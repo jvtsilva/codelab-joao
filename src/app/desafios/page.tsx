@@ -10,14 +10,33 @@ export default function ArenaPage() {
   const [userXp, setUserXp] = useState<number>(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // Estados do desafio interativo
+  const [codeAnswer, setCodeAnswer] = useState('')
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [challengeCompleted, setChallengeCompleted] = useState(false)
+
   useEffect(() => {
     async function loadUserArena() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session) {
-        setUserId(session.user.id)
+        const currentUserId = session.user.id
+        setUserId(currentUserId)
         const meta = session.user.user_metadata
         setUserName(meta?.full_name || meta?.name || 'Aluno')
+
+        // Verificar se já concluiu este desafio no Supabase
+        const { data } = await supabase
+          .from('user_challenges')
+          .select('completed')
+          .eq('user_id', currentUserId)
+          .eq('challenge_id', 'challenge-1')
+          .single()
+
+        if (data && data.completed) {
+          setChallengeCompleted(true)
+        }
       }
 
       if (typeof window !== 'undefined') {
@@ -27,6 +46,47 @@ export default function ArenaPage() {
     }
     loadUserArena()
   }, [])
+
+  const handleTestChallenge = async () => {
+    const cleanCode = codeAnswer.trim().replace(/\s+/g, ' ')
+
+    // Validação do código esperado: const cidadeNatal = "..."
+    const expectedPattern = /const\s+cidadeNatal\s*=\s*(["'])(?:(?!\1).)*\1\s*;?/i
+
+    if (!cleanCode) {
+      setFeedback('❌ Escreva seu código no campo acima antes de testar.')
+      setSuccess(false)
+      return
+    }
+
+    if (expectedPattern.test(cleanCode) || cleanCode.includes('cidadeNatal')) {
+      setSuccess(true)
+      setFeedback('🎉 Parabéns! Resposta correta. Missão concluída com sucesso!')
+      
+      if (!challengeCompleted) {
+        setChallengeCompleted(true)
+        const newXp = userXp + 50
+        setUserXp(newXp)
+
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('codelab_user_xp', String(newXp))
+        }
+
+        if (userId) {
+          await supabase.from('user_challenges').upsert({
+            user_id: userId,
+            challenge_id: 'challenge-1',
+            completed: true,
+            xp_earned: 50,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,challenge_id' })
+        }
+      }
+    } else {
+      setSuccess(false)
+      setFeedback('❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e a variável `cidadeNatal`.')
+    }
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -39,7 +99,7 @@ export default function ArenaPage() {
       {/* Header Responsivo da Arena */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         
-        {/* Lado Esquerdo: Ícone de Espada Estático (Sem redirecionar) + Título */}
+        {/* Lado Esquerdo: Ícone de Espada Estático + Título */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
             ⚔️
@@ -155,39 +215,57 @@ export default function ArenaPage() {
             Teste sua Lógica de Programação
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Resolva os desafios de código abaixo, pratique seus conhecimentos em JavaScript e acumule pontos de XP para o seu perfil.
+            Resolva o desafio de código abaixo, pratique seus conhecimentos em JavaScript e acumule pontos de XP para o seu perfil.
           </p>
         </div>
 
-        {/* Exemplo de card de desafio */}
-        <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
-          <div className="flex items-center justify-between">
+        {/* Card do Desafio Prático */}
+        <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold rounded-md">
-              Desafio #1 • Fácil
+              Desafio #1 • Fácil ⚡
             </span>
-            <span className="text-xs font-bold text-amber-400">+50 XP</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-amber-400">+50 XP</span>
+              {challengeCompleted && (
+                <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] rounded-md border border-emerald-500/30">
+                  Concluído ✓
+                </span>
+              )}
+            </div>
           </div>
 
-          <h3 className="text-sm sm:text-base font-bold text-white">Criando e Exibindo Variáveis</h3>
+          <h3 className="text-base sm:text-lg font-bold text-white">Criando e Exibindo Variáveis</h3>
           <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
             Escreva um trecho de código JavaScript que declare uma constante chamada <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">cidadeNatal</code> com o valor <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">&quot;São Paulo&quot;</code>.
           </p>
 
-          <div className="pt-2">
+          <div className="space-y-2 pt-2">
+            <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
+            <textarea
+              rows={3}
+              placeholder='const cidadeNatal = "São Paulo";'
+              value={codeAnswer}
+              onChange={(e) => setCodeAnswer(e.target.value)}
+              className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
+            />
+          </div>
+
+          <div className="pt-1">
             <button
-              onClick={() => {
-                const newXp = userXp + 50
-                setUserXp(newXp)
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('codelab_user_xp', String(newXp))
-                }
-                alert('🎉 Desafio concluído com sucesso! +50 XP adicionados.')
-              }}
-              className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center block"
+              onClick={handleTestChallenge}
+              className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center"
             >
-              ⚡ Resolver Desafio e Resgatar XP
+              🚀 Testar e Enviar Código
             </button>
           </div>
+
+          {feedback && (
+            <div className={`p-4 rounded-xl border font-mono text-xs space-y-1 ${success ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+              <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado da Execução:</div>
+              <p>{feedback}</p>
+            </div>
+          )}
         </div>
 
       </main>
