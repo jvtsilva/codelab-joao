@@ -9,11 +9,14 @@ export default function ArenaPage() {
   const [userXp, setUserXp] = useState<number>(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estados do desafio interativo
-  const [codeAnswer, setCodeAnswer] = useState('')
-  const [feedback, setFeedback] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [challengeCompleted, setChallengeCompleted] = useState(false)
+  // Estado para controlar qual desafio está aberto (ID do desafio atual)
+  const [openChallengeId, setOpenChallengeId] = useState<string | null>('challenge-1')
+
+  // Estados do Desafio #1
+  const [codeAnswer1, setCodeAnswer1] = useState('')
+  const [feedback1, setFeedback1] = useState<string | null>(null)
+  const [success1, setSuccess1] = useState(false)
+  const [challenge1Completed, setChallenge1Completed] = useState(false)
 
   useEffect(() => {
     async function loadUserArena() {
@@ -39,7 +42,7 @@ export default function ArenaPage() {
 
           const desafiop1 = challenges.find(c => c.challenge_id === 'challenge-1')
           if (desafiop1 && desafiop1.completed) {
-            setChallengeCompleted(true)
+            setChallenge1Completed(true)
           }
         }
       } else {
@@ -48,10 +51,9 @@ export default function ArenaPage() {
           const savedXp = localStorage.getItem('codelab_user_xp')
           if (savedXp) setUserXp(Number(savedXp))
           
-          // Verifica se o visitante já concluiu para marcar na tela
           const visitanteConcluiu = localStorage.getItem('codelab_visitante_desafio_1')
           if (visitanteConcluiu) {
-            setChallengeCompleted(true)
+            setChallenge1Completed(true)
           }
         }
       }
@@ -59,33 +61,28 @@ export default function ArenaPage() {
     loadUserArena()
   }, [])
 
-  const handleTestChallenge = async () => {
-    const cleanCode = codeAnswer.trim().replace(/\s+/g, ' ')
-
-    // Validação do código esperado: const cidadeNatal = "..."
+  const handleTestChallenge1 = async () => {
+    const cleanCode = codeAnswer1.trim().replace(/\s+/g, ' ')
     const expectedPattern = /const\s+cidadeNatal\s*=\s*(["'])(?:(?!\1).)*\1\s*;?/i
 
     if (!cleanCode) {
-      setFeedback('❌ Escreva seu código no campo acima antes de testar.')
-      setSuccess(false)
+      setFeedback1('❌ Escreva seu código no campo acima antes de testar.')
+      setSuccess1(false)
       return
     }
 
     if (expectedPattern.test(cleanCode) || cleanCode.includes('cidadeNatal')) {
-      setSuccess(true)
-      setFeedback('🎉 Parabéns! Resposta correta. Missão concluída com sucesso!')
+      setSuccess1(true)
+      setFeedback1('🎉 Parabéns! Resposta correta. Missão concluída com sucesso!')
       
-      if (!challengeCompleted) {
-        setChallengeCompleted(true)
+      if (!challenge1Completed) {
+        setChallenge1Completed(true)
         const newXp = userXp + 50
         setUserXp(newXp)
 
-        // Trava para visitantes não farmarem XP infinito recarregando a página
         if (!userId && typeof window !== 'undefined') {
           const visitanteJaGanhou = localStorage.getItem('codelab_visitante_desafio_1')
-          if (visitanteJaGanhou) {
-            return // Se já ganhou como visitante, não adiciona mais XP
-          }
+          if (visitanteJaGanhou) return
           localStorage.setItem('codelab_visitante_desafio_1', 'true')
         }
 
@@ -93,7 +90,6 @@ export default function ArenaPage() {
           localStorage.setItem('codelab_user_xp', String(newXp))
         }
 
-        // Salva no Supabase se o usuário estiver logado
         if (userId) {
           const { error } = await supabase.from('user_challenges').upsert({
             user_id: userId,
@@ -105,13 +101,13 @@ export default function ArenaPage() {
 
           if (error) {
             console.error('Erro ao salvar no Supabase:', error.message)
-            setFeedback('⚠️ Código correto, mas houve um erro ao sincronizar com o banco: ' + error.message)
+            setFeedback1('⚠️ Código correto, mas houve um erro ao sincronizar com o banco: ' + error.message)
           }
         }
       }
     } else {
-      setSuccess(false)
-      setFeedback('❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e a variável `cidadeNatal`.')
+      setSuccess1(false)
+      setFeedback1('❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e a variável `cidadeNatal`.')
     }
   }
 
@@ -245,57 +241,101 @@ export default function ArenaPage() {
             Teste sua Lógica de Programação
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Resolva o desafio de código abaixo, pratique seus conhecimentos em JavaScript e acumule pontos de XP armazenados no banco de dados.
+            Clique nos desafios abaixo para expandir, resolver o código em JavaScript e resgatar o XP direto para o seu perfil.
           </p>
         </div>
 
-        {/* Card do Desafio Prático */}
-        <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[11px] font-bold rounded-md">
-              Desafio #1 • Fácil ⚡
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-amber-400">+50 XP</span>
-              {challengeCompleted && (
-                <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] rounded-md border border-emerald-500/30">
-                  Concluído ✓
-                </span>
-              )}
-            </div>
-          </div>
-
-          <h3 className="text-base sm:text-lg font-bold text-white">Criando e Exibindo Variáveis</h3>
-          <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-            Escreva um trecho de código JavaScript que declare uma constante chamada <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">cidadeNatal</code> com o valor <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">&quot;São Paulo&quot;</code>.
-          </p>
-
-          <div className="space-y-2 pt-2">
-            <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
-            <textarea
-              rows={3}
-              placeholder='const cidadeNatal = "São Paulo";'
-              value={codeAnswer}
-              onChange={(e) => setCodeAnswer(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
-            />
-          </div>
-
-          <div className="pt-1">
+        {/* Lista de Desafios em Formato Acordeão (Aberto / Fechado) */}
+        <div className="space-y-4">
+          
+          {/* Desafio #1 */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl transition">
+            
+            {/* Cabeçalho do Card (Sempre visível - Clica para Abrir/Fechar) */}
             <button
-              onClick={handleTestChallenge}
-              className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center"
+              onClick={() => setOpenChallengeId(openChallengeId === 'challenge-1' ? null : 'challenge-1')}
+              className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-gray-850 transition cursor-pointer"
             >
-              🚀 Testar e Enviar Código
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  #1
+                </span>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm sm:text-base font-bold text-white">Criando e Exibindo Variáveis</h3>
+                    <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold rounded">
+                      Fácil
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">+50 XP • JavaScript Básico</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {challenge1Completed && (
+                  <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] rounded-md border border-emerald-500/30 hidden sm:inline-block">
+                    Concluído ✓
+                  </span>
+                )}
+                <span className="text-amber-400 font-bold text-sm transition-transform duration-300">
+                  {openChallengeId === 'challenge-1' ? '▲' : '▼'}
+                </span>
+              </div>
             </button>
+
+            {/* Conteúdo Expansível do Desafio #1 (Só aparece quando clicado para abrir) */}
+            {openChallengeId === 'challenge-1' && (
+              <div className="px-5 pb-6 sm:px-6 pt-2 border-t border-gray-800 space-y-4 animate-fadeIn">
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pt-2">
+                  Escreva um trecho de código JavaScript que declare uma constante chamada <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">cidadeNatal</code> com o valor <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">&quot;São Paulo&quot;</code>.
+                </p>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
+                  <textarea
+                    rows={3}
+                    placeholder='const cidadeNatal = "São Paulo";'
+                    value={codeAnswer1}
+                    onChange={(e) => setCodeAnswer1(e.target.value)}
+                    className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
+                  />
+                </div>
+
+                <div>
+                  <button
+                    onClick={handleTestChallenge1}
+                    className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center"
+                  >
+                    🚀 Testar e Enviar Código
+                  </button>
+                </div>
+
+                {feedback1 && (
+                  <div className={`p-4 rounded-xl border font-mono text-xs space-y-1 ${success1 ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado da Execução:</div>
+                    <p>{feedback1}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {feedback && (
-            <div className={`p-4 rounded-xl border font-mono text-xs space-y-1 ${success ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
-              <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado da Execução:</div>
-              <p>{feedback}</p>
+          {/* Exemplo de futuro Desafio #2 (Já fechadinho aguardando novos módulos) */}
+          <div className="bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden opacity-75">
+            <div className="w-full p-5 sm:p-6 flex items-center justify-between text-left">
+              <div className="flex items-center gap-3">
+                <span className="w-8 h-8 rounded-xl bg-gray-800 text-gray-400 flex items-center justify-center font-bold text-xs shrink-0">
+                  #2
+                </span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-gray-400">Funções e Condicionais (Em breve)</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">+100 XP • Bloqueado</p>
+                </div>
+              </div>
+              <span className="text-gray-600 text-xs font-bold uppercase tracking-wider">🔒 Em Breve</span>
             </div>
-          )}
+          </div>
+
         </div>
 
       </main>
