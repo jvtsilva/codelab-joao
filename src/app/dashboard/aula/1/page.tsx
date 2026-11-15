@@ -8,7 +8,7 @@ export default function AulaUmPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const [variableName, setVariableName] = useState('')
   const [variableValue, setVariableValue] = useState('')
@@ -93,12 +93,12 @@ export default function AulaUmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden relative">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative">
       
-      {/* Header Responsivo com Menu Mobile */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+      {/* Header Responsivo */}
+      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         
-        {/* Ícone JS Estático (Sem Redirecionamento) + Título */}
+        {/* Ícone JS Estático + Título */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
@@ -129,21 +129,21 @@ export default function AulaUmPage() {
         {/* Botão Menu Hamburguer (Mobile) */}
         <div className="flex sm:hidden items-center">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => setMenuOpen(!menuOpen)}
             className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
-            aria-label="Abrir Menu"
+            aria-label="Menu"
           >
-            <span className="text-xl leading-none">{mobileMenuOpen ? '✕' : '☰'}</span>
+            <span className="text-xl leading-none">{menuOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </header>
 
       {/* Menu Dropdown Mobile */}
-      {mobileMenuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-40 shadow-2xl animate-fadeIn">
+      {menuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
           <Link 
             href="/dashboard" 
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
           >
             <span>←</span> Voltar para a Trilha de Aulas
@@ -152,7 +152,7 @@ export default function AulaUmPage() {
           {userId && (
             <Link
               href="/painel"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => setMenuOpen(false)}
               className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs font-semibold text-emerald-400"
             >
               <span>⚙️ Meu Painel de Controle</span>
@@ -161,7 +161,7 @@ export default function AulaUmPage() {
           )}
 
           <button
-            onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+            onClick={() => { setMenuOpen(false); handleLogout(); }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
           >
             <span>🚪 Sair da Conta</span>
@@ -181,7 +181,6 @@ export default function AulaUmPage() {
           </div>
         )}
 
-        {/* Título da Aula */}
         <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-1 bg-emerald-500 text-gray-950 font-extrabold text-[11px] sm:text-xs rounded-md">
@@ -201,7 +200,7 @@ export default function AulaUmPage() {
           </p>
         </div>
 
-        {/* Abas de Navegação da Aula */}
+        {/* Abas */}
         <div className="flex border-b border-gray-800 gap-1 sm:gap-2 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('teoria')}
@@ -235,7 +234,6 @@ export default function AulaUmPage() {
           </button>
         </div>
 
-        {/* Conteúdo da Aba 1: Teoria */}
         {activeTab === 'teoria' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed">
@@ -266,7 +264,6 @@ export default function AulaUmPage() {
           </div>
         )}
 
-        {/* Conteúdo da Aba 2: Prática */}
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
@@ -333,7 +330,6 @@ export default function AulaUmPage() {
           </div>
         )}
 
-        {/* Conteúdo da Aba 3: Quiz Final */}
         {activeTab === 'quiz' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
