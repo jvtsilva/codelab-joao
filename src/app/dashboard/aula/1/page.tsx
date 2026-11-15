@@ -144,10 +144,10 @@ export default function AulaUmPage() {
           <Link 
             href="/dashboard" 
             onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
+            className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
           >
-         Voltar para a Trilha de Aulas
-         <span>→</span>
+            <span>📖 Voltar para a Trilha</span>
+            <span>→</span>
           </Link>
 
           {userId && (
