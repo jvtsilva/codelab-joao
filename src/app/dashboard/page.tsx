@@ -64,6 +64,7 @@ export default function DashboardPage() {
 
           {userId ? (
             <div className="flex items-center gap-2">
+              {/* LINK CORRIGIDO APONTANDO EXATAMENTE PARA /painel */}
               <Link
                 href="/painel"
                 className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
@@ -120,6 +121,7 @@ export default function DashboardPage() {
 
           {userId ? (
             <>
+              {/* LINK MOBILE CORRIGIDO APONTANDO EXATAMENTE PARA /painel */}
               <Link
                 href="/painel"
                 onClick={() => setMenuOpen(false)}
