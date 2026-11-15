@@ -7,6 +7,7 @@ import Link from 'next/link'
 export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
+  const [lessonTwoCompleted, setLessonTwoCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -20,13 +21,20 @@ export default function DashboardPage() {
 
         const { data } = await supabase
           .from('user_progress')
-          .select('completed')
+          .select('lesson_id, completed')
           .eq('user_id', currentUserId)
-          .eq('lesson_id', 'lesson-1')
-          .single()
 
-        if (data && data.completed) {
-          setLessonOneCompleted(true)
+        if (data) {
+          const l1 = data.find(item => item.lesson_id === 'lesson-1')
+          if (l1 && l1.completed) setLessonOneCompleted(true)
+
+          const l2 = data.find(item => item.lesson_id === 'lesson-2')
+          if (l2 && l2.completed) setLessonTwoCompleted(true)
+        }
+      } else {
+        if (typeof window !== 'undefined') {
+          if (localStorage.getItem('codelab_visitante_aula_1')) setLessonOneCompleted(true)
+          if (localStorage.getItem('codelab_visitante_aula_2')) setLessonTwoCompleted(true)
         }
       }
       setLoading(false)
@@ -38,6 +46,8 @@ export default function DashboardPage() {
     await supabase.auth.signOut()
     window.location.href = '/'
   }
+
+  const totalCompleted = (lessonOneCompleted ? 1 : 0) + (lessonTwoCompleted ? 1 : 0)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
@@ -208,11 +218,13 @@ export default function DashboardPage() {
               Módulo 1 • Aulas Disponíveis
             </h3>
             <span className="text-xs text-gray-500">
-              {loading ? 'Carregando...' : lessonOneCompleted ? '1/1 Aula concluída' : '0/1 Aula concluída'}
+              {loading ? 'Carregando...' : `${totalCompleted}/2 Aulas concluídas`}
             </span>
           </div>
 
           <div className="space-y-3">
+            
+            {/* Aula 1: O que é Programação do Zero */}
             <Link 
               href="/dashboard/aula/1"
               className={`p-4 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer group block ${
@@ -232,9 +244,47 @@ export default function DashboardPage() {
                 <div className="min-w-0 space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">
-                      Variáveis e Atribuição: As Caixas de Memória
+                      O que é Programação e Como o Computador Pensa?
                     </h4>
                     {lessonOneCompleted && (
+                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[10px] rounded-full border border-emerald-500/30 shrink-0">
+                        Concluída
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-400 truncate">Fundamentos teóricos e introdução do zero</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 group-hover:text-emerald-400 transition shrink-0">
+                <span className="hidden sm:inline">Assistir Aula</span>
+                <span>→</span>
+              </div>
+            </Link>
+
+            {/* Aula 2: Variáveis e Atribuição */}
+            <Link 
+              href="/dashboard/aula/2"
+              className={`p-4 rounded-2xl border transition flex items-center justify-between gap-3 cursor-pointer group block ${
+                lessonTwoCompleted 
+                  ? 'bg-emerald-500/5 border-emerald-500/30 hover:border-emerald-500/60' 
+                  : 'bg-gray-900/80 border-gray-800 hover:border-emerald-500/50'
+              }`}
+            >
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition shrink-0 ${
+                  lessonTwoCompleted
+                    ? 'bg-emerald-500 text-gray-950 shadow-lg shadow-emerald-500/20'
+                    : 'bg-gray-800 border border-gray-700 text-gray-300 group-hover:text-emerald-400 group-hover:border-emerald-500/40'
+                }`}>
+                  {lessonTwoCompleted ? '✓' : '2'}
+                </div>
+                <div className="min-w-0 space-y-0.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">
+                      Variáveis e Atribuição: As Caixas de Memória
+                    </h4>
+                    {lessonTwoCompleted && (
                       <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[10px] rounded-full border border-emerald-500/30 shrink-0">
                         Concluída
                       </span>
@@ -249,6 +299,7 @@ export default function DashboardPage() {
                 <span>→</span>
               </div>
             </Link>
+
           </div>
         </div>
       </main>
