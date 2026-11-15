@@ -8,7 +8,7 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false) // Estado para abrir/fechar o menu mobile
 
   useEffect(() => {
     async function checkUserAndProgress() {
@@ -40,10 +40,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col transition-opacity duration-700 opacity-100 overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950 relative">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative">
       
       {/* Header Responsivo */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <Link href="/" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
             JS
@@ -53,11 +53,11 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        {/* Botões Desktop */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
+        {/* Menu Desktop (Telas Grandes) */}
+        <div className="hidden sm:flex items-center gap-2.5 shrink-0">
           <Link 
             href="/contato" 
-            className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-emerald-400 border border-gray-800 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-emerald-400 border border-gray-800 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
           >
             <span>💬</span> Contato
           </Link>
@@ -95,24 +95,24 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Botão Menu Hamburguer (Mobile) */}
+        {/* Botão Hambúrguer Mobile (Apenas Celular) */}
         <div className="flex sm:hidden items-center">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
-            aria-label="Abrir Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
+            aria-label="Menu"
           >
-            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+            <span className="text-xl leading-none">{menuOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </header>
 
-      {/* Menu Dropdown Mobile */}
-      {mobileMenuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-40 shadow-2xl animate-fadeIn">
+      {/* Caixa do Menu Mobile (Dropdown que abre ao clicar no ☰) */}
+      {menuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-50 shadow-2xl animate-fadeIn">
           <Link 
             href="/contato" 
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-medium text-gray-300 hover:text-white"
           >
             <span>💬</span> Central de Contato
@@ -122,14 +122,14 @@ export default function DashboardPage() {
             <>
               <Link
                 href="/painel"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMenuOpen(false)}
                 className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
               >
                 <span>⚙️ Meu Painel de Controle</span>
                 <span>→</span>
               </Link>
               <button
-                onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                onClick={() => { setMenuOpen(false); handleLogout(); }}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
               >
                 <span>🚪 Sair da Conta</span>
@@ -139,14 +139,14 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-2 pt-1">
               <Link 
                 href="/login"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMenuOpen(false)}
                 className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300"
               >
                 Entrar
               </Link>
               <Link 
                 href="/cadastro"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMenuOpen(false)}
                 className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs shadow-lg"
               >
                 Criar Conta
@@ -161,13 +161,13 @@ export default function DashboardPage() {
         {!userId && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <span className="text-emerald-300 text-center sm:text-left">
-              Modo Visitante Ativo: você pode navegar livremente pela trilha de estudos, mas faça login para registrar suas conclusões oficiais.
+              Modo Visitante Ativo: navegue livremente pela trilha, mas faça login para registrar suas conclusões.
             </span>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Link href="/login" className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold rounded-xl text-center cursor-pointer">
+              <Link href="/login" className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-900 border border-gray-800 text-gray-300 font-semibold rounded-xl text-center">
                 Entrar
               </Link>
-              <Link href="/cadastro" className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-center cursor-pointer">
+              <Link href="/cadastro" className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-500 text-gray-950 font-extrabold rounded-xl text-center">
                 Criar Conta
               </Link>
             </div>

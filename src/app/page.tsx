@@ -8,7 +8,7 @@ export default function HomePage() {
   const [session, setSession] = useState<any>(null)
   const [userXp, setUserXp] = useState<number>(0)
   const [loading, setLoading] = useState(true)
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -25,11 +25,11 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden relative">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden">
       
       {/* Header Responsivo */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
+      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           <span className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg border border-emerald-500/30 shrink-0">
             JS
           </span>
@@ -38,8 +38,8 @@ export default function HomePage() {
           </h1>
         </div>
 
-        {/* Botões Desktop */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
+        {/* Menu Desktop */}
+        <div className="hidden sm:flex items-center gap-2.5 shrink-0">
           <Link 
             href="/contato" 
             className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer"
@@ -74,24 +74,24 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Botão Menu Hamburguer (Mobile) */}
+        {/* Botão Hambúrguer Mobile */}
         <div className="flex sm:hidden items-center">
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
-            aria-label="Abrir Menu"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
+            aria-label="Menu"
           >
-            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+            <span className="text-xl leading-none">{menuOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </header>
 
       {/* Menu Dropdown Mobile */}
-      {mobileMenuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-40 shadow-2xl animate-fadeIn">
+      {menuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-50 shadow-2xl animate-fadeIn">
           <Link 
             href="/contato" 
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-medium text-gray-300 hover:text-white"
           >
             <span>💬</span> Central de Contato
@@ -101,7 +101,7 @@ export default function HomePage() {
             session ? (
               <Link 
                 href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMenuOpen(false)}
                 className="flex items-center justify-between px-4 py-3 bg-emerald-500 text-gray-950 font-extrabold rounded-xl text-xs"
               >
                 <span>Acessar Painel</span> <span>🚀</span>
@@ -110,14 +110,14 @@ export default function HomePage() {
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <Link 
                   href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMenuOpen(false)}
                   className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300"
                 >
                   Entrar
                 </Link>
                 <Link 
                   href="/cadastro"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => setMenuOpen(false)}
                   className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs shadow-lg"
                 >
                   Criar Conta
