@@ -92,7 +92,7 @@ export default function AulaUmPage() {
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <Link href="/dashboard" className="px-2 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md shrink-0">
+          <Link href="/dashboard" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
             JS
           </Link>
           <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
@@ -103,9 +103,9 @@ export default function AulaUmPage() {
         <div className="flex items-center gap-2 shrink-0">
           <Link 
             href="/dashboard"
-            className="text-xs text-gray-400 hover:text-white transition flex items-center gap-1 bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800"
+            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
           >
-            ← Trilha
+            ← Voltar à Trilha
           </Link>
         </div>
       </header>
@@ -114,22 +114,22 @@ export default function AulaUmPage() {
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-24">
 
         {!userId && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 p-3.5 sm:p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <span className="text-emerald-300 text-center sm:text-left">Modo Visitante Ativo: estude e teste livremente, faça login para salvar seu progresso.</span>
-            <Link href="/login" className="px-3.5 py-1.5 bg-emerald-500 text-gray-950 font-bold rounded-lg shrink-0">
+          <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-emerald-300 text-center sm:text-left">Modo Visitante Ativo: estude e teste livremente. Faça login para salvar seu progresso.</span>
+            <Link href="/login" className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl transition text-center shrink-0 cursor-pointer">
               Fazer Login
             </Link>
           </div>
         )}
 
         {/* Título da Aula */}
-        <div className="space-y-2 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-4 sm:p-6 rounded-2xl">
+        <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2 py-0.5 bg-emerald-500 text-gray-950 font-bold text-[11px] sm:text-xs rounded-md">
+            <span className="px-2.5 py-1 bg-emerald-500 text-gray-950 font-extrabold text-[11px] sm:text-xs rounded-md">
               MÓDULO 1 • AULA 1
             </span>
             {completed && (
-              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] sm:text-xs rounded-md border border-emerald-500/30">
+              <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] sm:text-xs rounded-md border border-emerald-500/30">
                 Concluída ✓
               </span>
             )}
@@ -146,7 +146,7 @@ export default function AulaUmPage() {
         <div className="flex border-b border-gray-800 gap-1 sm:gap-2 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('teoria')}
-            className={`px-3.5 sm:px-4 py-2.5 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-3 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'teoria' 
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' 
                 : 'border-transparent text-gray-400 hover:text-white'
@@ -156,7 +156,7 @@ export default function AulaUmPage() {
           </button>
           <button
             onClick={() => setActiveTab('pratica')}
-            className={`px-3.5 sm:px-4 py-2.5 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-3 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'pratica' 
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' 
                 : 'border-transparent text-gray-400 hover:text-white'
@@ -166,7 +166,7 @@ export default function AulaUmPage() {
           </button>
           <button
             onClick={() => setActiveTab('quiz')}
-            className={`px-3.5 sm:px-4 py-2.5 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
+            className={`px-4 py-3 text-xs font-semibold transition border-b-2 whitespace-nowrap cursor-pointer ${
               activeTab === 'quiz' 
                 ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' 
                 : 'border-transparent text-gray-400 hover:text-white'
@@ -179,13 +179,13 @@ export default function AulaUmPage() {
         {/* Conteúdo da Aba 1: Teoria */}
         {activeTab === 'teoria' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-4 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-3.5 text-gray-300 text-xs sm:text-sm leading-relaxed">
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed">
               <h3 className="text-sm sm:text-base font-bold text-white">O que é uma Variável?</h3>
               <p>
                 Imagine que você tem uma estante cheia de caixas organizadoras. Para não esquecer o que tem dentro de cada caixa, você coloca uma etiqueta com um nome. Na programação, <strong>variável</strong> é exatamente isso: uma caixa na memória do computador com um rótulo para guardar dados.
               </p>
               
-              <div className="p-3.5 bg-gray-950 border border-gray-800 rounded-xl font-mono text-[11px] sm:text-xs text-emerald-300 space-y-1 overflow-x-auto">
+              <div className="p-4 bg-gray-950 border border-gray-800 rounded-xl font-mono text-xs text-emerald-300 space-y-1 overflow-x-auto">
                 <span className="text-gray-500">// Exemplo prático de criação de variável:</span>
                 <p>const nomeDoAluno = "João";</p>
                 <p>const pontuacaoMaxima = 150;</p>
@@ -199,7 +199,7 @@ export default function AulaUmPage() {
             <div className="flex justify-end">
               <button
                 onClick={() => setActiveTab('pratica')}
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
+                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
               >
                 Avançar para a Missão Prática →
               </button>
@@ -210,47 +210,47 @@ export default function AulaUmPage() {
         {/* Conteúdo da Aba 2: Prática */}
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-4 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-white">Laboratório de Código Interativo</h3>
               <p className="text-xs text-gray-300 leading-relaxed">
                 Crie sua primeira variável escrevendo o nome da etiqueta e o valor correspondente abaixo:
               </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                 <div className="space-y-1.5">
-                  <label className="text-[11px] sm:text-xs text-gray-400 font-medium">Nome da Variável (Etiqueta):</label>
+                  <label className="text-xs text-gray-400 font-medium">Nome da Variável (Etiqueta):</label>
                   <input
                     type="text"
                     placeholder="ex: idade"
                     value={variableName}
                     onChange={(e) => setVariableName(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-gray-950 border border-gray-800 px-4 py-3 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[11px] sm:text-xs text-gray-400 font-medium">Valor Armazenado:</label>
+                  <label className="text-xs text-gray-400 font-medium">Valor Armazenado:</label>
                   <input
                     type="text"
                     placeholder='ex: 20 ou "Texto"'
                     value={variableValue}
                     onChange={(e) => setVariableValue(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500"
+                    className="w-full bg-gray-950 border border-gray-800 px-4 py-3 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
               </div>
 
-              <div className="pt-1">
+              <div className="pt-2">
                 <button
                   onClick={handleRunCode}
-                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
                 >
                   ⚡ Executar Código
                 </button>
               </div>
 
               {consoleOutput && (
-                <div className={`p-3.5 sm:p-4 rounded-xl border font-mono text-xs space-y-1 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
                   <div className="text-gray-500 text-[10px] uppercase tracking-wider">Console do Navegador:</div>
                   <pre className="whitespace-pre-wrap">{consoleOutput}</pre>
                 </div>
@@ -260,13 +260,13 @@ export default function AulaUmPage() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <button
                 onClick={() => setActiveTab('teoria')}
-                className="text-xs text-gray-400 hover:text-white transition order-2 sm:order-1"
+                className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
                 ← Voltar para Teoria
               </button>
               <button
                 onClick={() => setActiveTab('quiz')}
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center order-1 sm:order-2"
+                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center order-1 sm:order-2"
               >
                 Avançar para o Quiz Final →
               </button>
@@ -277,16 +277,16 @@ export default function AulaUmPage() {
         {/* Conteúdo da Aba 3: Quiz Final */}
         {activeTab === 'quiz' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-4 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
               <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação</h3>
               <p className="text-xs sm:text-sm text-gray-300">
                 Qual palavra-chave devemos utilizar em JavaScript para declarar uma constante (uma variável cujo valor não pode ser alterado)?
               </p>
 
-              <div className="grid gap-2.5 pt-1">
+              <div className="grid gap-3 pt-1">
                 <button
                   onClick={() => handleQuizSubmit('let')}
-                  className={`w-full p-3.5 sm:p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
+                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
                     quizAnswer === 'let' 
                       ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300')
                       : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
@@ -296,7 +296,7 @@ export default function AulaUmPage() {
                 </button>
                 <button
                   onClick={() => handleQuizSubmit('const')}
-                  className={`w-full p-3.5 sm:p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
+                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
                     quizAnswer === 'const' 
                       ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300')
                       : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
@@ -306,7 +306,7 @@ export default function AulaUmPage() {
                 </button>
                 <button
                   onClick={() => handleQuizSubmit('variable')}
-                  className={`w-full p-3.5 sm:p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
+                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
                     quizAnswer === 'variable' 
                       ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300')
                       : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
@@ -317,7 +317,7 @@ export default function AulaUmPage() {
               </div>
 
               {quizFeedback && (
-                <div className={`p-3.5 sm:p-4 rounded-xl border font-mono text-xs space-y-1 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
                   <div className="text-gray-500 text-[10px] uppercase tracking-wider">Resultado da Avaliação:</div>
                   <p>{quizFeedback}</p>
                 </div>
@@ -327,14 +327,14 @@ export default function AulaUmPage() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <button
                 onClick={() => setActiveTab('pratica')}
-                className="text-xs text-gray-400 hover:text-white transition order-2 sm:order-1"
+                className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
                 ← Voltar para Prática
               </button>
 
               <Link
                 href="/dashboard"
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center order-1 sm:order-2"
+                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer order-1 sm:order-2"
               >
                 Concluir Aula e Voltar à Trilha 🚀
               </Link>

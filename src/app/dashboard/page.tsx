@@ -42,10 +42,10 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col transition-opacity duration-700 opacity-100 overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950">
       
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2">
+      {/* Header Responsivo */}
+      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Link href="/" className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md shrink-0 hover:bg-emerald-500/30 transition">
+          <Link href="/" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/30 transition cursor-pointer">
             JS
           </Link>
           <h1 className="font-bold text-base sm:text-lg tracking-wide truncate">
@@ -53,26 +53,26 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <Link 
             href="/contato" 
-            className="text-xs text-gray-400 hover:text-emerald-400 transition flex items-center gap-1 bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800 shrink-0 hidden xs:flex"
+            className="px-3.5 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-emerald-400 border border-gray-800 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer hidden xs:flex"
           >
             <span>💬</span>
-            <span className="hidden sm:inline">Contato</span>
+            <span>Contato</span>
           </Link>
 
           {userId ? (
             <div className="flex items-center gap-2">
               <Link
                 href="/painel"
-                className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-lg text-xs shrink-0 flex items-center gap-1 cursor-pointer"
+                className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <span>⚙️</span> Painel
               </Link>
               <button
                 onClick={handleLogout}
-                className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition font-medium rounded-lg text-xs cursor-pointer shrink-0"
+                className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition font-semibold rounded-xl text-xs cursor-pointer shrink-0"
               >
                 Sair
               </button>
@@ -81,13 +81,13 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-3 py-1.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 transition font-semibold rounded-lg text-xs shrink-0"
+                className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 transition font-semibold rounded-xl text-xs cursor-pointer shrink-0"
               >
                 Entrar
               </Link>
               <Link
                 href="/cadastro"
-                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold transition rounded-lg text-xs shrink-0"
+                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold transition rounded-xl text-xs cursor-pointer shrink-0 shadow-lg shadow-emerald-500/20"
               >
                 Criar Conta
               </Link>
@@ -104,11 +104,11 @@ export default function DashboardPage() {
             <span className="text-emerald-300 text-center sm:text-left">
               Modo Visitante Ativo: você pode navegar livremente pela trilha de estudos, mas faça login para registrar suas conclusões oficiais.
             </span>
-            <div className="flex items-center gap-2 shrink-0">
-              <Link href="/login" className="px-3 py-1.5 bg-gray-900 border border-gray-800 text-gray-300 font-bold rounded-lg">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Link href="/login" className="flex-1 sm:flex-none px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold rounded-xl text-center cursor-pointer">
                 Entrar
               </Link>
-              <Link href="/cadastro" className="px-3.5 py-1.5 bg-emerald-500 text-gray-950 font-bold rounded-lg">
+              <Link href="/cadastro" className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-center cursor-pointer">
                 Criar Conta
               </Link>
             </div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             </div>
             <Link 
               href="/desafios"
-              className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-xl transition text-center shadow-lg shadow-amber-500/20 block"
+              className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition text-center shadow-lg shadow-amber-500/20 block cursor-pointer"
             >
               Entrar na Arena ⚡
             </Link>
