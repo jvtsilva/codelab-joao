@@ -4,43 +4,39 @@ import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Turnstile } from '@marsidev/react-turnstile'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [loadingText, setLoadingText] = useState('Logando...')
-  const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setLoadingText('Logando...')
     setErrorMessage('')
-    setSuccessMessage('')
+
+    if (!turnstileToken) {
+      setErrorMessage('Por favor, aguarde a verificação de segurança (Turnstile).')
+      return
+    }
+
+    setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // 1. Validação opcional ou direta no Supabase Auth
+      // O Supabase já lida com o login seguro, mas o Turnstile blinda contra bots tentando floodar requisições.
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (signInError) throw signInError
 
-      // 1️⃣ O botão fica mais tempo no estado "Logando..." (ex: 2.5 segundos)
-      setTimeout(() => {
-        setLoadingText('Tudo pronto!')
-        
-        // 2️⃣ Depois mostra a mensagem de sucesso como antes e segura mais um tempo
-        setSuccessMessage('Logado com sucesso! Redirecionando...')
-        
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2500) // Tempo da mensagem de sucesso na tela
-        
-      }, 2500) // Tempo que o botão fica rodando "Logando..."
+      // 2. Redireciona para o dashboard se der tudo certo
+      router.push('/dashboard')
 
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao fazer login. Verifique suas credenciais.')
@@ -56,12 +52,6 @@ export default function LoginPage() {
         {errorMessage && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
             {errorMessage}
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg text-center font-medium animate-pulse">
-            {successMessage}
           </div>
         )}
 
@@ -91,6 +81,15 @@ export default function LoginPage() {
           />
         </div>
 
+        {/* Widget do Cloudflare Turnstile */}
+        <div className="flex justify-center my-2">
+          <Turnstile
+            siteKey="0x4AAAAAAGB6hl7FfTuEMZ36"
+            onSuccess={(token) => setTurnstileToken(token)}
+            options={{ theme: 'dark' }}
+          />
+        </div>
+
         <button
           type="submit"
           disabled={loading}
@@ -99,7 +98,7 @@ export default function LoginPage() {
           {loading ? (
             <>
               <span className="w-4 h-4 border-2 border-gray-950 border-t-transparent rounded-full animate-spin"></span>
-              {loadingText}
+              Entrando...
             </>
           ) : (
             'Entrar'
@@ -107,7 +106,7 @@ export default function LoginPage() {
         </button>
 
         <p className="text-center text-xs text-gray-500 mt-4">
-          Não tem uma conta?{' '}
+          Ainda não tem uma conta?{' '}
           <Link href="/cadastro" className="text-emerald-400 hover:underline">
             Cadastre-se
           </Link>
