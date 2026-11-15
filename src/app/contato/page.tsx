@@ -13,7 +13,7 @@ export default function ContatoPage() {
   const instagramUrl = `https://instagram.com/${instagramUser}`
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden animate-fadeIn">
       
       {/* Top Bar / Header Ajustado e Elegante */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
@@ -31,7 +31,7 @@ export default function ContatoPage() {
           onClick={() => router.back()}
           className="text-xs font-semibold text-gray-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md"
         >
-        <span>Voltar à tela anterior</span>
+          <span>Voltar à tela anterior</span>
         </button>
       </header>
 

@@ -12,7 +12,7 @@ export default function PainelPage() {
   const [lastSignIn, setLastSignIn] = useState<string | null>(null)
   const [deviceInfo, setDeviceInfo] = useState<string>('Detectando...')
   const [loading, setLoading] = useState(true)
-  const [menuOpen, setMenuOpen] = useState(false) // Estado para o menu hamburguer mobile
+  const [menuOpen, setMenuOpen] = useState(false)
 
   // Estados para alteração de senha
   const [newPassword, setNewPassword] = useState('')
@@ -129,6 +129,9 @@ export default function PainelPage() {
 
       if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
 
+      localStorage.removeItem('codelab_user_xp')
+      localStorage.removeItem('codelab_visitante_desafio_1')
+
       await supabase.auth.signOut()
       setDeleteLoading(false)
       setDeleteSuccess(true)
@@ -140,6 +143,7 @@ export default function PainelPage() {
   }
 
   const handleLogout = async () => {
+    localStorage.removeItem('codelab_user_xp')
     await supabase.auth.signOut()
     router.push('/login')
   }
@@ -156,23 +160,21 @@ export default function PainelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-x-hidden">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-x-hidden animate-fadeIn">
+      
       {/* Header Superior */}
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
           
-          {/* Lado Esquerdo: Voltar para os estudos */}
           <div className="flex items-center gap-3">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0 cursor-pointer"
             >
-              
               <span>Voltar para os estudos</span>
             </Link>
           </div>
 
-          {/* Lado Direito Desktop: Info do usuário + Botão Sair */}
           <div className="hidden sm:flex items-center gap-3">
             <span className="text-xs text-gray-400 bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50 truncate max-w-[180px]">
               {userName}
@@ -185,7 +187,6 @@ export default function PainelPage() {
             </button>
           </div>
 
-          {/* Botão Hambúrguer Mobile (Apenas em telas pequenas) */}
           <div className="flex sm:hidden items-center">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -210,11 +211,11 @@ export default function PainelPage() {
             onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
           >
-          Voltar para a Trilha de Aulas
+            Voltar para a Trilha de Aulas
           </Link>
           <button
             onClick={() => { setMenuOpen(false); handleLogout(); }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs cursor-pointer"
           >
             <span>🚪 Sair da Conta</span>
           </button>
@@ -239,7 +240,6 @@ export default function PainelPage() {
         {/* Grid de Informações e Segurança */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Card de Dados do Usuário */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 lg:col-span-1 shadow-lg">
             <h3 className="text-base sm:text-lg font-bold">Informações</h3>
             <div className="space-y-3 text-xs">
@@ -270,10 +270,8 @@ export default function PainelPage() {
             </div>
           </div>
 
-          {/* Coluna Direita: Senha + Zona de Perigo */}
           <div className="space-y-6 lg:col-span-2">
             
-            {/* Card de Alteração de Senha */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
               <div>
                 <h3 className="text-base sm:text-lg font-bold">Segurança</h3>
@@ -316,7 +314,6 @@ export default function PainelPage() {
                   </div>
                 </div>
 
-                {/* Checklist visual de requisitos */}
                 <div className="p-3 bg-gray-950/60 border border-gray-800 rounded-xl space-y-1.5 text-xs">
                   <p className="text-gray-400 font-medium mb-1">A nova senha deve conter:</p>
                   <div className={`flex items-center gap-2 transition-colors ${hasMinLength ? 'text-emerald-400' : 'text-gray-500'}`}>
@@ -354,7 +351,6 @@ export default function PainelPage() {
               </form>
             </div>
 
-            {/* Zona de Perigo (Exclusão de Conta) */}
             <div className="bg-gray-900 border border-red-500/20 rounded-2xl p-5 sm:p-6 space-y-3 shadow-lg">
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-red-400">Zona de Perigo</h3>

@@ -93,7 +93,7 @@ export default function AulaUmPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
       
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
@@ -104,7 +104,7 @@ export default function AulaUmPage() {
             JS
           </div>
           <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
-            Módulo 1 <span className="text-emerald-400 font-normal hidden xs:inline">• Aula 1</span>
+            Módulo 1 <span className="text-emerald-400 font-normal">Aula 1</span>
           </h1>
         </div>
 
@@ -114,7 +114,7 @@ export default function AulaUmPage() {
             href="/dashboard"
             className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
           >
-             Voltar à Trilha
+            Voltar à Trilha
           </Link>
           {userId && (
             <Link
@@ -163,7 +163,7 @@ export default function AulaUmPage() {
 
           <button
             onClick={() => { setMenuOpen(false); handleLogout(); }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs cursor-pointer"
           >
             <span>🚪 Sair da Conta</span>
           </button>
