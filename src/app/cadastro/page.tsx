@@ -60,7 +60,7 @@ export default function CadastroPage() {
 
       if (signUpError) throw signUpError
 
-      // 3. Feedback visual customizado (Passa de Cadastrando para Tudo pronto!)
+      // 3. Feedback visual customizado
       setTimeout(() => {
         setLoadingText('Tudo pronto!')
         setSuccessMessage('Cadastro realizado com sucesso! Redirecionando...')
@@ -132,10 +132,10 @@ export default function CadastroPage() {
           </div>
         </div>
 
-        {/* Widget do Cloudflare Turnstile */}
+        {/* Widget do Cloudflare Turnstile com a sua chave direta */}
         <div className="flex justify-center my-2">
           <Turnstile
-            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
+            siteKey="0x4AAAAAAGB6hl7FfTuEMZ36"
             onSuccess={(token) => setTurnstileToken(token)}
             options={{ theme: 'dark' }}
           />
