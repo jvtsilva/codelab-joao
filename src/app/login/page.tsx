@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState(false) // Estado para o sucesso
+  const [successMessage, setSuccessMessage] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
 
@@ -34,26 +34,24 @@ export default function LoginPage() {
 
       if (signInError) throw signInError
 
-      // Ativa o estado de sucesso visual antes de redirecionar
       setSuccessMessage(true)
 
-      // Pequeno delay para o usuário ver a mensagem de sucesso e animação suave
+      // 2 segundos completos de feedback visual suave antes de redirecionar
       setTimeout(() => {
         router.push('/dashboard')
-      }, 1000)
+      }, 2000)
 
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao fazer login. Verifique suas credenciais.')
-      setLoading(false) // Libera o botão se der erro
+      setLoading(false)
     }
   }
 
   return (
-    // 'animate-fade-in' traz a transição suave de entrada na tela
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-950 text-white transition-opacity duration-500">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-950 text-white animate-fade-in">
       <form 
         onSubmit={handleLogin} 
-        className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl space-y-4 transform transition-all duration-300 scale-100 hover:border-gray-700"
+        className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl space-y-4 transition-all duration-300"
       >
         <div className="text-center space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Acesse sua conta</h2>
@@ -61,13 +59,13 @@ export default function LoginPage() {
         </div>
         
         {errorMessage && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg animate-shake">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
             {errorMessage}
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg flex items-center justify-center gap-2 font-medium">
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg flex items-center justify-center gap-2 font-medium transition-all">
             <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
             Logado com sucesso! Redirecionando...
           </div>
@@ -111,7 +109,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading || successMessage}
-          className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition-all font-bold rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2 transform active:scale-95"
+          className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition-all font-bold rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2"
         >
           {loading && !successMessage ? (
             <>
