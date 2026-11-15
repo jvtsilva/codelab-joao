@@ -1,8 +1,10 @@
 'use client'
 
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function ContatoPage() {
+  const router = useRouter()
+
   const whatsappNumber = '5519995200014'
   const instagramUser = 'jvsilva.dev'
   const emailContato = 'codelab.joao@gmail.com'
@@ -13,23 +15,24 @@ export default function ContatoPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
       
-      {/* Top Bar / Header */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+      {/* Top Bar / Header Ajustado e Elegante */}
+      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2.5">
-          <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md border border-emerald-500/30">
+          <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg border border-emerald-500/30 select-none">
             JS
-          </span>
-          <h1 className="font-bold text-base sm:text-lg tracking-wide">
+          </div>
+          <h1 className="font-bold text-sm sm:text-base tracking-wide truncate">
             Codelab <span className="text-emerald-400 font-normal">João</span>
           </h1>
         </div>
 
-        <Link 
-          href="/" 
-          className="text-xs text-gray-300 hover:text-white transition px-3.5 py-1.5 rounded-lg bg-gray-900 border border-gray-800 flex items-center gap-1.5"
+        {/* Botão Voltar Inteligente (Retorna à tela anterior de onde o usuário veio) */}
+        <button 
+          onClick={() => router.back()}
+          className="text-xs font-semibold text-gray-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md"
         >
-          ← Voltar para o Início
-        </Link>
+          <span>←</span> <span>Voltar à tela anterior</span>
+        </button>
       </header>
 
       {/* Main Content */}
@@ -37,7 +40,6 @@ export default function ContatoPage() {
         <div className="w-full bg-gray-900 border border-gray-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6">
           
           <div className="text-center space-y-3 flex flex-col items-center">
-            {/* Bloco verde posicionado no topo */}
             <span className="inline-block px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs rounded-full">
               SUPORTE E ATENDIMENTO 💬
             </span>
