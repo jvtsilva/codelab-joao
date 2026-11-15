@@ -147,6 +147,7 @@ export default function AulaUmPage() {
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
           >
          Voltar para a Trilha de Aulas
+         <span>→</span>
           </Link>
 
           {userId && (
