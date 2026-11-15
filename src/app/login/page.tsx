@@ -34,9 +34,10 @@ export default function LoginPage() {
 
       if (signInError) throw signInError
 
+      // Ativa o feedback visual de sucesso
       setSuccessMessage(true)
 
-      // 2 segundos completos de feedback visual suave antes de redirecionar
+      // 2 segundos de delay antes de redirecionar para a trilha de estudos
       setTimeout(() => {
         router.push('/dashboard')
       }, 2000)
@@ -54,8 +55,8 @@ export default function LoginPage() {
         className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-2xl space-y-4 transition-all duration-300"
       >
         <div className="text-center space-y-1">
-          <h2 className="text-2xl font-bold tracking-tight">Acesse sua conta</h2>
-          <p className="text-xs text-gray-400">Entre com seus dados para continuar</p>
+          <h2 className="text-2xl font-bold tracking-tight">Codelab João</h2>
+          <p className="text-xs text-gray-400">Entre com sua conta para acessar a trilha</p>
         </div>
         
         {errorMessage && (
