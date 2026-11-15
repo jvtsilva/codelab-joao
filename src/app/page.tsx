@@ -10,26 +10,22 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function loadUserData() {
+    async function loadData() {
+      // Verificar sessão do Supabase
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
 
-      if (session) {
-        // Buscar somatório de XP do usuário na tabela user_challenges
-        const { data } = await supabase
-          .from('user_challenges')
-          .select('xp_earned')
-          .eq('user_id', session.user.id)
-
-        if (data && data.length > 0) {
-          const totalXp = data.reduce((acc, curr) => acc + (curr.xp_earned || 0), 0)
-          setUserXp(totalXp)
+      // Recuperar XP salvo no navegador (usado na Arena de Desafios)
+      if (typeof window !== 'undefined') {
+        const savedXp = localStorage.getItem('codelab_user_xp')
+        if (savedXp) {
+          setUserXp(Number(savedXp))
         }
       }
 
       setLoading(false)
     }
-    loadUserData()
+    loadData()
   }, [])
 
   return (
@@ -89,7 +85,7 @@ export default function HomePage() {
         {/* Badge de Destaque com XP / Status */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] sm:text-xs font-semibold">
           <span>✨</span> 
-          {session ? `Seu XP Atual: ${userXp} XP ⚡` : 'Modo Visitante Ativo • Aulas + Arena XP'}
+          {userXp > 0 ? `Seu XP Atual: ${userXp} XP ⚡` : 'Modo Visitante Ativo • Aulas + Arena XP'}
         </div>
 
         <div className="space-y-3 sm:space-y-4 max-w-3xl">
@@ -140,7 +136,7 @@ export default function HomePage() {
             <div className="flex items-center justify-between">
               <div className="text-xl sm:text-2xl">🏆</div>
               <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-md">
-                {session ? `${userXp} XP` : 'Até 500+ XP'}
+                {userXp > 0 ? `${userXp} XP` : 'Até 500+ XP'}
               </span>
             </div>
             <h3 className="font-bold text-white text-sm">Arena com XP</h3>
