@@ -22,6 +22,12 @@ export default function CadastroPage() {
   const hasNumber = /[0-9]/.test(password)
   const hasSpecialChar = /[^A-Za-z0-9]/.test(password)
 
+  // Validação estrita de formato de e-mail (exigindo domínio e extensão válida)
+  const isValidEmail = (emailStr: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+    return emailRegex.test(emailStr)
+  }
+
   // Função para Cadastro / Login com o Google via Supabase OAuth
   const handleGoogleLogin = async () => {
     setErrorMessage('')
@@ -42,6 +48,11 @@ export default function CadastroPage() {
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage('')
+
+    if (!isValidEmail(email)) {
+      setErrorMessage('Por favor, insira um e-mail válido com extensão (ex: seu@email.com).')
+      return
+    }
 
     if (!turnstileToken) {
       setErrorMessage('Por favor, aguarde a verificação de segurança (Turnstile).')
@@ -112,23 +123,23 @@ export default function CadastroPage() {
           className="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white font-medium rounded-xl text-xs sm:text-sm transition flex items-center justify-center gap-3 cursor-pointer shadow-md disabled:opacity-50"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
-  <path
-    fill="#4285F4"
-    d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
-  />
-  <path
-    fill="#34A853"
-    d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.23v3.15C3.21 21.32 7.31 24 12 24z"
-  />
-  <path
-    fill="#FBBC05"
-    d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.23C.44 8.16 0 9.94 0 11.8s.44 3.64 1.23 5.22l4.05-3.15z"
-  />
-  <path
-    fill="#EA4335"
-    d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.21 2.68 1.23 6.58l4.05 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-  />
-</svg>
+            <path
+              fill="#4285F4"
+              d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+            />
+            <path
+              fill="#34A853"
+              d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.23v3.15C3.21 21.32 7.31 24 12 24z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.23C.44 8.16 0 9.94 0 11.8s.44 3.64 1.23 5.22l4.05-3.15z"
+            />
+            <path
+              fill="#EA4335"
+              d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.21 2.68 1.23 6.58l4.05 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+            />
+          </svg>
           Continuar com o Google
         </button>
 
