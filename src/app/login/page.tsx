@@ -26,8 +26,6 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      // 1. Validação opcional ou direta no Supabase Auth
-      // O Supabase já lida com o login seguro, mas o Turnstile blinda contra bots tentando floodar requisições.
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,12 +33,12 @@ export default function LoginPage() {
 
       if (signInError) throw signInError
 
-      // 2. Redireciona para o dashboard se der tudo certo
+      // Redireciona para o dashboard se o login for bem-sucedido
       router.push('/dashboard')
 
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao fazer login. Verifique suas credenciais.')
-      setLoading(false)
+      setLoading(false) // Libera o botão imediatamente se der erro
     }
   }
 
