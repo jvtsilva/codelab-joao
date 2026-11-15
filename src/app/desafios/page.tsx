@@ -6,7 +6,6 @@ import Link from 'next/link'
 
 export default function ArenaPage() {
   const [userId, setUserId] = useState<string | null>(null)
-  const [userName, setUserName] = useState<string>('Visitante')
   const [userXp, setUserXp] = useState<number>(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -23,25 +22,31 @@ export default function ArenaPage() {
       if (session) {
         const currentUserId = session.user.id
         setUserId(currentUserId)
-        const meta = session.user.user_metadata
-        setUserName(meta?.full_name || meta?.name || 'Aluno')
 
-        // Verificar se já concluiu este desafio no Supabase
-        const { data } = await supabase
+        // Busca o progresso e XP real salvo no banco de dados do usuário
+        const { data: challenges, error } = await supabase
           .from('user_challenges')
-          .select('completed')
+          .select('challenge_id, completed, xp_earned')
           .eq('user_id', currentUserId)
-          .eq('challenge_id', 'challenge-1')
-          .single()
 
-        if (data && data.completed) {
-          setChallengeCompleted(true)
+        if (!error && challenges && challenges.length > 0) {
+          const totalXpFromDb = challenges.reduce((acc, curr) => acc + (curr.xp_earned || 0), 0)
+          setUserXp(totalXpFromDb)
+          
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('codelab_user_xp', String(totalXpFromDb))
+          }
+
+          const desafiop1 = challenges.find(c => c.challenge_id === 'challenge-1')
+          if (desafiop1 && desafiop1.completed) {
+            setChallengeCompleted(true)
+          }
         }
-      }
-
-      if (typeof window !== 'undefined') {
-        const savedXp = localStorage.getItem('codelab_user_xp')
-        if (savedXp) setUserXp(Number(savedXp))
+      } else {
+        if (typeof window !== 'undefined') {
+          const savedXp = localStorage.getItem('codelab_user_xp')
+          if (savedXp) setUserXp(Number(savedXp))
+        }
       }
     }
     loadUserArena()
@@ -72,14 +77,20 @@ export default function ArenaPage() {
           localStorage.setItem('codelab_user_xp', String(newXp))
         }
 
+        // Salva no Supabase se o usuário estiver logado
         if (userId) {
-          await supabase.from('user_challenges').upsert({
+          const { error } = await supabase.from('user_challenges').upsert({
             user_id: userId,
             challenge_id: 'challenge-1',
             completed: true,
             xp_earned: 50,
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id,challenge_id' })
+
+          if (error) {
+            console.error('Erro ao salvar no Supabase:', error.message)
+            setFeedback('⚠️ Código correto, mas houve um erro ao sincronizar com o banco: ' + error.message)
+          }
         }
       }
     } else {
@@ -89,6 +100,9 @@ export default function ArenaPage() {
   }
 
   const handleLogout = async () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('codelab_user_xp')
+    }
     await supabase.auth.signOut()
     window.location.href = '/'
   }
@@ -99,7 +113,7 @@ export default function ArenaPage() {
       {/* Header Responsivo da Arena */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         
-        {/* Lado Esquerdo: Ícone de Espada Estático + Título */}
+        {/* Ícone de Espada Estático + Título */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
             ⚔️
@@ -109,7 +123,7 @@ export default function ArenaPage() {
           </h1>
         </div>
 
-        {/* Badges e Botões Desktop */}
+        {/* Botões Desktop */}
         <div className="hidden sm:flex items-center gap-3 shrink-0">
           <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-inner">
             <span>⭐</span> {userXp} XP
@@ -215,7 +229,7 @@ export default function ArenaPage() {
             Teste sua Lógica de Programação
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Resolva o desafio de código abaixo, pratique seus conhecimentos em JavaScript e acumule pontos de XP para o seu perfil.
+            Resolva o desafio de código abaixo, pratique seus conhecimentos em JavaScript e acumule pontos de XP armazenados no banco de dados.
           </p>
         </div>
 
