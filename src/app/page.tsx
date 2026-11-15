@@ -11,18 +11,13 @@ export default function HomePage() {
 
   useEffect(() => {
     async function loadData() {
-      // Verificar sessão do Supabase
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
 
-      // Recuperar XP salvo no navegador (usado na Arena de Desafios)
       if (typeof window !== 'undefined') {
         const savedXp = localStorage.getItem('codelab_user_xp')
-        if (savedXp) {
-          setUserXp(Number(savedXp))
-        }
+        if (savedXp) setUserXp(Number(savedXp))
       }
-
       setLoading(false)
     }
     loadData()
@@ -31,7 +26,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
       
-      {/* Header / Navbar Responsivo */}
+      {/* Header */}
       <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md border border-emerald-500/30 shrink-0">
@@ -63,7 +58,7 @@ export default function HomePage() {
               <div className="flex items-center gap-1.5">
                 <Link 
                   href="/login"
-                  className="px-2.5 py-1.5 text-xs font-semibold text-gray-300 hover:text-white transition hidden sm:inline"
+                  className="px-3 py-1.5 text-xs font-semibold text-gray-300 hover:text-white transition bg-gray-900 border border-gray-800 rounded-xl"
                 >
                   Entrar
                 </Link>
@@ -79,10 +74,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Hero Section Principal */}
+      {/* Main Content */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-14 md:py-16 flex flex-col items-center text-center space-y-6 sm:space-y-8">
         
-        {/* Badge de Destaque com XP / Status */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] sm:text-xs font-semibold">
           <span>✨</span> 
           {userXp > 0 ? `Seu XP Atual: ${userXp} XP ⚡` : 'Modo Visitante Ativo • Aulas + Arena XP'}
@@ -97,7 +91,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Botões de Ação Principal */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
           <Link 
             href="/dashboard"
@@ -114,7 +107,6 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Cards de Destaque / Benefícios */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 w-full pt-8 sm:pt-12 text-left">
           <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2">
             <div className="text-xl sm:text-2xl">📖</div>
@@ -148,7 +140,6 @@ export default function HomePage() {
 
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs text-gray-500 max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3">
         <p>Codelab João • Plataforma educacional voltada para o aprendizado prático</p>
         <Link href="/contato" className="hover:text-emerald-400 transition font-medium text-gray-400">
