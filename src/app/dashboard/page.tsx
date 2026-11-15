@@ -44,10 +44,12 @@ export default function DashboardPage() {
       
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+        
+        {/* Ícone JS Estático (Sem redirecionamento) + Nome */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <Link href="/" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
+          <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
-          </Link>
+          </div>
           <h1 className="font-bold text-base sm:text-lg tracking-wide truncate">
             Codelab <span className="text-emerald-400 text-xs sm:text-sm font-normal">João</span>
           </h1>
@@ -64,7 +66,6 @@ export default function DashboardPage() {
 
           {userId ? (
             <div className="flex items-center gap-2">
-              {/* LINK CORRIGIDO APONTANDO EXATAMENTE PARA /painel */}
               <Link
                 href="/painel"
                 className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
@@ -121,7 +122,6 @@ export default function DashboardPage() {
 
           {userId ? (
             <>
-              {/* LINK MOBILE CORRIGIDO APONTANDO EXATAMENTE PARA /painel */}
               <Link
                 href="/painel"
                 onClick={() => setMenuOpen(false)}
