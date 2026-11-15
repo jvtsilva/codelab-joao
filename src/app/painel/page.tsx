@@ -59,14 +59,12 @@ export default function PainelPage() {
         let browser = 'Navegador Desconhecido'
         let os = 'Dispositivo Desconhecido'
 
-        // Detectando Sistema Operacional
         if (ua.includes('Win')) os = 'Windows'
         else if (ua.includes('Mac')) os = 'macOS'
         else if (ua.includes('Linux')) os = 'Linux'
         else if (ua.includes('Android')) os = 'Android'
         else if (ua.includes('like Mac') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
 
-        // Detectando Navegador
         if (ua.includes('Firefox')) browser = 'Firefox'
         else if (ua.includes('SamsungBrowser')) browser = 'Samsung Internet'
         else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera'
@@ -158,30 +156,30 @@ export default function PainelPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white transition-opacity duration-700 opacity-100 flex flex-col relative">
-      {/* Header Superior */}
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-x-hidden">
+      {/* Header Superior Responsivo */}
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold hover:bg-emerald-500/20 transition" title="Voltar para a Trilha">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <Link href="/dashboard" className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold hover:bg-emerald-500/20 transition shrink-0" title="Voltar para a Trilha">
               ⚡
             </Link>
-            <span className="font-bold text-lg tracking-tight">Painel de Controle</span>
+            <span className="font-bold text-sm sm:text-base tracking-tight truncate">Painel de Controle</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link 
               href="/dashboard"
-              className="text-xs text-emerald-400 hover:underline hidden sm:inline"
+              className="text-xs text-emerald-400 hover:underline hidden md:inline"
             >
-              Ir para Trilha de Estudos →
+              Ir para Trilha →
             </Link>
-            <span className="text-xs text-gray-400 hidden md:inline bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50">
-              {userName} ({userEmail})
+            <span className="text-xs text-gray-400 hidden lg:inline bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50 truncate max-w-[180px]">
+              {userName}
             </span>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition cursor-pointer"
+              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition cursor-pointer shrink-0"
             >
               Sair
             </button>
@@ -190,13 +188,13 @@ export default function PainelPage() {
       </header>
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Olá, {userName} 🚀</h1>
-            <p className="text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta no Codelab João.</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Olá, {userName} 🚀</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta no Codelab João.</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center self-start md:self-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               Sessão Autenticada
@@ -204,12 +202,12 @@ export default function PainelPage() {
           </div>
         </div>
 
-        {/* Grid de Informações e Segurança */}
+        {/* Grid de Informações e Segurança (Empilha perfeitamente no mobile) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Card de Dados do Usuário */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4 lg:col-span-1">
-            <h3 className="text-lg font-bold">Informações</h3>
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 lg:col-span-1 shadow-lg">
+            <h3 className="text-base sm:text-lg font-bold">Informações</h3>
             <div className="space-y-3 text-xs">
               <div>
                 <span className="text-gray-500 block mb-1">Nome Cadastrado</span>
@@ -231,7 +229,7 @@ export default function PainelPage() {
               </div>
               <div>
                 <span className="text-gray-500 block mb-1">Último Acesso</span>
-                <span className="text-emerald-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800">
+                <span className="text-emerald-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
                   {lastSignIn}
                 </span>
               </div>
@@ -242,9 +240,9 @@ export default function PainelPage() {
           <div className="space-y-6 lg:col-span-2">
             
             {/* Card de Alteração de Senha */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
               <div>
-                <h3 className="text-lg font-bold">Segurança</h3>
+                <h3 className="text-base sm:text-lg font-bold">Segurança</h3>
                 <p className="text-xs text-gray-400 mt-0.5">Atualize sua senha de acesso à plataforma.</p>
               </div>
 
@@ -268,7 +266,7 @@ export default function PainelPage() {
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                      className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
                     />
                   </div>
                   <div>
@@ -279,12 +277,12 @@ export default function PainelPage() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       placeholder="••••••••"
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                      className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
                     />
                   </div>
                 </div>
 
-                {/* Checklist visual de requisitos idêntico ao do cadastro */}
+                {/* Checklist visual de requisitos */}
                 <div className="p-3 bg-gray-950/60 border border-gray-800 rounded-xl space-y-1.5 text-xs">
                   <p className="text-gray-400 font-medium mb-1">A nova senha deve conter:</p>
                   <div className={`flex items-center gap-2 transition-colors ${hasMinLength ? 'text-emerald-400' : 'text-gray-500'}`}>
@@ -308,7 +306,7 @@ export default function PainelPage() {
                 <button
                   type="submit"
                   disabled={passwordLoading || !hasMinLength || !hasUpperCase || !hasNumber || !hasSpecialChar}
-                  className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
                 >
                   {passwordLoading ? (
                     <>
@@ -323,16 +321,16 @@ export default function PainelPage() {
             </div>
 
             {/* Zona de Perigo (Exclusão de Conta) */}
-            <div className="bg-gray-900 border border-red-500/20 rounded-2xl p-6 space-y-3">
+            <div className="bg-gray-900 border border-red-500/20 rounded-2xl p-5 sm:p-6 space-y-3 shadow-lg">
               <div>
-                <h3 className="text-lg font-bold text-red-400">Zona de Perigo</h3>
+                <h3 className="text-base sm:text-lg font-bold text-red-400">Zona de Perigo</h3>
                 <p className="text-xs text-gray-400 mt-0.5">Ações irreversíveis relacionadas à sua conta na plataforma.</p>
               </div>
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                 <span className="text-xs text-gray-400">Excluir permanentemente sua conta e todos os dados associados.</span>
                 <button
                   onClick={() => setShowDeleteModal(true)}
-                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg text-xs transition cursor-pointer"
+                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg text-xs transition cursor-pointer shrink-0 text-center"
                 >
                   Excluir Conta
                 </button>
@@ -344,13 +342,13 @@ export default function PainelPage() {
         </div>
       </main>
 
-      {/* Modal de Confirmação e Agradecimento com Nome */}
+      {/* Modal Responsivo de Exclusão */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-6 rounded-2xl space-y-4 shadow-2xl">
+          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-2xl space-y-4 shadow-2xl">
             
             {deleteSuccess ? (
-              <div className="py-6 text-center space-y-4">
+              <div className="py-4 text-center space-y-4">
                 <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
                   ✓
                 </div>
@@ -370,7 +368,7 @@ export default function PainelPage() {
               </div>
             ) : (
               <>
-                <h3 className="text-lg font-bold text-red-400">Deseja realmente excluir sua conta?</h3>
+                <h3 className="text-base sm:text-lg font-bold text-red-400">Deseja realmente excluir sua conta?</h3>
                 <p className="text-xs text-gray-300 leading-relaxed">
                   Esta ação é <strong className="text-white">definitiva e irreversível</strong>, {userName}. Todos os seus dados e acessos serão apagados permanentemente do Codelab João.
                 </p>
@@ -381,12 +379,12 @@ export default function PainelPage() {
                   </div>
                 )}
 
-                <div className="flex items-center justify-end gap-3 pt-2">
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2">
                   <button
                     type="button"
                     onClick={() => setShowDeleteModal(false)}
                     disabled={deleteLoading}
-                    className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-xs transition cursor-pointer"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-xs transition cursor-pointer text-center"
                   >
                     Cancelar
                   </button>
@@ -394,7 +392,7 @@ export default function PainelPage() {
                     type="button"
                     onClick={handleDeleteAccount}
                     disabled={deleteLoading}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                    className="w-full sm:w-auto px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {deleteLoading ? (
                       <>
