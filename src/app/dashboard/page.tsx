@@ -8,7 +8,7 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [menuOpen, setMenuOpen] = useState(false) // Estado para abrir/fechar o menu mobile
+  const [menuOpen, setMenuOpen] = useState(false)
 
   useEffect(() => {
     async function checkUserAndProgress() {
@@ -53,7 +53,7 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        {/* Menu Desktop (Telas Grandes) */}
+        {/* Menu Desktop */}
         <div className="hidden sm:flex items-center gap-2.5 shrink-0">
           <Link 
             href="/contato" 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Botão Hambúrguer Mobile (Apenas Celular) */}
+        {/* Botão Hambúrguer Mobile */}
         <div className="flex sm:hidden items-center">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
@@ -107,7 +107,7 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Caixa do Menu Mobile (Dropdown que abre ao clicar no ☰) */}
+      {/* Menu Dropdown Mobile */}
       {menuOpen && (
         <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-50 shadow-2xl animate-fadeIn">
           <Link 
@@ -123,7 +123,7 @@ export default function DashboardPage() {
               <Link
                 href="/painel"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
+                className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs font-semibold text-emerald-400"
               >
                 <span>⚙️ Meu Painel de Controle</span>
                 <span>→</span>
