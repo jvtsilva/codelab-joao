@@ -9,8 +9,8 @@ export default function ArenaPage() {
   const [userXp, setUserXp] = useState<number>(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estado para controlar qual desafio está aberto (ID do desafio atual)
-  const [openChallengeId, setOpenChallengeId] = useState<string | null>('challenge-1')
+  // Estado alterado para null: agora começa com TODOS os desafios fechados!
+  const [openChallengeId, setOpenChallengeId] = useState<string | null>(null)
 
   // Estados do Desafio #1
   const [codeAnswer1, setCodeAnswer1] = useState('')
@@ -320,7 +320,7 @@ export default function ArenaPage() {
             )}
           </div>
 
-          {/* Exemplo de futuro Desafio #2 (Já fechadinho aguardando novos módulos) */}
+          {/* Exemplo de futuro Desafio #2 (Fechado) */}
           <div className="bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden opacity-75">
             <div className="w-full p-5 sm:p-6 flex items-center justify-between text-left">
               <div className="flex items-center gap-3">
