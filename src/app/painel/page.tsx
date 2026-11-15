@@ -54,7 +54,6 @@ export default function PainelPage() {
           setLastSignIn('Sessão ativa recente')
         }
 
-        // Detecção inteligente do Navegador e Dispositivo via UserAgent
         const ua = navigator.userAgent
         let browser = 'Navegador Desconhecido'
         let os = 'Dispositivo Desconhecido'
@@ -157,23 +156,24 @@ export default function PainelPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-x-hidden">
-      {/* Header Superior Responsivo */}
+      {/* Header Superior */}
       <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <Link href="/dashboard" className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold hover:bg-emerald-500/20 transition shrink-0" title="Voltar para a Trilha">
-              ⚡
+          
+          {/* Lado Esquerdo: Botão Voltar para os estudos com Painel de Controle */}
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/dashboard" 
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0"
+            >
+              <span>←</span>
+              <span>Voltar para os estudos</span>
             </Link>
-            <span className="font-bold text-sm sm:text-base tracking-tight truncate">Painel de Controle</span>
+           
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link 
-              href="/dashboard"
-              className="text-xs text-emerald-400 hover:underline hidden md:inline"
-            >
-              Ir para Trilha →
-            </Link>
+          {/* Lado Direito: Info do usuário + Botão Sair */}
+          <div className="flex items-center gap-3">
             <span className="text-xs text-gray-400 hidden lg:inline bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50 truncate max-w-[180px]">
               {userName}
             </span>
@@ -184,6 +184,7 @@ export default function PainelPage() {
               Sair
             </button>
           </div>
+
         </div>
       </header>
 
@@ -191,8 +192,8 @@ export default function PainelPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Olá, {userName} 🚀</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta no Codelab João.</p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Painel de Controle 🚀</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta, {userName}.</p>
           </div>
           <div className="flex items-center self-start md:self-auto">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -202,7 +203,7 @@ export default function PainelPage() {
           </div>
         </div>
 
-        {/* Grid de Informações e Segurança (Empilha perfeitamente no mobile) */}
+        {/* Grid de Informações e Segurança */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* Card de Dados do Usuário */}
