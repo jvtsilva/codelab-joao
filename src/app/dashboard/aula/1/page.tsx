@@ -97,10 +97,12 @@ export default function AulaUmPage() {
       
       {/* Header Responsivo com Menu Mobile */}
       <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+        
+        {/* Ícone JS Estático (Sem Redirecionamento) + Título */}
         <div className="flex items-center gap-2.5 min-w-0">
-          <Link href="/dashboard" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
+          <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
-          </Link>
+          </div>
           <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
             Módulo 1 <span className="text-emerald-400 font-normal hidden xs:inline">• Aula 1</span>
           </h1>
@@ -128,10 +130,10 @@ export default function AulaUmPage() {
         <div className="flex sm:hidden items-center">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
+            className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
             aria-label="Abrir Menu"
           >
-            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+            <span className="text-xl leading-none">{mobileMenuOpen ? '✕' : '☰'}</span>
           </button>
         </div>
       </header>
@@ -151,7 +153,7 @@ export default function AulaUmPage() {
             <Link
               href="/painel"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
+              className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs font-semibold text-emerald-400"
             >
               <span>⚙️ Meu Painel de Controle</span>
               <span>→</span>
@@ -244,7 +246,7 @@ export default function AulaUmPage() {
               
               <div className="p-4 bg-gray-950 border border-gray-800 rounded-xl font-mono text-xs text-emerald-300 space-y-1 overflow-x-auto">
                 <span className="text-gray-500">// Exemplo prático de criação de variável:</span>
-                <p>const nomeDoAluno = "João";</p>
+                <p>const nomeDoAluno = &quot;João&quot;;</p>
                 <p>const pontuacaoMaxima = 150;</p>
               </div>
 
