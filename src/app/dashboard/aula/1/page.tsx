@@ -8,6 +8,7 @@ export default function AulaUmPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const [variableName, setVariableName] = useState('')
   const [variableValue, setVariableValue] = useState('')
@@ -86,12 +87,17 @@ export default function AulaUmPage() {
     }
   }
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden relative">
       
-      {/* Header Responsivo */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* Header Responsivo com Menu Mobile */}
+      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
           <Link href="/dashboard" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
             JS
           </Link>
@@ -100,15 +106,66 @@ export default function AulaUmPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Botões Desktop */}
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           <Link 
             href="/dashboard"
             className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
           >
             ← Voltar à Trilha
           </Link>
+          {userId && (
+            <Link
+              href="/painel"
+              className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>⚙️</span> Painel
+            </Link>
+          )}
+        </div>
+
+        {/* Botão Menu Hamburguer (Mobile) */}
+        <div className="flex sm:hidden items-center">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
+            aria-label="Abrir Menu"
+          >
+            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+          </button>
         </div>
       </header>
+
+      {/* Menu Dropdown Mobile */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-40 shadow-2xl animate-fadeIn">
+          <Link 
+            href="/dashboard" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
+          >
+            <span>←</span> Voltar para a Trilha de Aulas
+          </Link>
+
+          {userId && (
+            <Link
+              href="/painel"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
+            >
+              <span>⚙️ Meu Painel de Controle</span>
+              <span>→</span>
+            </Link>
+          )}
+
+          <button
+            onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
+          >
+            <span>🚪 Sair da Conta</span>
+          </button>
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-24">

@@ -8,6 +8,7 @@ export default function HomePage() {
   const [session, setSession] = useState<any>(null)
   const [userXp, setUserXp] = useState<number>(0)
   const [loading, setLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -24,7 +25,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden relative">
       
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between gap-3">
@@ -37,20 +38,20 @@ export default function HomePage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Botões Desktop */}
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           <Link 
             href="/contato" 
-            className="px-3.5 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer shrink-0"
+            className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1.5 cursor-pointer"
           >
-            <span>💬</span>
-            <span className="hidden xs:inline">Contato</span>
+            <span>💬</span> Contato
           </Link>
 
           {!loading && (
             session ? (
               <Link 
                 href="/dashboard"
-                className="w-full sm:w-auto px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Painel</span> <span>🚀</span>
               </Link>
@@ -58,13 +59,13 @@ export default function HomePage() {
               <div className="flex items-center gap-2">
                 <Link 
                   href="/login"
-                  className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer shrink-0"
+                  className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition cursor-pointer"
                 >
                   Entrar
                 </Link>
                 <Link 
                   href="/cadastro"
-                  className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer shrink-0"
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer"
                 >
                   Criar Conta
                 </Link>
@@ -72,11 +73,63 @@ export default function HomePage() {
             )
           )}
         </div>
+
+        {/* Botão Menu Hamburguer (Mobile) */}
+        <div className="flex sm:hidden items-center">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
+            aria-label="Abrir Menu"
+          >
+            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+          </button>
+        </div>
       </header>
+
+      {/* Menu Dropdown Mobile */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-40 shadow-2xl animate-fadeIn">
+          <Link 
+            href="/contato" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-medium text-gray-300 hover:text-white"
+          >
+            <span>💬</span> Central de Contato
+          </Link>
+
+          {!loading && (
+            session ? (
+              <Link 
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 bg-emerald-500 text-gray-950 font-extrabold rounded-xl text-xs"
+              >
+                <span>Acessar Painel</span> <span>🚀</span>
+              </Link>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <Link 
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300"
+                >
+                  Entrar
+                </Link>
+                <Link 
+                  href="/cadastro"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs shadow-lg"
+                >
+                  Criar Conta
+                </Link>
+              </div>
+            )
+          )}
+        </div>
+      )}
 
       {/* Hero Section */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-14 md:py-16 flex flex-col items-center text-center space-y-6 sm:space-y-8">
-        
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
           <span>✨</span> 
           {userXp > 0 ? `Seu XP Atual: ${userXp} XP ⚡` : 'Modo Visitante Ativo • Aulas + Arena XP'}
@@ -91,7 +144,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Botões de Ação Principal */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
           <Link 
             href="/dashboard"
@@ -108,24 +160,17 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/* Cards de Benefícios */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 w-full pt-8 sm:pt-12 text-left">
           <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2">
             <div className="text-xl sm:text-2xl">📖</div>
             <h3 className="font-bold text-white text-sm">Trilha de Aulas</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Conteúdos organizados passo a passo com teoria visual e laboratório interativo.
-            </p>
+            <p className="text-xs text-gray-400 leading-relaxed">Conteúdos organizados passo a passo com teoria visual e laboratório.</p>
           </div>
-
           <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2">
             <div className="text-xl sm:text-2xl">⚡</div>
             <h3 className="font-bold text-white text-sm">Modo Visitante Livre</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Experimente as aulas e os códigos imediatamente, sem burocracia ou login obrigatório.
-            </p>
+            <p className="text-xs text-gray-400 leading-relaxed">Experimente as aulas imediatamente, sem login obrigatório.</p>
           </div>
-
           <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2 relative overflow-hidden">
             <div className="flex items-center justify-between">
               <div className="text-xl sm:text-2xl">🏆</div>
@@ -134,22 +179,17 @@ export default function HomePage() {
               </span>
             </div>
             <h3 className="font-bold text-white text-sm">Arena com XP</h3>
-            <p className="text-xs text-gray-400 leading-relaxed">
-              Teste sua lógica em desafios práticos e acumule pontos salvos na nuvem.
-            </p>
+            <p className="text-xs text-gray-400 leading-relaxed">Teste sua lógica em desafios práticos e acumule pontos.</p>
           </div>
         </div>
-
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs text-gray-500 max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3">
         <p>Codelab João • Plataforma educacional voltada para o aprendizado prático</p>
-        <Link href="/contato" className="hover:text-emerald-400 transition font-medium text-gray-400 cursor-pointer">
+        <Link href="/contato" className="hover:text-emerald-400 transition font-medium text-gray-400">
           💬 Central de Atendimento e Suporte
         </Link>
       </footer>
-
     </div>
   )
 }

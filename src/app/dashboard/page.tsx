@@ -8,6 +8,7 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     async function checkUserAndProgress() {
@@ -28,7 +29,6 @@ export default function DashboardPage() {
           setLessonOneCompleted(true)
         }
       }
-
       setLoading(false)
     }
     checkUserAndProgress()
@@ -40,12 +40,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col transition-opacity duration-700 opacity-100 overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col transition-opacity duration-700 opacity-100 overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950 relative">
       
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Link href="/" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/30 transition cursor-pointer">
+          <Link href="/" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
             JS
           </Link>
           <h1 className="font-bold text-base sm:text-lg tracking-wide truncate">
@@ -53,26 +53,26 @@ export default function DashboardPage() {
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Botões Desktop */}
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           <Link 
             href="/contato" 
-            className="px-3.5 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-emerald-400 border border-gray-800 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer hidden xs:flex"
+            className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-emerald-400 border border-gray-800 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
           >
-            <span>💬</span>
-            <span>Contato</span>
+            <span>💬</span> Contato
           </Link>
 
           {userId ? (
             <div className="flex items-center gap-2">
               <Link
                 href="/painel"
-                className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <span>⚙️</span> Painel
               </Link>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition font-semibold rounded-xl text-xs cursor-pointer shrink-0"
+                className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition font-semibold rounded-xl text-xs cursor-pointer"
               >
                 Sair
               </button>
@@ -81,24 +81,83 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
-                className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 transition font-semibold rounded-xl text-xs cursor-pointer shrink-0"
+                className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 transition font-semibold rounded-xl text-xs cursor-pointer"
               >
                 Entrar
               </Link>
               <Link
                 href="/cadastro"
-                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold transition rounded-xl text-xs cursor-pointer shrink-0 shadow-lg shadow-emerald-500/20"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold transition rounded-xl text-xs cursor-pointer shadow-lg shadow-emerald-500/20"
               >
                 Criar Conta
               </Link>
             </div>
           )}
         </div>
+
+        {/* Botão Menu Hamburguer (Mobile) */}
+        <div className="flex sm:hidden items-center">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-gray-300 hover:text-white transition cursor-pointer"
+            aria-label="Abrir Menu"
+          >
+            <span className="text-lg">{mobileMenuOpen ? '✕' : '☰'}</span>
+          </button>
+        </div>
       </header>
+
+      {/* Menu Dropdown Mobile */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-40 shadow-2xl animate-fadeIn">
+          <Link 
+            href="/contato" 
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-medium text-gray-300 hover:text-white"
+          >
+            <span>💬</span> Central de Contato
+          </Link>
+
+          {userId ? (
+            <>
+              <Link
+                href="/painel"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
+              >
+                <span>⚙️ Meu Painel de Controle</span>
+                <span>→</span>
+              </Link>
+              <button
+                onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
+              >
+                <span>🚪 Sair da Conta</span>
+              </button>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Link 
+                href="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300"
+              >
+                Entrar
+              </Link>
+              <Link 
+                href="/cadastro"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs shadow-lg"
+              >
+                Criar Conta
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Main Content */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 space-y-6 pb-20">
-        
         {!userId && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <span className="text-emerald-300 text-center sm:text-left">
@@ -115,7 +174,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Banner de Boas-Vindas & Arena */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2 space-y-3 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
             <span className="text-xs font-semibold tracking-wider text-emerald-400 uppercase block">
@@ -142,7 +200,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Lista de Aulas do Módulo 1 */}
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">
@@ -192,7 +249,6 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
-
       </main>
     </div>
   )
