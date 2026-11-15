@@ -108,7 +108,7 @@ export default function CadastroPage() {
           href="/"
           className="text-xs font-semibold text-gray-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 flex items-center gap-1.5 cursor-pointer"
         >
-          ← Início
+         Início
         </Link>
       </header>
 
