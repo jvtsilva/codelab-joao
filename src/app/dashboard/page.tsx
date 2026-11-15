@@ -42,11 +42,10 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col transition-opacity duration-700 opacity-100 overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950">
-      
-      {/* Header Responsivo */}
-      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md shrink-0">
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-950/90 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-md">
             JS
           </span>
           <h1 className="font-bold text-base sm:text-lg tracking-wide truncate">
@@ -63,28 +62,13 @@ export default function DashboardPage() {
             <span className="hidden sm:inline">Contato</span>
           </Link>
 
-          {userId ? (
-            <div className="flex items-center gap-2">
-              <Link
-                href="/painel"
-                className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-lg text-xs shrink-0 flex items-center gap-1 cursor-pointer"
-              >
-                <span>⚙️</span> Painel
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition font-medium rounded-lg text-xs cursor-pointer shrink-0"
-              >
-                Sair
-              </button>
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold transition rounded-lg text-xs shrink-0"
+          {userId && (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition font-medium rounded-lg text-xs cursor-pointer shrink-0"
             >
-              Entrar
-            </Link>
+              Sair
+            </button>
           )}
         </div>
       </header>
@@ -94,17 +78,15 @@ export default function DashboardPage() {
         
         {!userId && (
           <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <span className="text-emerald-300 text-center sm:text-left">
-              Modo Visitante Ativo: você pode navegar livremente pela trilha de estudos, mas faça login para registrar suas conclusões oficiais.
-            </span>
-            <Link href="/login" className="px-3.5 py-1.5 bg-emerald-500 text-gray-950 font-bold rounded-lg shrink-0 text-center">
+            <span className="text-emerald-300">Modo Visitante Ativo: você pode navegar livremente pela trilha de estudos, mas faça login para registrar suas conclusões oficiais.</span>
+            <Link href="/login" className="px-3.5 py-1.5 bg-emerald-500 text-gray-950 font-bold rounded-lg shrink-0">
               Fazer Login / Cadastro
             </Link>
           </div>
         )}
 
         {/* Banner de Boas-Vindas & Arena */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-3 gap-4">
           <div className="sm:col-span-2 space-y-3 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
             <span className="text-xs font-semibold tracking-wider text-emerald-400 uppercase block">
               Trilha de Ensino • Módulo 1 🚀
@@ -159,17 +141,17 @@ export default function DashboardPage() {
                   {lessonOneCompleted ? '✓' : '1'}
                 </div>
                 <div className="min-w-0 space-y-0.5">
-                  <div className="flex items-center gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
                     <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">
                       Variáveis e Atribuição: As Caixas de Memória
                     </h4>
                     {lessonOneCompleted && (
-                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[10px] rounded-full border border-emerald-500/30 shrink-0">
+                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[10px] rounded-full border border-emerald-500/30">
                         Concluída
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-gray-400 truncate">Teoria leve e missão prática guiada</p>
+                  <p className="text-xs text-gray-400">Teoria leve e missão prática guiada</p>
                 </div>
               </div>
 

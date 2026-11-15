@@ -6,26 +6,15 @@ import Link from 'next/link'
 
 export default function HomePage() {
   const [session, setSession] = useState<any>(null)
-  const [userXp, setUserXp] = useState<number>(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function loadData() {
-      // Verificar sessão do Supabase
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-
-      // Recuperar XP salvo no navegador (usado na Arena de Desafios)
-      if (typeof window !== 'undefined') {
-        const savedXp = localStorage.getItem('codelab_user_xp')
-        if (savedXp) {
-          setUserXp(Number(savedXp))
-        }
-      }
-
+    async function checkSession() {
+      const { data } = await supabase.auth.getSession()
+      setSession(data.session)
       setLoading(false)
     }
-    loadData()
+    checkSession()
   }, [])
 
   return (
@@ -80,12 +69,10 @@ export default function HomePage() {
       </header>
 
       {/* Hero Section Principal */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-14 md:py-16 flex flex-col items-center text-center space-y-6 sm:space-y-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-16 md:py-20 flex flex-col items-center text-center space-y-6 sm:space-y-8">
         
-        {/* Badge de Destaque com XP / Status */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] sm:text-xs font-semibold">
-          <span>✨</span> 
-          {userXp > 0 ? `Seu XP Atual: ${userXp} XP ⚡` : 'Modo Visitante Ativo • Aulas + Arena XP'}
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] sm:text-xs font-semibold">
+          <span>✨</span> Aulas práticas do zero absoluto + Arena de XP
         </div>
 
         <div className="space-y-3 sm:space-y-4 max-w-3xl">
@@ -132,13 +119,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2 relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <div className="text-xl sm:text-2xl">🏆</div>
-              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded-md">
-                {userXp > 0 ? `${userXp} XP` : 'Até 500+ XP'}
-              </span>
-            </div>
+          <div className="p-4 sm:p-6 bg-gray-900/60 border border-gray-800 rounded-2xl space-y-2">
+            <div className="text-xl sm:text-2xl">🏆</div>
             <h3 className="font-bold text-white text-sm">Arena com XP</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Teste sua lógica em desafios práticos e acumule pontos salvos na nuvem.
