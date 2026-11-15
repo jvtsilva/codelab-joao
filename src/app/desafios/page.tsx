@@ -43,9 +43,16 @@ export default function ArenaPage() {
           }
         }
       } else {
+        // Modo visitante: carrega do localStorage
         if (typeof window !== 'undefined') {
           const savedXp = localStorage.getItem('codelab_user_xp')
           if (savedXp) setUserXp(Number(savedXp))
+          
+          // Verifica se o visitante já concluiu para marcar na tela
+          const visitanteConcluiu = localStorage.getItem('codelab_visitante_desafio_1')
+          if (visitanteConcluiu) {
+            setChallengeCompleted(true)
+          }
         }
       }
     }
@@ -72,6 +79,15 @@ export default function ArenaPage() {
         setChallengeCompleted(true)
         const newXp = userXp + 50
         setUserXp(newXp)
+
+        // Trava para visitantes não farmarem XP infinito recarregando a página
+        if (!userId && typeof window !== 'undefined') {
+          const visitanteJaGanhou = localStorage.getItem('codelab_visitante_desafio_1')
+          if (visitanteJaGanhou) {
+            return // Se já ganhou como visitante, não adiciona mais XP
+          }
+          localStorage.setItem('codelab_visitante_desafio_1', 'true')
+        }
 
         if (typeof window !== 'undefined') {
           localStorage.setItem('codelab_user_xp', String(newXp))
