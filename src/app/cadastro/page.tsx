@@ -17,6 +17,13 @@ export default function CadastroPage() {
     setLoading(true)
     setErrorMessage('')
 
+    // 🛡️ Regra de segurança para a senha (mínimo 8 caracteres)
+    if (password.length < 8) {
+      setErrorMessage('A senha precisa ter no mínimo 8 caracteres.')
+      setLoading(false)
+      return
+    }
+
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -25,7 +32,7 @@ export default function CadastroPage() {
 
       if (error) throw error
 
-      // Como tiramos a confirmação, vai direto para o dashboard!
+      // Cadastro bem-sucedido, vai direto para o dashboard
       router.push('/dashboard')
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao criar conta. Tente novamente.')
@@ -67,6 +74,10 @@ export default function CadastroPage() {
             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
             placeholder="••••••••"
           />
+          {/* Dica visual em tempo real */}
+          <p className={`text-[11px] mt-1.5 ${password.length >= 8 ? 'text-emerald-400' : 'text-gray-500'}`}>
+            {password.length >= 8 ? '✓ Senha válida (mínimo de 8 caracteres)' : 'Mínimo de 8 caracteres'}
+          </p>
         </div>
 
         <button
