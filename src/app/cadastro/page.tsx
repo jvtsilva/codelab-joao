@@ -2,14 +2,15 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function CadastroPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const router = useRouter()
 
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,54 +21,21 @@ export default function CadastroPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
       })
 
       if (error) throw error
 
-      // 🛡️ Segurança: Desloga na hora para barrar acesso sem confirmar e-mail
-      await supabase.auth.signOut()
-
-      const confirmationUrl = `${window.location.origin}/dashboard`
-
-      const res = await window.fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, confirmationUrl }),
-      })
-
-      if (!res.ok) {
-        throw new Error('Erro ao enviar o e-mail pelo Resend.')
-      }
-
-      setEmailSent(true)
+      // Como tiramos a confirmação, vai direto para o dashboard!
+      router.push('/dashboard')
     } catch (error: any) {
-      setErrorMessage(error.message || 'Ocorreu um erro durante o cadastro.')
+      setErrorMessage(error.message || 'Erro ao criar conta. Tente novamente.')
     } finally {
       setLoading(false)
     }
   }
 
-  if (emailSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl text-center shadow-xl space-y-4">
-          <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl">
-            ✉️
-          </div>
-          <h2 className="text-2xl font-bold">Verifique seu e-mail</h2>
-          <p className="text-gray-400 text-sm">
-            Enviamos um link de confirmação para <strong>{email}</strong>. Confirme sua conta para liberar o acesso ao sistema.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-950 text-white">
       <form onSubmit={handleCadastro} className="max-w-md w-full bg-gray-900 border border-gray-800 p-8 rounded-2xl shadow-xl space-y-4">
         <h2 className="text-2xl font-bold text-center mb-2">Crie sua conta</h2>
         
@@ -106,7 +74,7 @@ export default function CadastroPage() {
           disabled={loading}
           className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-sm disabled:opacity-50 shadow-lg shadow-emerald-500/20 cursor-pointer"
         >
-          {loading ? 'Cadastrando...' : 'Criar conta'}
+          {loading ? 'Cadastrando...' : 'Cadastrar'}
         </button>
 
         <p className="text-center text-xs text-gray-500 mt-4">
