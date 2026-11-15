@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Codelab",
-  description: "Sistema seguro com Supabase, Next.js e Resend",
+  title: "Codelab João",
+  description: "Plataforma interativa para aprendizado de JavaScript do zero absoluto.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-gray-950 text-white">
+      <body className="min-h-full flex flex-col bg-gray-950 text-white selection:bg-emerald-500 selection:text-gray-950">
         {children}
       </body>
     </html>
