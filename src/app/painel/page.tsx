@@ -372,10 +372,10 @@ export default function PainelPage() {
         </div>
       </main>
 
-      {/* Modal Responsivo de Exclusão */}
+      {/* Modal Fixo e Centralizado na Tela (Travado e sem rolar junto) */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-2xl space-y-4 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-3xl space-y-4 shadow-2xl animate-fadeIn my-auto">
             
             {deleteSuccess ? (
               <div className="py-4 text-center space-y-4">
