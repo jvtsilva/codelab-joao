@@ -45,7 +45,7 @@ export default function DashboardPage() {
       {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         
-        {/* Ícone JS Estático (Sem redirecionamento) + Nome */}
+        {/* Ícone JS Estático + Nome */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
