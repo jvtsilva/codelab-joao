@@ -167,7 +167,7 @@ export default function PainelPage() {
               href="/dashboard" 
               className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0"
             >
-              <span>←</span>
+              
               <span>Voltar para os estudos</span>
             </Link>
           </div>
@@ -210,7 +210,7 @@ export default function PainelPage() {
             onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
           >
-            <span>←</span> Voltar para a Trilha de Aulas
+          Voltar para a Trilha de Aulas
           </Link>
           <button
             onClick={() => { setMenuOpen(false); handleLogout(); }}

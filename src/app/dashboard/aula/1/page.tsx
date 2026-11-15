@@ -114,7 +114,7 @@ export default function AulaUmPage() {
             href="/dashboard"
             className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
           >
-            ← Voltar à Trilha
+             Voltar à Trilha
           </Link>
           {userId && (
             <Link
@@ -146,7 +146,7 @@ export default function AulaUmPage() {
             onClick={() => setMenuOpen(false)}
             className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
           >
-            <span>←</span> Voltar para a Trilha de Aulas
+         Voltar para a Trilha de Aulas
           </Link>
 
           {userId && (
@@ -318,7 +318,7 @@ export default function AulaUmPage() {
                 onClick={() => setActiveTab('teoria')}
                 className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
-                ← Voltar para Teoria
+                Voltar para Teoria
               </button>
               <button
                 onClick={() => setActiveTab('quiz')}
@@ -384,7 +384,7 @@ export default function AulaUmPage() {
                 onClick={() => setActiveTab('pratica')}
                 className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
-                ← Voltar para Prática
+                Voltar para Prática
               </button>
 
               <Link
