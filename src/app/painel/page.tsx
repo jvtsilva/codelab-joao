@@ -2,107 +2,216 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function PainelPage() {
-  const [userEmail, setUserEmail] = useState<string>('')
+  const [userName, setUserName] = useState<string>('Usuário')
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [lastSignIn, setLastSignIn] = useState<string | null>(null)
+  const [deviceInfo, setDeviceInfo] = useState<string>('Detectando...')
+  const [loading, setLoading] = useState(true)
+  const [menuOpen, setMenuOpen] = useState(false) // Estado para o menu hamburguer mobile
+
+  // Estados para alteração de senha
   const [newPassword, setNewPassword] = useState('')
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [menuOpen, setMenuOpen] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordMessage, setPasswordMessage] = useState({ text: '', type: '' })
+
+  // Validações em tempo real para a nova senha
+  const hasMinLength = newPassword.length >= 8
+  const hasUpperCase = /[A-Z]/.test(newPassword)
+  const hasNumber = /[0-9]/.test(newPassword)
+  const hasSpecialChar = /[^A-Za-z0-9]/.test(newPassword)
+
+  // Estados para exclusão de conta
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteSuccess, setDeleteSuccess] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+
+  const router = useRouter()
 
   useEffect(() => {
-    async function loadUser() {
+    async function getUser() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setUserEmail(session.user.email || '')
+      
+      if (!session) {
+        router.push('/login')
       } else {
-        window.location.href = '/login'
+        const metadata = session.user.user_metadata
+        const nameFromMeta = metadata?.full_name || metadata?.name || 'Aluno'
+        
+        setUserName(nameFromMeta)
+        setUserEmail(session.user.email ?? 'E-mail não informado')
+        setUserId(session.user.id)
+        
+        if (session.user.last_sign_in_at) {
+          const date = new Date(session.user.last_sign_in_at)
+          setLastSignIn(date.toLocaleString('pt-BR'))
+        } else {
+          setLastSignIn('Sessão ativa recente')
+        }
+
+        const ua = navigator.userAgent
+        let browser = 'Navegador Desconhecido'
+        let os = 'Dispositivo Desconhecido'
+
+        if (ua.includes('Win')) os = 'Windows'
+        else if (ua.includes('Mac')) os = 'macOS'
+        else if (ua.includes('Linux')) os = 'Linux'
+        else if (ua.includes('Android')) os = 'Android'
+        else if (ua.includes('like Mac') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
+
+        if (ua.includes('Firefox')) browser = 'Firefox'
+        else if (ua.includes('SamsungBrowser')) browser = 'Samsung Internet'
+        else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera'
+        else if (ua.includes('Edg')) browser = 'Microsoft Edge'
+        else if (ua.includes('Chrome')) browser = 'Google Chrome'
+        else if (ua.includes('Safari')) browser = 'Safari'
+
+        setDeviceInfo(`${browser} (${os})`)
+        setLoading(false)
       }
     }
-    loadUser()
-  }, [])
+
+    getUser()
+  }, [router])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setMessage(null)
+    setPasswordMessage({ text: '', type: '' })
 
-    if (!newPassword || newPassword.length < 6) {
-      setMessage({ text: 'A nova senha precisa ter pelo menos 6 caracteres.', type: 'error' })
-      setLoading(false)
+    if (!hasMinLength || !hasUpperCase || !hasNumber || !hasSpecialChar) {
+      setPasswordMessage({ text: 'A nova senha precisa atender a todos os requisitos de segurança.', type: 'error' })
       return
     }
 
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-
-    if (error) {
-      setMessage({ text: `Erro ao atualizar senha: ${error.message}`, type: 'error' })
-    } else {
-      setMessage({ text: 'Senha alterada com sucesso! 🚀', type: 'success' })
-      setNewPassword('')
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ text: 'As senhas não coincidem.', type: 'error' })
+      return
     }
-    setLoading(false)
+
+    setPasswordLoading(true)
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      })
+
+      if (error) throw error
+
+      setPasswordMessage({ text: 'Senha alterada com sucesso!', type: 'success' })
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error: any) {
+      setPasswordMessage({ text: error.message || 'Erro ao alterar a senha.', type: 'error' })
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!userId) return
+    setDeleteLoading(true)
+    setDeleteError('')
+
+    try {
+      const response = await fetch('/api/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
+
+      await supabase.auth.signOut()
+      setDeleteLoading(false)
+      setDeleteSuccess(true)
+
+    } catch (error: any) {
+      setDeleteError(error.message || 'Não foi possível excluir a conta.')
+      setDeleteLoading(false)
+    }
   }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    window.location.href = '/'
+    router.push('/login')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+          <span className="text-sm text-gray-400">Carregando painel de controle...</span>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden">
-      
-      {/* Header Responsivo com Menu Mobile */}
-      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <Link href="/dashboard" className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 hover:bg-emerald-500/35 transition cursor-pointer">
-            JS
-          </Link>
-          <h1 className="font-bold text-sm sm:text-base tracking-wide truncate">
-            Painel do <span className="text-emerald-400 font-normal">Aluno</span>
-          </h1>
-        </div>
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col relative overflow-x-hidden">
+      {/* Header Superior */}
+      <header className="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+          
+          {/* Lado Esquerdo: Voltar para os estudos */}
+          <div className="flex items-center gap-3">
+            <Link 
+              href="/dashboard" 
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0"
+            >
+              <span>←</span>
+              <span>Voltar para os estudos</span>
+            </Link>
+          </div>
 
-        {/* Menu Desktop */}
-        <div className="hidden sm:flex items-center gap-2.5 shrink-0">
-          <Link 
-            href="/dashboard" 
-            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition cursor-pointer"
-          >
-            ← Voltar à Trilha
-          </Link>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-semibold text-xs rounded-xl transition cursor-pointer"
-          >
-            Sair
-          </button>
-        </div>
+          {/* Lado Direito Desktop: Info do usuário + Botão Sair */}
+          <div className="hidden sm:flex items-center gap-3">
+            <span className="text-xs text-gray-400 bg-gray-800/60 px-3 py-1.5 rounded-full border border-gray-700/50 truncate max-w-[180px]">
+              {userName}
+            </span>
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-semibold rounded-lg transition cursor-pointer shrink-0"
+            >
+              Sair
+            </button>
+          </div>
 
-        {/* Botão Hambúrguer Mobile */}
-        <div className="flex sm:hidden items-center">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
-            aria-label="Menu"
-          >
-            <span className="text-xl leading-none">{menuOpen ? '✕' : '☰'}</span>
-          </button>
+          {/* Botão Hambúrguer Mobile (Apenas em telas pequenas) */}
+          <div className="flex sm:hidden items-center">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2.5 bg-gray-800 border border-gray-700 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
+              aria-label="Menu"
+            >
+              <span className="text-lg leading-none">{menuOpen ? '✕' : '☰'}</span>
+            </button>
+          </div>
+
         </div>
       </header>
 
       {/* Menu Dropdown Mobile */}
       {menuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-3 z-50 shadow-2xl animate-fadeIn">
+          <div className="px-3 py-2 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 truncate">
+            👤 Logado como: <strong className="text-emerald-400">{userName}</strong>
+          </div>
           <Link 
             href="/dashboard" 
             onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
+            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-emerald-400"
           >
             <span>←</span> Voltar para a Trilha de Aulas
           </Link>
-
           <button
             onClick={() => { setMenuOpen(false); handleLogout(); }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs"
@@ -112,58 +221,229 @@ export default function PainelPage() {
         </div>
       )}
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-2xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 py-10">
-        
-        {/* Info do Aluno */}
-        <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-2">
-          <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Conta Conectada</span>
-          <h2 className="text-base sm:text-lg font-bold text-white truncate">{userEmail || 'Carregando e-mail...'}</h2>
-          <p className="text-xs text-gray-400">Gerencie suas credenciais de acesso à plataforma Codelab João.</p>
+      {/* Conteúdo Principal */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Painel de Controle 🚀</h1>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta, {userName}.</p>
+          </div>
+          <div className="flex items-center self-start md:self-auto">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Sessão Autenticada
+            </span>
+          </div>
         </div>
 
-        {/* Formulário de Alteração de Senha */}
-        <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
-          <div className="space-y-1">
-            <h3 className="font-bold text-sm sm:text-base text-white">Alterar Senha de Acesso</h3>
-            <p className="text-xs text-gray-400">Escolha uma nova senha forte com pelo menos 6 caracteres.</p>
+        {/* Grid de Informações e Segurança */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Card de Dados do Usuário */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 lg:col-span-1 shadow-lg">
+            <h3 className="text-base sm:text-lg font-bold">Informações</h3>
+            <div className="space-y-3 text-xs">
+              <div>
+                <span className="text-gray-500 block mb-1">Nome Cadastrado</span>
+                <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                  {userName}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">E-mail</span>
+                <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                  {userEmail}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">Dispositivo / Navegador</span>
+                <span className="text-blue-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                  {deviceInfo}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-500 block mb-1">Último Acesso</span>
+                <span className="text-emerald-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                  {lastSignIn}
+                </span>
+              </div>
+            </div>
           </div>
 
-          <form onSubmit={handleUpdatePassword} className="space-y-4 pt-1">
-            <div className="space-y-1.5">
-              <label className="text-xs text-gray-300 font-medium">Nova Senha:</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 px-4 py-3 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-emerald-500 transition"
-              />
+          {/* Coluna Direita: Senha + Zona de Perigo */}
+          <div className="space-y-6 lg:col-span-2">
+            
+            {/* Card de Alteração de Senha */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold">Segurança</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Atualize sua senha de acesso à plataforma.</p>
+              </div>
+
+              {passwordMessage.text && (
+                <div className={`p-3 text-xs rounded-lg border ${
+                  passwordMessage.type === 'success' 
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                }`}>
+                  {passwordMessage.text}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdatePassword} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Nova Senha</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1">Confirme a Nova Senha</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      placeholder="••••••••"
+                      className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Checklist visual de requisitos */}
+                <div className="p-3 bg-gray-950/60 border border-gray-800 rounded-xl space-y-1.5 text-xs">
+                  <p className="text-gray-400 font-medium mb-1">A nova senha deve conter:</p>
+                  <div className={`flex items-center gap-2 transition-colors ${hasMinLength ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{hasMinLength ? '✓' : '○'}</span>
+                    <span>Mínimo de 8 caracteres</span>
+                  </div>
+                  <div className={`flex items-center gap-2 transition-colors ${hasUpperCase ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{hasUpperCase ? '✓' : '○'}</span>
+                    <span>Pelo menos uma letra maiúscula</span>
+                  </div>
+                  <div className={`flex items-center gap-2 transition-colors ${hasNumber ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{hasNumber ? '✓' : '○'}</span>
+                    <span>Pelo menos um número</span>
+                  </div>
+                  <div className={`flex items-center gap-2 transition-colors ${hasSpecialChar ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{hasSpecialChar ? '✓' : '○'}</span>
+                    <span>Pelo menos um caracter especial (ex: @, #, $, !)</span>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={passwordLoading || !hasMinLength || !hasUpperCase || !hasNumber || !hasSpecialChar}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {passwordLoading ? (
+                    <>
+                      <span className="w-3.5 h-3.5 border-2 border-gray-950 border-t-transparent rounded-full animate-spin"></span>
+                      Alterando...
+                    </>
+                  ) : (
+                    'Alterar Senha'
+                  )}
+                </button>
+              </form>
             </div>
 
-            {message && (
-              <div className={`p-3.5 rounded-xl border text-xs font-medium ${message.type === 'success' ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300' : 'bg-red-950/40 border-red-500/30 text-red-300'}`}>
-                {message.text}
+            {/* Zona de Perigo (Exclusão de Conta) */}
+            <div className="bg-gray-900 border border-red-500/20 rounded-2xl p-5 sm:p-6 space-y-3 shadow-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-red-400">Zona de Perigo</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Ações irreversíveis relacionadas à sua conta na plataforma.</p>
               </div>
-            )}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                <span className="text-xs text-gray-400">Excluir permanentemente sua conta e todos os dados associados.</span>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg text-xs transition cursor-pointer shrink-0 text-center"
+                >
+                  Excluir Conta
+                </button>
+              </div>
+            </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs sm:text-sm rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
-            >
-              {loading ? 'Salvando alteração...' : '🔒 Atualizar Senha'}
-            </button>
-          </form>
+          </div>
+
         </div>
-
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs text-gray-500 max-w-2xl mx-auto w-full">
-        <p>Codelab João • Painel de Controle do Aluno</p>
-      </footer>
+      {/* Modal Responsivo de Exclusão */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-2xl space-y-4 shadow-2xl">
+            
+            {deleteSuccess ? (
+              <div className="py-4 text-center space-y-4">
+                <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
+                  ✓
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-bold text-white">Até logo, {userName}! 👋</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">
+                    Sua conta foi excluída com sucesso. Foi incrível ter você com a gente no Codelab João. Sucesso na sua jornada e até a próxima! 🚀
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => router.push('/login')}
+                  className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg text-xs transition cursor-pointer mt-2"
+                >
+                  Voltar para a Página de Login
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-base sm:text-lg font-bold text-red-400">Deseja realmente excluir sua conta?</h3>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Esta ação é <strong className="text-white">definitiva e irreversível</strong>, {userName}. Todos os seus dados e acessos serão apagados permanentemente do Codelab João.
+                </p>
 
+                {deleteError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={deleteLoading}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-xs transition cursor-pointer text-center"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteAccount}
+                    disabled={deleteLoading}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {deleteLoading ? (
+                      <>
+                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Excluindo...
+                      </>
+                    ) : (
+                      'Sim, excluir conta'
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }
