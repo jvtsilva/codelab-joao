@@ -8,6 +8,7 @@ export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
   const [lessonTwoCompleted, setLessonTwoCompleted] = useState(false)
+  const [lessonThreeCompleted, setLessonThreeCompleted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -20,11 +21,13 @@ export default function DashboardPage() {
         if (data) {
           if (data.find(i => i.lesson_id === 'lesson-1')?.completed) setLessonOneCompleted(true)
           if (data.find(i => i.lesson_id === 'lesson-2')?.completed) setLessonTwoCompleted(true)
+          if (data.find(i => i.lesson_id === 'lesson-3')?.completed) setLessonThreeCompleted(true)
         }
       } else {
         if (typeof window !== 'undefined') {
           if (localStorage.getItem('codelab_visitante_aula_1')) setLessonOneCompleted(true)
           if (localStorage.getItem('codelab_visitante_aula_2')) setLessonTwoCompleted(true)
+          if (localStorage.getItem('codelab_visitante_aula_3')) setLessonThreeCompleted(true)
         }
       }
       setLoading(false)
@@ -37,7 +40,7 @@ export default function DashboardPage() {
     window.location.href = '/'
   }
 
-  const totalCompleted = (lessonOneCompleted ? 1 : 0) + (lessonTwoCompleted ? 1 : 0)
+  const totalCompleted = (lessonOneCompleted ? 1 : 0) + (lessonTwoCompleted ? 1 : 0) + (lessonThreeCompleted ? 1 : 0)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
@@ -89,48 +92,64 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Módulo 1 */}
+        {/* Módulo 1 • Bloco A (Fundamentos e Ambiente) */}
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">Módulo 1 • Aulas Disponíveis</h3>
-            <span className="text-xs text-gray-500">{loading ? 'Carregando...' : `${totalCompleted}/2 Aulas concluídas`}</span>
+            <h3 className="text-xs font-semibold tracking-wider text-gray-400 uppercase">Módulo 1 • Bloco A (Fundamentos e Ambiente)</h3>
+            <span className="text-xs text-gray-500">{loading ? 'Carregando...' : `${totalCompleted}/3 Aulas concluídas`}</span>
           </div>
           <div className="space-y-3">
+            
+            {/* Aula 1 */}
             <Link href="/dashboard/aula/1" className="p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group block">
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${lessonOneCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>{lessonOneCompleted ? '✓' : '1'}</div>
                 <div>
-                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">O que é Programação e Como o Computador Pensa?</h4>
-                  <p className="text-xs text-gray-400">Fundamentos teóricos e introdução à lógica</p>
+                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">O Que É Programação de Verdade?</h4>
+                  <p className="text-xs text-gray-400">Desmistificando a lógica, hardware vs software e a máquina sem intuição</p>
                 </div>
               </div>
               <span className="text-xs font-semibold text-emerald-400 group-hover:underline shrink-0">Fazer Aula ⚡</span>
             </Link>
 
+            {/* Aula 2 */}
             <Link href="/dashboard/aula/2" className="p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group block">
               <div className="flex items-center gap-3.5 min-w-0">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${lessonTwoCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>{lessonTwoCompleted ? '✓' : '2'}</div>
                 <div>
-                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">Variáveis e Atribuição: As Caixas de Memória</h4>
-                  <p className="text-xs text-gray-400">Console real de código e missão prática guiada</p>
+                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">O Pensamento Algorítmico e a Lógica Sequencial</h4>
+                  <p className="text-xs text-gray-400">Decomposição de problemas e missão prática com o robô</p>
                 </div>
               </div>
               <span className="text-xs font-semibold text-emerald-400 group-hover:underline shrink-0">Fazer Aula ⚡</span>
             </Link>
+
+            {/* Aula 3 */}
+            <Link href="/dashboard/aula/3" className="p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group block">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${lessonThreeCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>{lessonThreeCompleted ? '✓' : '3'}</div>
+                <div>
+                  <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">Onde o Código Vive? (Navegador e Console)</h4>
+                  <p className="text-xs text-gray-400">Trio da web (HTML/CSS/JS) e o comando console.log()</p>
+                </div>
+              </div>
+              <span className="text-xs font-semibold text-emerald-400 group-hover:underline shrink-0">Fazer Aula ⚡</span>
+            </Link>
+
           </div>
         </div>
 
-        {/* Módulo 2 (Em Breve) */}
+        {/* Próximos Blocos (Em Breve) */}
         <div className="space-y-4 pt-4 opacity-75">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold tracking-wider text-gray-500 uppercase">Módulo 2 • Em Breve 🔒</h3>
+            <h3 className="text-xs font-semibold tracking-wider text-gray-500 uppercase">Bloco B • O Armazém da Memória e Variáveis (Em Breve 🔒)</h3>
           </div>
           <div className="p-4 rounded-2xl border bg-gray-900/40 border-gray-800/80 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-gray-800/50 text-gray-500 flex items-center justify-center font-bold text-sm">3</div>
+              <div className="w-10 h-10 rounded-xl bg-gray-800/50 text-gray-500 flex items-center justify-center font-bold text-sm">4+</div>
               <div>
-                <h4 className="font-bold text-sm sm:text-base text-gray-400">Condicionais e Tomada de Decisão (If / Else)</h4>
-                <p className="text-xs text-gray-600">Conteúdo avançado em desenvolvimento</p>
+                <h4 className="font-bold text-sm sm:text-base text-gray-400">Variáveis, let, const e Tipos de Dados</h4>
+                <p className="text-xs text-gray-600">Próximas aulas em desenvolvimento no padrão profundo</p>
               </div>
             </div>
             <span className="text-xs text-gray-600 font-bold uppercase">Em Breve</span>

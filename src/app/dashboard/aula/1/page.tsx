@@ -10,12 +10,17 @@ export default function AulaUmPage() {
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estados da missão lógica teórica
-  const [userConcept, setUserConcept] = useState('')
-  const [consoleOutput, setConsoleOutput] = useState<string | null>(null)
+  // Estados da missão lógica interativa (Ordenação do algoritmo do café)
+  const [steps, setSteps] = useState([
+    { id: 1, text: '2. Ferver a água no fogão' },
+    { id: 2, text: '3. Passar a água quente pelo coador com pó' },
+    { id: 3, text: '1. Colocar o pó de café no coador' },
+    { id: 4, text: '4. Servir a xícara de café quente' }
+  ])
+  const [missionOutput, setMissionOutput] = useState<string | null>(null)
   const [missionSuccess, setMissionSuccess] = useState(false)
 
-  // Estados do Quiz Final refinado
+  // Estados do Quiz Final
   const [selectedQuizOption, setSelectedQuizOption] = useState<string | null>(null)
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null)
   const [quizSuccess, setQuizSuccess] = useState(false)
@@ -66,36 +71,48 @@ export default function AulaUmPage() {
     }
   }
 
-  // Validação da Missão Lógica
-  const handleRunCode = () => {
-    const text = userConcept.trim().toLowerCase()
+  // Função para mover os passos do mini-game de lógica
+  const moveStep = (index: number, direction: 'up' | 'down') => {
+    const newSteps = [...steps]
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    
+    if (targetIndex < 0 || targetIndex >= newSteps.length) return
 
-    if (!text) {
-      setConsoleOutput('💬 O campo de reflexão está vazio. Escreva sua explicação antes de validar.')
-      setMissionSuccess(false)
-      return
-    }
+    const temp = newSteps[index]
+    newSteps[index] = newSteps[targetIndex]
+    newSteps[targetIndex] = temp
 
-    if (text.length > 15 && (text.includes('passo') || text.includes('instrução') || text.includes('ordem') || text.includes('lógica') || text.includes('sequência') || text.includes('tarefa') || text.includes('comando'))) {
-      setConsoleOutput(`> Analisando reflexão: "${userConcept}"\n-> Resultado: Raciocínio lógico estruturado corretamente!\n✨ Perfeito! Você capturou a essência de como as máquinas interpretam sequências operacionais.`)
+    setSteps(newSteps)
+    setMissionOutput(null)
+  }
+
+  // Validação da ordem correta do algoritmo (IDs esperados: 3, 1, 2, 4)
+  const handleValidateAlgorithm = () => {
+    const currentOrder = steps.map(s => s.id)
+    const expectedOrder = [3, 1, 2, 4]
+
+    const isCorrect = currentOrder.every((val, idx) => val === expectedOrder[idx])
+
+    if (isCorrect) {
+      setMissionOutput('✨ Perfeito! Sequência lógica executada com sucesso. O café foi passado na ordem correta!')
       setMissionSuccess(true)
       handleCompleteLesson()
     } else {
-      setConsoleOutput(`> Analisando reflexão: "${userConcept}"\n💡 Quase lá! Tente detalhar um pouco mais como o computador depende de uma sequência lógica estrita de passos para resolver problemas.`)
+      setMissionOutput('❌ Ops! A ordem dos passos está invertida. Pense: o que vem primeiro antes de ferver a água? Tente reorganizar!')
       setMissionSuccess(false)
     }
   }
 
-  // Quiz Final Refinado
+  // Quiz Final com explicação pedagógica
   const handleQuizSubmit = (option: string) => {
     setSelectedQuizOption(option)
     if (option === 'b') {
       setQuizSuccess(true)
-      setQuizFeedback('✨ Resposta Correta! A programação consiste em traduzir problemas complexos em sequências de instruções lógicas ordenadas que a máquina executa com precisão.')
+      setQuizFeedback('✨ Resposta Correta! A programação consiste em traduzir ideias e resolver problemas estruturando instruções lógicas em sequências ordenadas que a máquina executa com precisão.')
       handleCompleteLesson()
     } else {
       setQuizSuccess(false)
-      setQuizFeedback('💡 Incorreto. Lembre-se de que o computador não possui intuição ou livre-arbítrio; ele executa estritamente a ordem lógica dos comandos que recebe. Tente outra alternativa!')
+      setQuizFeedback('💡 Incorreto. Lembre-se de que o computador não possui intuição ou livre-arbítrio; ele depende estritamente da ordem lógica dos comandos que você fornece. Tente outra alternativa!')
     }
   }
 
@@ -191,10 +208,10 @@ export default function AulaUmPage() {
             )}
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-            O que é Programação e Como o Computador Pensa?
+            O Que É Programação de Verdade? (Desmistificando a Lógica)
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Uma imersão profunda nos alicerces lógicos que regem o desenvolvimento de software e a construção da web moderna.
+            Esqueça qualquer mito sobre matemática avançada. Vamos entender o que é um computador por dentro, a diferença entre corpo e alma (Hardware e Software) e como funciona o pensamento lógico.
           </p>
         </div>
 
@@ -206,7 +223,7 @@ export default function AulaUmPage() {
               activeTab === 'teoria' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            📖 1. Teoria Visual
+            📖 1. Teoria Visual Profunda
           </button>
           <button
             onClick={() => setActiveTab('pratica')}
@@ -233,49 +250,39 @@ export default function AulaUmPage() {
               
               <div className="space-y-2">
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>🧠</span> 1. A Mente por Trás das Máquinas
+                  <span>🧠</span> 1. Quebrando o Mito da Matemática
                 </h3>
                 <p>
-                  Existe um equívoco comum de que programar é sinônimo de decorar códigos mirabolantes ou dominar matemática avançada. Na essência, <strong className="text-emerald-400">programar é a arte de resolver problemas complexos dividindo-os em pedaços microscópicos</strong> que um computador consegue compreender.
+                  Existe um mito gigantesco de que para programar você precisa ser um gênio da matemática ou resolver equações complexas o dia todo. A verdade nua e crua é bem diferente: <strong className="text-emerald-400">programar tem muito mais a ver com criatividade e organização de ideias do que com contas mirabolantes</strong>.
                 </p>
                 <p>
-                  As máquinas são incrivelmente rápidas, mas possuem uma limitação fundamental: <strong>zero intuição</strong>. Elas não interpretam entrelinhas; executam estritamente o que foi escrito.
+                  Na essência, programar é a arte de pegar um problema grande do mundo real (ex: calcular frete, organizar uma lista de tarefas, mover um personagem na tela) e dividi-lo em pedaços tão pequenos e simples que uma máquina consegue executar.
                 </p>
               </div>
 
               <div className="space-y-3 border-t border-gray-800 pt-5">
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>🗺️</span> 2. O Pensamento Algorítmico
+                  <span>🖥️</span> 2. Hardware vs Software (O Corpo e a Alma)
                 </h3>
                 <p>
-                  Um <strong>algoritmo</strong> nada mais é do que uma receita detalhada, uma sequência finita de regras bem definidas que levam à solução de um problema. 
+                  Para entender a computação, pense nela como um ser humano:
                 </p>
-                <p>
-                  Se você pedir para um humano abrir a porta, ele compreende o contexto. Se você pedir a um robô sem algoritmo, ele esbarrará na parede. Na programação, cada detalhe importa: checar se a porta está trancada, girar a maçaneta em sentido horário, empurrar para frente. Essa granularidade de raciocínio é o que chamamos de mentalidade computacional.
-                </p>
+                <ul className="list-disc pl-5 space-y-1.5 text-gray-400">
+                  <li><strong className="text-white">Hardware:</strong> É o corpo físico (o processador, a placa-mãe, a memória RAM, o monitor, o teclado). Sozinho, o hardware é apenas um pedaço de metal e silício morto.</li>
+                  <li><strong className="text-white">Software:</strong> É a alma, o conjunto de instruções lógicas que dão vida ao hardware. O software diz ao processador o que fazer quando você clica em um botão.</li>
+                </ul>
               </div>
 
               <div className="space-y-3 border-t border-gray-800 pt-5">
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>🌐</span> 3. Os Três Pilares da Web e o JavaScript
+                  <span>🤖</span> 3. A Máquina sem Intuição
                 </h3>
                 <p>
-                  Para construir qualquer página ou aplicação na internet, utilizamos a cooperação harmoniosa de três tecnologias centrais:
+                  O computador é a ferramenta mais rápida e poderosa já inventada pela humanidade, mas ele possui uma característica imutável: <strong className="text-emerald-400">ele tem zero intuição</strong>. 
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  <div className="p-3 bg-gray-950 rounded-xl border border-gray-800">
-                    <span className="font-bold text-emerald-400 block mb-1">HTML</span>
-                    <p className="text-[11px] text-gray-400">Esqueleto e conteúdo bruto (textos, títulos, botões e imagens).</p>
-                  </div>
-                  <div className="p-3 bg-gray-950 rounded-xl border border-gray-800">
-                    <span className="font-bold text-emerald-400 block mb-1">CSS</span>
-                    <p className="text-[11px] text-gray-400">Estética visual e design (cores, fontes, sombras e responsividade).</p>
-                  </div>
-                  <div className="p-3 bg-gray-950 rounded-xl border border-gray-800">
-                    <span className="font-bold text-emerald-400 block mb-1">JavaScript</span>
-                    <p className="text-[11px] text-gray-400">Dinâmica e comportamento (cálculos lógicos, animações e salvamento de dados).</p>
-                  </div>
-                </div>
+                <p>
+                  Se você pedir para um amigo "traga um copo d'água", ele entende o contexto mesmo se você esquecer de detalhar. Se você der essa mesma ordem vaga para um robô sem instruções atômicas, ele trava ou bate na parede. O computador faz <em>exatamente</em> o que você manda, na ordem exata em que você manda — nem mais, nem menos.
+                </p>
               </div>
 
             </div>
@@ -291,41 +298,64 @@ export default function AulaUmPage() {
           </div>
         )}
 
-        {/* ABA 2: MISSÃO LÓGICA REFLEXIVA */}
+        {/* ABA 2: MISSÃO LÓGICA INTERATIVA */}
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
-              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Laboratório Teórico: Consolidando o Pensamento Lógico</h3>
+              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Lógica: Montando o Algoritmo do Café</h3>
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                Com base no que aprendemos sobre a falta de intuição das máquinas, escreva em suas próprias palavras como você explicaria por que um computador exige comandos em uma sequência estrita de passos:
+                Como vimos, o computador depende estritamente da ordem dos passos. Utilize os botões <span className="text-emerald-400 font-bold">↑</span> e <span className="text-emerald-400 font-bold">↓</span> para organizar as instruções na <strong>ordem lógica correta</strong> de execução para o robô passar o café:
               </p>
 
-              <div className="space-y-2">
-                <textarea
-                  rows={4}
-                  placeholder='Ex: O computador precisa de ordens em sequência porque ele não tem intuição própria e executa exatamente o que mandamos...'
-                  value={userConcept}
-                  onChange={(e) => setUserConcept(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition leading-relaxed shadow-inner"
-                />
+              {/* Lista interativa de passos */}
+              <div className="space-y-2 pt-1">
+                {steps.map((step, index) => (
+                  <div 
+                    key={step.id} 
+                    className="flex items-center justify-between p-3.5 bg-gray-950 border border-gray-800 rounded-xl text-xs sm:text-sm font-mono text-gray-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-6 rounded-lg bg-gray-800 text-emerald-400 flex items-center justify-center font-bold text-xs">
+                        {index + 1}
+                      </span>
+                      <span>{step.text}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => moveStep(index, 'up')}
+                        disabled={index === 0}
+                        className="px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-30 text-gray-300 rounded-lg text-xs font-bold cursor-pointer transition"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => moveStep(index, 'down')}
+                        disabled={index === steps.length - 1}
+                        className="px-2.5 py-1.5 bg-gray-900 hover:bg-gray-800 disabled:opacity-30 text-gray-300 rounded-lg text-xs font-bold cursor-pointer transition"
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
 
-              <div>
+              <div className="pt-2">
                 <button
-                  onClick={handleRunCode}
+                  onClick={handleValidateAlgorithm}
                   className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center flex items-center justify-center gap-2"
                 >
-                  <span>✨</span> Validar Raciocínio Lógico
+                  <span>⚡</span> Testar Sequência no Robô
                 </button>
               </div>
 
-              {consoleOutput && (
-                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
+              {missionOutput && (
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
                   <div className="text-gray-500 text-[10px] uppercase tracking-wider flex items-center justify-between">
-                    <span>Terminal de Avaliação</span>
-                    <span>{missionSuccess ? 'Status: Aprovado' : 'Status: Revisão Necessária'}</span>
+                    <span>Terminal de Execução</span>
+                    <span>{missionSuccess ? 'Status: Sucesso [Algoritmo Válido]' : 'Status: Erro na Ordem'}</span>
                   </div>
-                  <pre className="whitespace-pre-wrap font-mono">{consoleOutput}</pre>
+                  <pre className="whitespace-pre-wrap font-mono">{missionOutput}</pre>
                 </div>
               )}
             </div>
@@ -347,13 +377,13 @@ export default function AulaUmPage() {
           </div>
         )}
 
-        {/* ABA 3: QUIZ FINAL REFINADO COM EXPLICAÇÃO PEDAGÓGICA */}
+        {/* ABA 3: QUIZ FINAL */}
         {activeTab === 'quiz' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-5 shadow-xl">
-              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação e Avaliação de Conhecimento</h3>
+              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação • Aula 1</h3>
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                Considerando a forma como os computadores operam e processam informações, qual das alternativas abaixo define com maior precisão o conceito de programação?
+                Considerando como o hardware e o software se relacionam e a total falta de intuição das máquinas, qual das alternativas abaixo define com exatidão o que é a programação?
               </p>
 
               <div className="grid gap-3 pt-1">
@@ -366,7 +396,7 @@ export default function AulaUmPage() {
                   }`}
                 >
                   <span className="font-bold shrink-0">A)</span>
-                  <span>Um processo intuitivo onde a máquina interpreta os sentimentos e desejos do usuário para automatizar tarefas cotidianas.</span>
+                  <span>Um processo intuitivo onde o computador descobre sozinho o que você quer fazer através dos seus sentimentos.</span>
                 </button>
 
                 <button
@@ -378,14 +408,14 @@ export default function AulaUmPage() {
                   }`}
                 >
                   <span className="font-bold shrink-0">B)</span>
-                  <span>A elaboração e estruturação de sequências de instruções lógicas ordenadas passo a passo para que o computador resolva problemas específicos.</span>
+                  <span>A criação de sequências de instruções lógicas ordenadas passo a passo para que o hardware execute tarefas e resolva problemas.</span>
                 </button>
               </div>
 
               {quizFeedback && (
                 <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
                   <div className="text-gray-500 text-[10px] uppercase tracking-wider flex items-center gap-1.5">
-                    <span>💡 Análise Pedagógica do Mentor</span>
+                    <span>💡 Análise do Mentor</span>
                   </div>
                   <p className="leading-relaxed">{quizFeedback}</p>
                 </div>

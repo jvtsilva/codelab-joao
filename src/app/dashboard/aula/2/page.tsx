@@ -4,19 +4,25 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default function AulaUmPage() {
+export default function AulaDoisPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estados da missão interativa da Aula 1
-  const [userConcept, setUserConcept] = useState('')
-  const [consoleOutput, setConsoleOutput] = useState<string | null>(null)
+  // Estados da missão lógica da Aula 2 (Simulador de Robô na Grelha / Passos)
+  const [robotSteps, setRobotSteps] = useState([
+    { id: 1, action: 'Virar à Direita', correct: false },
+    { id: 2, action: 'Dar 3 passos para frente', correct: true },
+    { id: 3, action: 'Pegar a chave dourada', correct: true },
+    { id: 4, action: 'Pular sem olhar', correct: false }
+  ])
+  const [selectedRobotActions, setSelectedRobotActions] = useState<number[]>([])
+  const [missionOutput, setMissionOutput] = useState<string | null>(null)
   const [missionSuccess, setMissionSuccess] = useState(false)
 
   // Estados do Quiz Final
-  const [quizAnswer, setQuizAnswer] = useState<string | null>(null)
+  const [selectedQuizOption, setSelectedQuizOption] = useState<string | null>(null)
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null)
   const [quizSuccess, setQuizSuccess] = useState(false)
 
@@ -32,14 +38,14 @@ export default function AulaUmPage() {
           .from('user_progress')
           .select('completed')
           .eq('user_id', currentUserId)
-          .eq('lesson_id', 'lesson-1')
+          .eq('lesson_id', 'lesson-2')
           .single()
 
         if (data && data.completed) {
           setCompleted(true)
         }
       } else {
-        if (typeof window !== 'undefined' && localStorage.getItem('codelab_visitante_aula_1')) {
+        if (typeof window !== 'undefined' && localStorage.getItem('codelab_visitante_aula_2')) {
           setCompleted(true)
         }
       }
@@ -52,13 +58,13 @@ export default function AulaUmPage() {
       setCompleted(true)
 
       if (!userId && typeof window !== 'undefined') {
-        localStorage.setItem('codelab_visitante_aula_1', 'true')
+        localStorage.setItem('codelab_visitante_aula_2', 'true')
       }
 
       if (userId) {
         await supabase.from('user_progress').upsert({
           user_id: userId,
-          lesson_id: 'lesson-1',
+          lesson_id: 'lesson-2',
           completed: true,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,lesson_id' })
@@ -66,34 +72,48 @@ export default function AulaUmPage() {
     }
   }
 
-  const handleRunCode = () => {
-    const text = userConcept.trim().toLowerCase()
+  // Marcar/desmarcar ações do robô
+  const toggleAction = (id: number) => {
+    if (selectedRobotActions.includes(id)) {
+      setSelectedRobotActions(selectedRobotActions.filter(item => item !== id))
+    } else {
+      setSelectedRobotActions([...selectedRobotActions, id])
+    }
+    setMissionOutput(null)
+  }
 
-    if (!text) {
-      setConsoleOutput('💬 Escreva sua explicação no campo acima para continuarmos.')
+  // Validar o algoritmo do robô (Ações corretas esperadas: IDs 2 e 3)
+  const handleValidateRobot = () => {
+    const hasTwo = selectedRobotActions.includes(2)
+    const hasThree = selectedRobotActions.includes(3)
+    const hasWrong = selectedRobotActions.includes(1) || selectedRobotActions.includes(4)
+
+    if (selectedRobotActions.length === 0) {
+      setMissionOutput('💬 Selecione pelo menos as instruções necessárias para o robô cumprir a missão.')
       setMissionSuccess(false)
       return
     }
 
-    if (text.includes('passo') || text.includes('instrução') || text.includes('ordem') || text.includes('lógica') || text.includes('tarefa')) {
-      setConsoleOutput(`> Analisando: "${userConcept}"\n✨ Perfeito! Você pegou a essência de como o computador funciona.\n💚 Missão teórica concluída com sucesso!`)
+    if (hasTwo && hasThree && !hasWrong) {
+      setMissionOutput('✨ Excelente! Você selecionou exatamente os passos atômicos corretos. O robô atravessou o corredor e pegou a chave com sucesso!')
       setMissionSuccess(true)
       handleCompleteLesson()
     } else {
-      setConsoleOutput(`> Analisando: "${userConcept}"\n💡 Quase lá! Pense na programação como uma sequência organizada de passos. Tente de novo!`)
+      setMissionOutput('❌ Cuidado! Você incluiu passos desnecessários ou perigosos (como pular sem olhar ou virar sem contexto). Lembre-se que o robô só executa o que é preciso e lógico. Tente novamente!')
       setMissionSuccess(false)
     }
   }
 
+  // Quiz Final
   const handleQuizSubmit = (option: string) => {
-    setQuizAnswer(option)
+    setSelectedQuizOption(option)
     if (option === 'b') {
       setQuizSuccess(true)
-      setQuizFeedback('✨ Isso aí! Programação é exatamente dar instruções lógicas passo a passo para o computador.')
+      setQuizFeedback('✨ Perfeito! O algoritmo é uma sequência finita de instruções claras e sem ambiguidades que guiam a máquina rumo à solução do problema.')
       handleCompleteLesson()
     } else {
       setQuizSuccess(false)
-      setQuizFeedback('💡 Quase! Pense na programação como uma receita lógica passo a passo. Tente outra alternativa!')
+      setQuizFeedback('💡 Incorreto. Lembre-se de que algoritmos exigem rigor lógico e ordem estrita; eles não funcionam com adivinhações subjetivas. Tente outra alternativa!')
     }
   }
 
@@ -112,7 +132,7 @@ export default function AulaUmPage() {
             JS
           </div>
           <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
-            Módulo 1 • Aula 1
+            Módulo 1 • Aula 2
           </h1>
         </div>
 
@@ -177,10 +197,10 @@ export default function AulaUmPage() {
       {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-24">
 
-        <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
+        <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl shadow-xl">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-1 bg-emerald-500 text-gray-950 font-extrabold text-[11px] sm:text-xs rounded-md">
-              MÓDULO 1 • AULA 1
+              MÓDULO 1 • AULA 2
             </span>
             {completed && (
               <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] sm:text-xs rounded-md border border-emerald-500/30">
@@ -189,10 +209,10 @@ export default function AulaUmPage() {
             )}
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-            O que é Programação e Como o Computador Pensa?
+            O Pensamento Algorítmico e a Lógica Sequencial
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Vamos conversar do zero sobre lógica, raciocínio e como dar vida às nossas ideias através da tecnologia.
+            Mergulhe fundo no conceito de algoritmos, aprenda a decompor problemas complexos em passos atômicos e entenda por que a ordem dos comandos muda tudo.
           </p>
         </div>
 
@@ -204,7 +224,7 @@ export default function AulaUmPage() {
               activeTab === 'teoria' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            📖 1. Teoria Visual
+            📖 1. Teoria Visual Profunda
           </button>
           <button
             onClick={() => setActiveTab('pratica')}
@@ -212,7 +232,7 @@ export default function AulaUmPage() {
               activeTab === 'pratica' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            💻 2. Missão Lógica
+            💻 2. Missão Algorítmica
           </button>
           <button
             onClick={() => setActiveTab('quiz')}
@@ -224,21 +244,41 @@ export default function AulaUmPage() {
           </button>
         </div>
 
+        {/* ABA 1: TEORIA VISUAL PROFUNDA */}
         {activeTab === 'teoria' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed">
-              <h3 className="text-sm sm:text-base font-bold text-white">1. Afinal, o que é programar?</h3>
-              <p>
-                Sabe aquela ideia de que programação é um bicho de sete cabeças? Pode esquecer. <strong className="text-emerald-400">Programar é apenas conversar com o computador através de instruções lógicas passo a passo</strong>.
-              </p>
-              <p>
-                Pense em como você explica para alguém como fazer um café ou uma receita de bolo. Se você trocar a ordem dos fatores, o resultado sai errado. Com o computador é igualzinho: ele é extremamente obediente e executa exatamente o que você manda, na ordem exata.
-              </p>
+            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-6 text-gray-300 text-xs sm:text-sm leading-relaxed shadow-xl">
+              
+              <div className="space-y-2">
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <span>🗺️</span> 1. O Que é um Algoritmo de Verdade?
+                </h3>
+                <p>
+                  A palavra <em>algoritmo</em> parece técnica e distante, mas ela significa algo muito simples: <strong className="text-emerald-400">uma sequência finita de regras bem definidas e sem ambiguidades que resolvem um problema específico</strong>.
+                </p>
+                <p>
+                  Sempre que você segue uma receita de bolo, monta um móvel com manual de instruções ou dá direções de GPS para alguém, você está aplicando um algoritmo na vida real.
+                </p>
+              </div>
 
-              <h3 className="text-sm sm:text-base font-bold text-white pt-2">2. Por que o JavaScript?</h3>
-              <p>
-                O <strong>JavaScript</strong> é a linguagem que dá alma e interatividade à internet. Enquanto o HTML monta a estrutura e o CSS cuida da beleza, o JavaScript faz as coisas acontecerem de verdade na tela.
-              </p>
+              <div className="space-y-3 border-t border-gray-800 pt-5">
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <span>⚙️</span> 2. Decomposição: Quebrando o Monstro em Pedaços
+                </h3>
+                <p>
+                  Quando um programador iniciante olha para um sistema inteiro (como criar um Instagram ou um jogo de tiro), ele se assusta. O segredo dos profissionais é a <strong className="text-white">decomposição</strong>: pegar um problema gigantesco e ir quebrando-o em subtarefas atômicas até que cada pedacinho seja ridiculamente simples de resolver.
+                </p>
+              </div>
+
+              <div className="space-y-3 border-t border-gray-800 pt-5">
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <span>🔄</span> 3. O Fluxo de Execução Sequencial
+                </h3>
+                <p>
+                  O computador lê códigos como quem lê um livro em português: <strong className="text-emerald-400">da esquerda para a direita, de cima para baixo, linha por linha</strong>. Se você colocar a linha 2 antes da linha 1 de forma incorreta, o programa falha ou gera um <em>bug</em>. Garantir essa harmonia sequencial é o núcleo do pensamento lógico.
+                </p>
+              </div>
+
             </div>
 
             <div className="flex justify-end">
@@ -246,43 +286,67 @@ export default function AulaUmPage() {
                 onClick={() => setActiveTab('pratica')}
                 className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
               >
-                Avançar para a Missão Lógica →
+                Avançar para a Missão Algorítmica →
               </button>
             </div>
           </div>
         )}
 
+        {/* ABA 2: MISSÃO ALGORÍTMICA INTERATIVA */}
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Teórica: Exercitando o Raciocínio</h3>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                Com suas próprias palavras, escreva brevemente como você explicaria o conceito de dar instruções passo a passo para resolver algo (tente usar termos como <em>passo, ordem ou lógica</em>):
+            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
+              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Algorítmica: Programando o Robô</h3>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                O robô precisa atravessar o corredor para pegar a chave dourada. Selecione abaixo <strong>apenas as instruções corretas e necessárias</strong> para que o algoritmo cumpra a missão sem falhas:
               </p>
 
-              <div className="space-y-2">
-                <textarea
-                  rows={3}
-                  placeholder='Ex: É organizar os passos de forma lógica para o computador entender...'
-                  value={userConcept}
-                  onChange={(e) => setUserConcept(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"
-                />
+              {/* Lista de seleção de comandos */}
+              <div className="space-y-2.5 pt-1">
+                {robotSteps.map((step) => {
+                  const isSelected = selectedRobotActions.includes(step.id)
+                  return (
+                    <div 
+                      key={step.id} 
+                      onClick={() => toggleAction(step.id)}
+                      className={`flex items-center justify-between p-4 rounded-xl border text-xs sm:text-sm font-mono cursor-pointer transition ${
+                        isSelected 
+                          ? 'bg-emerald-500/15 border-emerald-500 text-emerald-200' 
+                          : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center font-bold text-xs border ${
+                          isSelected ? 'bg-emerald-500 border-emerald-400 text-gray-950' : 'border-gray-700 bg-gray-900'
+                        }`}>
+                          {isSelected ? '✓' : ''}
+                        </div>
+                        <span>{step.action}</span>
+                      </div>
+                      <span className="text-[11px] text-gray-500 uppercase tracking-wider">
+                        {isSelected ? 'Selecionado' : 'Disponível'}
+                      </span>
+                    </div>
+                  )
+                })}
               </div>
 
-              <div>
+              <div className="pt-2">
                 <button
-                  onClick={handleRunCode}
-                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
+                  onClick={handleValidateRobot}
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center flex items-center justify-center gap-2"
                 >
-                  ✨ Testar Raciocínio
+                  <span>⚡</span> Enviar Algoritmo para o Robô
                 </button>
               </div>
 
-              {consoleOutput && (
-                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
-                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Feedback do Mentor:</div>
-                  <pre className="whitespace-pre-wrap">{consoleOutput}</pre>
+              {missionOutput && (
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                  <div className="text-gray-500 text-[10px] uppercase tracking-wider flex items-center justify-between">
+                    <span>Terminal de Execução</span>
+                    <span>{missionSuccess ? 'Status: Sucesso [Missão Concluída]' : 'Status: Falha no Algoritmo'}</span>
+                  </div>
+                  <pre className="whitespace-pre-wrap font-mono">{missionOutput}</pre>
                 </div>
               )}
             </div>
@@ -292,7 +356,7 @@ export default function AulaUmPage() {
                 onClick={() => setActiveTab('teoria')}
                 className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
-                Voltar para Teoria
+                ← Voltar para Teoria
               </button>
               <button
                 onClick={() => setActiveTab('quiz')}
@@ -304,37 +368,47 @@ export default function AulaUmPage() {
           </div>
         )}
 
+        {/* ABA 3: QUIZ FINAL */}
         {activeTab === 'quiz' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação da Aula 1</h3>
-              <p className="text-xs sm:text-sm text-gray-300">
-                Em essência, como podemos definir o que é a programação de computadores?
+            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-5 shadow-xl">
+              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação • Aula 2</h3>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
+                O que caracteriza essencialmente um algoritmo bem estruturado para ser executado por um computador?
               </p>
 
               <div className="grid gap-3 pt-1">
                 <button
                   onClick={() => handleQuizSubmit('a')}
-                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
-                    quizAnswer === 'a' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
+                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer flex items-start gap-3 ${
+                    selectedQuizOption === 'a' 
+                      ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-200' : 'bg-red-500/20 border-red-500 text-red-200') 
+                      : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
                   }`}
                 >
-                  A) Um componente físico que alimenta a placa-mãe de energia elétrica.
+                  <span className="font-bold shrink-0">A)</span>
+                  <span>Uma lista de ideias vagas e criativas que a máquina pode interpretar livremente dependendo do seu humor.</span>
                 </button>
+
                 <button
                   onClick={() => handleQuizSubmit('b')}
-                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
-                    quizAnswer === 'b' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
+                  className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer flex items-start gap-3 ${
+                    selectedQuizOption === 'b' 
+                      ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-200' : 'bg-red-500/20 border-red-500 text-red-200') 
+                      : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
                   }`}
                 >
-                  B) Dar instruções lógicas passo a passo para o computador resolver tarefas.
+                  <span className="font-bold shrink-0">B)</span>
+                  <span>Uma sequência finita de instruções claras, ordenadas e sem ambiguidades que levam à resolução de um problema.</span>
                 </button>
               </div>
 
               {quizFeedback && (
                 <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
-                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Feedback do Mentor:</div>
-                  <p>{quizFeedback}</p>
+                  <div className="text-gray-500 text-[10px] uppercase tracking-wider flex items-center gap-1.5">
+                    <span>💡 Análise do Mentor</span>
+                  </div>
+                  <p className="leading-relaxed">{quizFeedback}</p>
                 </div>
               )}
             </div>
@@ -344,7 +418,7 @@ export default function AulaUmPage() {
                 onClick={() => setActiveTab('pratica')}
                 className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
-                Voltar para Missão
+                ← Voltar para Missão
               </button>
 
               <Link
