@@ -4,16 +4,18 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
-export default function AulaDoisPage() {
+export default function AulaUmPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  const [codeAnswer, setCodeAnswer] = useState('')
+  // Estados da missão interativa da Aula 1
+  const [userConcept, setUserConcept] = useState('')
   const [consoleOutput, setConsoleOutput] = useState<string | null>(null)
   const [missionSuccess, setMissionSuccess] = useState(false)
 
+  // Estados do Quiz Final
   const [quizAnswer, setQuizAnswer] = useState<string | null>(null)
   const [quizFeedback, setQuizFeedback] = useState<string | null>(null)
   const [quizSuccess, setQuizSuccess] = useState(false)
@@ -30,14 +32,14 @@ export default function AulaDoisPage() {
           .from('user_progress')
           .select('completed')
           .eq('user_id', currentUserId)
-          .eq('lesson_id', 'lesson-2')
+          .eq('lesson_id', 'lesson-1')
           .single()
 
         if (data && data.completed) {
           setCompleted(true)
         }
       } else {
-        if (typeof window !== 'undefined' && localStorage.getItem('codelab_visitante_aula_2')) {
+        if (typeof window !== 'undefined' && localStorage.getItem('codelab_visitante_aula_1')) {
           setCompleted(true)
         }
       }
@@ -50,13 +52,13 @@ export default function AulaDoisPage() {
       setCompleted(true)
 
       if (!userId && typeof window !== 'undefined') {
-        localStorage.setItem('codelab_visitante_aula_2', 'true')
+        localStorage.setItem('codelab_visitante_aula_1', 'true')
       }
 
       if (userId) {
         await supabase.from('user_progress').upsert({
           user_id: userId,
-          lesson_id: 'lesson-2',
+          lesson_id: 'lesson-1',
           completed: true,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id,lesson_id' })
@@ -65,50 +67,33 @@ export default function AulaDoisPage() {
   }
 
   const handleRunCode = () => {
-    const cleanCode = codeAnswer.trim()
-    const expectedPattern = /const\s+cidadeNatal\s*=\s*(["'])(?:(?!\1).)*\1\s*;?/i
+    const text = userConcept.trim().toLowerCase()
 
-    if (!cleanCode) {
-      setConsoleOutput('💬 Escreva seu código no campo acima antes de testar.')
+    if (!text) {
+      setConsoleOutput('💬 Escreva sua explicação no campo acima para continuarmos.')
       setMissionSuccess(false)
       return
     }
 
-    if (expectedPattern.test(cleanCode) || cleanCode.includes('cidadeNatal')) {
-      try {
-        let logs: string[] = []
-        const originalLog = console.log
-        console.log = (...args) => logs.push(args.join(' '))
-
-        eval(cleanCode)
-        if (!cleanCode.includes('console.log')) {
-          logs.push("Variável 'cidadeNatal' alocada e guardada com sucesso na memória!")
-        }
-
-        console.log = originalLog
-
-        setConsoleOutput(`> ${cleanCode}\n-> ${logs.join('\n-> ')}\n✨ Esplêndido! O interpretador executou seu código sem erros.`)
-        setMissionSuccess(true)
-        handleCompleteLesson()
-      } catch (err: any) {
-        setConsoleOutput(`> ${cleanCode}\n💡 Erro de sintaxe detectado: ${err.message}`)
-        setMissionSuccess(false)
-      }
+    if (text.includes('passo') || text.includes('instrução') || text.includes('ordem') || text.includes('lógica') || text.includes('tarefa')) {
+      setConsoleOutput(`> Analisando: "${userConcept}"\n✨ Perfeito! Você pegou a essência de como o computador funciona.\n💚 Missão teórica concluída com sucesso!`)
+      setMissionSuccess(true)
+      handleCompleteLesson()
     } else {
-      setConsoleOutput(`> ${cleanCode}\n💡 Dica do mentor: Lembre-se de utilizar a palavra-chave 'const' seguida de 'cidadeNatal' e atribuir um texto entre aspas.`)
+      setConsoleOutput(`> Analisando: "${userConcept}"\n💡 Quase lá! Pense na programação como uma sequência organizada de passos. Tente de novo!`)
       setMissionSuccess(false)
     }
   }
 
   const handleQuizSubmit = (option: string) => {
     setQuizAnswer(option)
-    if (option === 'const') {
+    if (option === 'b') {
       setQuizSuccess(true)
-      setQuizFeedback('✨ Perfeito! `const` define uma constante imutável, garantindo que o valor protegido não seja sobrescrito por engano.')
+      setQuizFeedback('✨ Isso aí! Programação é exatamente dar instruções lógicas passo a passo para o computador.')
       handleCompleteLesson()
     } else {
       setQuizSuccess(false)
-      setQuizFeedback('💡 Incorreto. Pense qual palavra reservada do JavaScript utilizamos para caixas cujos dados não podem mudar.')
+      setQuizFeedback('💡 Quase! Pense na programação como uma receita lógica passo a passo. Tente outra alternativa!')
     }
   }
 
@@ -120,13 +105,14 @@ export default function AulaDoisPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative animate-fadeIn">
       
+      {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
           </div>
           <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
-            Módulo 1 • Aula 2
+            Módulo 1 • Aula 1
           </h1>
         </div>
 
@@ -158,6 +144,7 @@ export default function AulaDoisPage() {
         </div>
       </header>
 
+      {/* Menu Dropdown Mobile */}
       {menuOpen && (
         <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
           <Link 
@@ -187,12 +174,13 @@ export default function AulaDoisPage() {
         </div>
       )}
 
+      {/* Main Content */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-24">
 
         <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-1 bg-emerald-500 text-gray-950 font-extrabold text-[11px] sm:text-xs rounded-md">
-              MÓDULO 1 • AULA 2
+              MÓDULO 1 • AULA 1
             </span>
             {completed && (
               <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] sm:text-xs rounded-md border border-emerald-500/30">
@@ -201,13 +189,14 @@ export default function AulaDoisPage() {
             )}
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-            Variáveis e Atribuição: As Caixas de Memória
+            O que é Programação e Como o Computador Pensa?
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Compreenda a fundo como armazenar, nomear e recuperar dados utilizando constantes em JavaScript.
+            Vamos conversar do zero sobre lógica, raciocínio e como dar vida às nossas ideias através da tecnologia.
           </p>
         </div>
 
+        {/* Abas */}
         <div className="flex border-b border-gray-800 gap-1 sm:gap-2 overflow-x-auto scrollbar-none">
           <button
             onClick={() => setActiveTab('teoria')}
@@ -223,7 +212,7 @@ export default function AulaDoisPage() {
               activeTab === 'pratica' ? 'border-emerald-500 text-emerald-400 bg-emerald-500/5' : 'border-transparent text-gray-400 hover:text-white'
             }`}
           >
-            💻 2. Missão com Console
+            💻 2. Missão Lógica
           </button>
           <button
             onClick={() => setActiveTab('quiz')}
@@ -237,45 +226,19 @@ export default function AulaDoisPage() {
 
         {activeTab === 'teoria' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-5 text-gray-300 text-xs sm:text-sm leading-relaxed shadow-xl">
-              
-              <div className="space-y-2">
-                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>📦</span> 1. O Conceito de Variável na Prática
-                </h3>
-                <p>
-                  Imagine que a memória RAM do seu computador é um grande armazém cheio de gavetas. Quando criamos um programa, precisamos guardar informações temporárias (como o nome de um usuário logado, o placar de um jogo ou o preço de um produto).
-                </p>
-                <p>
-                  Uma <strong className="text-emerald-400">variável</strong> é justamente uma gaveta desse armazém à qual damos um nome (uma etiqueta) para conseguirmos achar o conteúdo facilmente depois.
-                </p>
-              </div>
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed">
+              <h3 className="text-sm sm:text-base font-bold text-white">1. Afinal, o que é programar?</h3>
+              <p>
+                Sabe aquela ideia de que programação é um bicho de sete cabeças? Pode esquecer. <strong className="text-emerald-400">Programar é apenas conversar com o computador através de instruções lógicas passo a passo</strong>.
+              </p>
+              <p>
+                Pense em como você explica para alguém como fazer um café ou uma receita de bolo. Se você trocar a ordem dos fatores, o resultado sai errado. Com o computador é igualzinho: ele é extremamente obediente e executa exatamente o que você manda, na ordem exata.
+              </p>
 
-              <div className="space-y-2 border-t border-gray-800 pt-4">
-                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>🔑</span> 2. A Palavra-Chave <code>const</code>
-                </h3>
-                <p>
-                  Em JavaScript moderno, usamos a palavra <code className="text-emerald-400 bg-gray-950 px-1.5 py-0.5 rounded">const</code> (abreviação de constante) para declarar gavetas cujos valores não serão alterados ao longo da execução do programa. É a forma mais segura e recomendada de começar.
-                </p>
-                <div className="p-4 bg-gray-950 border border-gray-800 rounded-xl font-mono text-xs text-emerald-300 space-y-1.5">
-                  <span className="text-gray-500">// Anatomia de uma declaração:</span>
-                  <p><span className="text-blue-400">const</span> nomeDoUsuario = <span className="text-amber-300">&quot;Mariana&quot;</span>;</p>
-                  <p><span className="text-blue-400">const</span> pontuacaoTotal = <span className="text-purple-400">120</span>;</p>
-                </div>
-              </div>
-
-              <div className="space-y-2 border-t border-gray-800 pt-4">
-                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>⚠️</span> 3. Regras de Ouro para Nomear Variáveis
-                </h3>
-                <ul className="list-disc pl-5 space-y-1.5 text-gray-400">
-                  <li><strong>Sem espaços:</strong> Use camelCase para juntar palavras (ex: <code className="text-emerald-400">cidadeNatal</code> em vez de <code className="text-red-400">cidade natal</code>).</li>
-                  <li><strong>Sem números no início:</strong> O nome nunca pode começar com dígitos (ex: <code className="text-red-400">1lugar</code> é inválido, mas <code className="text-emerald-400">lugar1</code> é válido).</li>
-                  <li><strong>Letras maiúsculas e minúsculas importam:</strong> <code className="text-emerald-400">idade</code> e <code className="text-emerald-400">Idade</code> são tratadas como duas gavetas totalmente diferentes.</li>
-                </ul>
-              </div>
-
+              <h3 className="text-sm sm:text-base font-bold text-white pt-2">2. Por que o JavaScript?</h3>
+              <p>
+                O <strong>JavaScript</strong> é a linguagem que dá alma e interatividade à internet. Enquanto o HTML monta a estrutura e o CSS cuida da beleza, o JavaScript faz as coisas acontecerem de verdade na tela.
+              </p>
             </div>
 
             <div className="flex justify-end">
@@ -283,7 +246,7 @@ export default function AulaDoisPage() {
                 onClick={() => setActiveTab('pratica')}
                 className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
               >
-                Avançar para a Missão Prática →
+                Avançar para a Missão Lógica →
               </button>
             </div>
           </div>
@@ -291,18 +254,18 @@ export default function AulaDoisPage() {
 
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
-              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Prática: Declarando sua Primeira Constante</h3>
-              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed">
-                No editor abaixo, escreva um código em JavaScript declarando uma constante chamada <code className="text-emerald-400 bg-gray-950 px-1.5 py-0.5 rounded">cidadeNatal</code> atribuindo a ela o valor em texto <code className="text-emerald-400 bg-gray-950 px-1.5 py-0.5 rounded">&quot;São Paulo&quot;</code> (ou a sua própria cidade):
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Teórica: Exercitando o Raciocínio</h3>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                Com suas próprias palavras, escreva brevemente como você explicaria o conceito de dar instruções passo a passo para resolver algo (tente usar termos como <em>passo, ordem ou lógica</em>):
               </p>
 
               <div className="space-y-2">
                 <textarea
                   rows={3}
-                  placeholder='const cidadeNatal = "São Paulo";'
-                  value={codeAnswer}
-                  onChange={(e) => setCodeAnswer(e.target.value)}
+                  placeholder='Ex: É organizar os passos de forma lógica para o computador entender...'
+                  value={userConcept}
+                  onChange={(e) => setUserConcept(e.target.value)}
                   className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"
                 />
               </div>
@@ -312,13 +275,13 @@ export default function AulaDoisPage() {
                   onClick={handleRunCode}
                   className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
                 >
-                  ⚡ Executar no Console Real
+                  ✨ Testar Raciocínio
                 </button>
               </div>
 
               {consoleOutput && (
                 <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
-                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Console de Execução:</div>
+                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Feedback do Mentor:</div>
                   <pre className="whitespace-pre-wrap">{consoleOutput}</pre>
                 </div>
               )}
@@ -343,28 +306,28 @@ export default function AulaDoisPage() {
 
         {activeTab === 'quiz' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 shadow-xl">
-              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação da Aula 2</h3>
+            <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
+              <h3 className="text-sm sm:text-base font-bold text-white">Quiz de Fixação da Aula 1</h3>
               <p className="text-xs sm:text-sm text-gray-300">
-                Qual palavra-chave padrão em JavaScript utilizamos para declarar uma constante cujo valor não pode ser modificado após a atribuição inicial?
+                Em essência, como podemos definir o que é a programação de computadores?
               </p>
 
               <div className="grid gap-3 pt-1">
                 <button
-                  onClick={() => handleQuizSubmit('var')}
+                  onClick={() => handleQuizSubmit('a')}
                   className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
-                    quizAnswer === 'var' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
+                    quizAnswer === 'a' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
                   }`}
                 >
-                  A) <code>var</code> (variável global antiga)
+                  A) Um componente físico que alimenta a placa-mãe de energia elétrica.
                 </button>
                 <button
-                  onClick={() => handleQuizSubmit('const')}
+                  onClick={() => handleQuizSubmit('b')}
                   className={`w-full p-4 rounded-xl border text-left text-xs sm:text-sm font-medium transition cursor-pointer ${
-                    quizAnswer === 'const' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
+                    quizAnswer === 'b' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
                   }`}
                 >
-                  B) <code>const</code> (constante imutável)
+                  B) Dar instruções lógicas passo a passo para o computador resolver tarefas.
                 </button>
               </div>
 
@@ -381,7 +344,7 @@ export default function AulaDoisPage() {
                 onClick={() => setActiveTab('pratica')}
                 className="w-full sm:w-auto px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-semibold text-xs rounded-xl transition text-center cursor-pointer order-2 sm:order-1"
               >
-                Voltar para Prática
+                Voltar para Missão
               </button>
 
               <Link
