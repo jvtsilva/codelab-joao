@@ -9,14 +9,20 @@ export default function ArenaPage() {
   const [userXp, setUserXp] = useState<number>(0)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estado alterado para null: agora começa com TODOS os desafios fechados!
+  // Começa com todos os desafios fechados por padrão
   const [openChallengeId, setOpenChallengeId] = useState<string | null>(null)
 
-  // Estados do Desafio #1
-  const [codeAnswer1, setCodeAnswer1] = useState('')
+  // Estados do Desafio #1 (Teoria)
+  const [selectedOption1, setSelectedOption1] = useState<string | null>(null)
   const [feedback1, setFeedback1] = useState<string | null>(null)
   const [success1, setSuccess1] = useState(false)
   const [challenge1Completed, setChallenge1Completed] = useState(false)
+
+  // Estados do Desafio #2 (Prática - Criar variável de idade)
+  const [codeAnswer2, setCodeAnswer2] = useState('')
+  const [feedback2, setFeedback2] = useState<string | null>(null)
+  const [success2, setSuccess2] = useState(false)
+  const [challenge2Completed, setChallenge2Completed] = useState(false)
 
   useEffect(() => {
     async function loadUserArena() {
@@ -26,7 +32,6 @@ export default function ArenaPage() {
         const currentUserId = session.user.id
         setUserId(currentUserId)
 
-        // Busca o progresso e XP real salvo no banco de dados do usuário
         const { data: challenges, error } = await supabase
           .from('user_challenges')
           .select('challenge_id, completed, xp_earned')
@@ -40,74 +45,106 @@ export default function ArenaPage() {
             localStorage.setItem('codelab_user_xp', String(totalXpFromDb))
           }
 
-          const desafiop1 = challenges.find(c => c.challenge_id === 'challenge-1')
-          if (desafiop1 && desafiop1.completed) {
-            setChallenge1Completed(true)
-          }
+          const c1 = challenges.find(c => c.challenge_id === 'challenge-1')
+          if (c1 && c1.completed) setChallenge1Completed(true)
+
+          const c2 = challenges.find(c => c.challenge_id === 'challenge-2')
+          if (c2 && c2.completed) setChallenge2Completed(true)
         }
       } else {
-        // Modo visitante: carrega do localStorage
         if (typeof window !== 'undefined') {
           const savedXp = localStorage.getItem('codelab_user_xp')
           if (savedXp) setUserXp(Number(savedXp))
           
-          const visitanteConcluiu = localStorage.getItem('codelab_visitante_desafio_1')
-          if (visitanteConcluiu) {
-            setChallenge1Completed(true)
-          }
+          if (localStorage.getItem('codelab_visitante_desafio_1')) setChallenge1Completed(true)
+          if (localStorage.getItem('codelab_visitante_desafio_2')) setChallenge2Completed(true)
         }
       }
     }
     loadUserArena()
   }, [])
 
+  // Validação do Desafio #1 (Teoria)
   const handleTestChallenge1 = async () => {
-    const cleanCode = codeAnswer1.trim().replace(/\s+/g, ' ')
-    const expectedPattern = /const\s+cidadeNatal\s*=\s*(["'])(?:(?!\1).)*\1\s*;?/i
-
-    if (!cleanCode) {
-      setFeedback1('❌ Escreva seu código no campo acima antes de testar.')
+    if (!selectedOption1) {
+      setFeedback1('❌ Selecione uma alternativa antes de enviar.')
       setSuccess1(false)
       return
     }
 
-    if (expectedPattern.test(cleanCode) || cleanCode.includes('cidadeNatal')) {
+    if (selectedOption1 === 'b') {
       setSuccess1(true)
-      setFeedback1('🎉 Parabéns! Resposta correta. Missão concluída com sucesso!')
-      
+      setFeedback1('🎉 Parabéns! Resposta correta. A programação consiste em dar instruções lógicas passo a passo.')
+
       if (!challenge1Completed) {
         setChallenge1Completed(true)
-        const newXp = userXp + 50
+        const newXp = userXp + 30
         setUserXp(newXp)
 
         if (!userId && typeof window !== 'undefined') {
-          const visitanteJaGanhou = localStorage.getItem('codelab_visitante_desafio_1')
-          if (visitanteJaGanhou) return
           localStorage.setItem('codelab_visitante_desafio_1', 'true')
         }
-
         if (typeof window !== 'undefined') {
           localStorage.setItem('codelab_user_xp', String(newXp))
         }
 
         if (userId) {
-          const { error } = await supabase.from('user_challenges').upsert({
+          await supabase.from('user_challenges').upsert({
             user_id: userId,
             challenge_id: 'challenge-1',
             completed: true,
-            xp_earned: 50,
+            xp_earned: 30,
             updated_at: new Date().toISOString()
           }, { onConflict: 'user_id,challenge_id' })
-
-          if (error) {
-            console.error('Erro ao salvar no Supabase:', error.message)
-            setFeedback1('⚠️ Código correto, mas houve um erro ao sincronizar com o banco: ' + error.message)
-          }
         }
       }
     } else {
       setSuccess1(false)
-      setFeedback1('❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e a variável `cidadeNatal`.')
+      setFeedback1('❌ Incorreto. Pense na programação como uma sequência lógica de passos para o computador.')
+    }
+  }
+
+  // Validação do Desafio #2 (Prática - idade)
+  const handleTestChallenge2 = async () => {
+    const cleanCode = codeAnswer2.trim().replace(/\s+/g, ' ')
+    // Valida se o usuário criou a constante 'idade' com um valor numérico ou string
+    const expectedPattern = /const\s+idade\s*=\s*\d+\s*;?/i
+
+    if (!cleanCode) {
+      setFeedback2('❌ Escreva seu código no campo acima antes de testar.')
+      setSuccess2(false)
+      return
+    }
+
+    if (expectedPattern.test(cleanCode) || cleanCode.includes('idade')) {
+      setSuccess2(true)
+      setFeedback2('🎉 Parabéns! Resposta correta. Variável "idade" criada com sucesso na Arena!')
+      
+      if (!challenge2Completed) {
+        setChallenge2Completed(true)
+        const newXp = userXp + 50
+        setUserXp(newXp)
+
+        if (!userId && typeof window !== 'undefined') {
+          localStorage.setItem('codelab_visitante_desafio_2', 'true')
+        }
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('codelab_user_xp', String(newXp))
+        }
+
+        if (userId) {
+          await supabase.from('user_challenges').upsert({
+            user_id: userId,
+            challenge_id: 'challenge-2',
+            completed: true,
+            xp_earned: 50,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,challenge_id' })
+        }
+      }
+    } else {
+      setSuccess2(false)
+      setFeedback2('❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e nomear a variável exatamente como `idade`.')
     }
   }
 
@@ -124,8 +161,6 @@ export default function ArenaPage() {
       
       {/* Header Responsivo da Arena */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
-        
-        {/* Ícone de Espada Estático + Título */}
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
             ⚔️
@@ -135,7 +170,6 @@ export default function ArenaPage() {
           </h1>
         </div>
 
-        {/* Botões Desktop */}
         <div className="hidden sm:flex items-center gap-3 shrink-0">
           <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-inner">
             <span>⭐</span> {userXp} XP
@@ -165,7 +199,6 @@ export default function ArenaPage() {
           )}
         </div>
 
-        {/* Botão Menu Hamburguer (Mobile) */}
         <div className="flex sm:hidden items-center gap-2">
           <div className="px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[11px] rounded-lg">
             {userXp} XP
@@ -241,17 +274,15 @@ export default function ArenaPage() {
             Teste sua Lógica de Programação
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Clique nos desafios abaixo para expandir, resolver o código em JavaScript e resgatar o XP direto para o seu perfil.
+            Resolva missões exclusivas na Arena para testar seus conhecimentos e acumular XP no seu perfil.
           </p>
         </div>
 
-        {/* Lista de Desafios em Formato Acordeão (Aberto / Fechado) */}
+        {/* Lista de Desafios */}
         <div className="space-y-4">
           
-          {/* Desafio #1 */}
+          {/* Desafio #1: Teoria (Aula 1) */}
           <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl transition">
-            
-            {/* Cabeçalho do Card (Sempre visível - Clica para Abrir/Fechar) */}
             <button
               onClick={() => setOpenChallengeId(openChallengeId === 'challenge-1' ? null : 'challenge-1')}
               className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-gray-850 transition cursor-pointer"
@@ -262,12 +293,12 @@ export default function ArenaPage() {
                 </span>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm sm:text-base font-bold text-white">Criando e Exibindo Variáveis</h3>
+                    <h3 className="text-sm sm:text-base font-bold text-white">O que é Programação e Lógica</h3>
                     <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold rounded">
-                      Fácil
+                      Iniciante
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-0.5">+50 XP • JavaScript Básico</p>
+                  <p className="text-xs text-gray-400 mt-0.5">+30 XP • Fundamentos Teóricos</p>
                 </div>
               </div>
 
@@ -283,22 +314,25 @@ export default function ArenaPage() {
               </div>
             </button>
 
-            {/* Conteúdo Expansível do Desafio #1 (Só aparece quando clicado para abrir) */}
             {openChallengeId === 'challenge-1' && (
               <div className="px-5 pb-6 sm:px-6 pt-2 border-t border-gray-800 space-y-4 animate-fadeIn">
                 <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pt-2">
-                  Escreva um trecho de código JavaScript que declare uma constante chamada <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">cidadeNatal</code> com o valor <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">&quot;São Paulo&quot;</code>.
+                  Como podemos definir o conceito básico de programação de computadores?
                 </p>
 
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
-                  <textarea
-                    rows={3}
-                    placeholder='const cidadeNatal = "São Paulo";'
-                    value={codeAnswer1}
-                    onChange={(e) => setCodeAnswer1(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
-                  />
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${selectedOption1 === 'a' ? 'bg-amber-500/10 border-amber-500/50 text-white' : 'bg-gray-950 border-gray-800 text-gray-300 hover:border-gray-700'}`}>
+                    <input type="radio" name="challenge1" value="a" checked={selectedOption1 === 'a'} onChange={() => setSelectedOption1('a')} className="mt-0.5 accent-amber-500" />
+                    <span>a) Um cabo elétrico que transmite energia para a placa de vídeo.</span>
+                  </label>
+                  <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${selectedOption1 === 'b' ? 'bg-amber-500/10 border-amber-500/50 text-white' : 'bg-gray-950 border-gray-800 text-gray-300 hover:border-gray-700'}`}>
+                    <input type="radio" name="challenge1" value="b" checked={selectedOption1 === 'b'} onChange={() => setSelectedOption1('b')} className="mt-0.5 accent-amber-500" />
+                    <span>b) Dar instruções lógicas passo a passo para o computador resolver tarefas.</span>
+                  </label>
+                  <label className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition ${selectedOption1 === 'c' ? 'bg-amber-500/10 border-amber-500/50 text-white' : 'bg-gray-950 border-gray-800 text-gray-300 hover:border-gray-700'}`}>
+                    <input type="radio" name="challenge1" value="c" checked={selectedOption1 === 'c'} onChange={() => setSelectedOption1('c')} className="mt-0.5 accent-amber-500" />
+                    <span>c) Um antivírus automático para navegadores web.</span>
+                  </label>
                 </div>
 
                 <div>
@@ -306,13 +340,13 @@ export default function ArenaPage() {
                     onClick={handleTestChallenge1}
                     className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center"
                   >
-                    🚀 Testar e Enviar Código
+                    🚀 Enviar Resposta
                   </button>
                 </div>
 
                 {feedback1 && (
                   <div className={`p-4 rounded-xl border font-mono text-xs space-y-1 ${success1 ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
-                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado da Execução:</div>
+                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado:</div>
                     <p>{feedback1}</p>
                   </div>
                 )}
@@ -320,20 +354,73 @@ export default function ArenaPage() {
             )}
           </div>
 
-          {/* Exemplo de futuro Desafio #2 (Fechado) */}
-          <div className="bg-gray-900/60 border border-gray-800/60 rounded-2xl overflow-hidden opacity-75">
-            <div className="w-full p-5 sm:p-6 flex items-center justify-between text-left">
+          {/* Desafio #2: Prática - Armazenando a Idade (Diferente da aula) */}
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl transition">
+            <button
+              onClick={() => setOpenChallengeId(openChallengeId === 'challenge-2' ? null : 'challenge-2')}
+              className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-gray-850 transition cursor-pointer"
+            >
               <div className="flex items-center gap-3">
-                <span className="w-8 h-8 rounded-xl bg-gray-800 text-gray-400 flex items-center justify-center font-bold text-xs shrink-0">
+                <span className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
                   #2
                 </span>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-gray-400">Funções e Condicionais (Em breve)</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">+100 XP • Bloqueado</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-sm sm:text-base font-bold text-white">Armazenando a Idade do Usuário</h3>
+                    <span className="px-2 py-0.5 bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold rounded">
+                      Fácil
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">+50 XP • Prática de Variável Numérica</p>
                 </div>
               </div>
-              <span className="text-gray-600 text-xs font-bold uppercase tracking-wider">🔒 Em Breve</span>
-            </div>
+
+              <div className="flex items-center gap-3">
+                {challenge2Completed && (
+                  <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] rounded-md border border-emerald-500/30 hidden sm:inline-block">
+                    Concluído ✓
+                  </span>
+                )}
+                <span className="text-amber-400 font-bold text-sm transition-transform duration-300">
+                  {openChallengeId === 'challenge-2' ? '▲' : '▼'}
+                </span>
+              </div>
+            </button>
+
+            {openChallengeId === 'challenge-2' && (
+              <div className="px-5 pb-6 sm:px-6 pt-2 border-t border-gray-800 space-y-4 animate-fadeIn">
+                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pt-2">
+                  Escreva um código em JavaScript declarando uma constante chamada <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">idade</code> contendo o seu valor de idade (ex: <code className="text-amber-400 bg-gray-950 px-1.5 py-0.5 rounded">25</code>).
+                </p>
+
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
+                  <textarea
+                    rows={3}
+                    placeholder='const idade = 25;'
+                    value={codeAnswer2}
+                    onChange={(e) => setCodeAnswer2(e.target.value)}
+                    className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
+                  />
+                </div>
+
+                <div>
+                  <button
+                    onClick={handleTestChallenge2}
+                    className="w-full sm:w-auto px-6 py-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-amber-500/20 cursor-pointer text-center"
+                  >
+                    🚀 Testar e Enviar Código
+                  </button>
+                </div>
+
+                {feedback2 && (
+                  <div className={`p-4 rounded-xl border font-mono text-xs space-y-1 ${success2 ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
+                    <div className="text-[10px] uppercase tracking-wider text-gray-500">Resultado da Execução:</div>
+                    <p>{feedback2}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
         </div>
