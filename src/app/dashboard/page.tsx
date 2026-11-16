@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <div className="sm:col-span-2 space-y-3 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
             <span className="text-xs font-semibold tracking-wider text-emerald-400 uppercase block">Trilha de Ensino • Módulo 1 🚀</span>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Fundamentos de JavaScript</h2>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">Aprenda a lógica de programação passo a passo nas aulas e teste suas habilidades na Arena.</p>
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">Aprenda a lógica de programação passo a passo nas aulas práticas e teste suas habilidades na Arena.</p>
           </div>
           <div className="bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl flex flex-col justify-between space-y-3">
             <div className="space-y-1">
@@ -101,10 +101,10 @@ export default function DashboardPage() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${lessonOneCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>{lessonOneCompleted ? '✓' : '1'}</div>
                 <div>
                   <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">O que é Programação e Como o Computador Pensa?</h4>
-                  <p className="text-xs text-gray-400">Fundamentos teóricos e introdução do zero (+20 XP)</p>
+                  <p className="text-xs text-gray-400">Fundamentos teóricos e introdução à lógica</p>
                 </div>
               </div>
-              <span className="text-xs text-gray-400 group-hover:text-emerald-400">Assistir →</span>
+              <span className="text-xs font-semibold text-emerald-400 group-hover:underline shrink-0">Fazer Aula ⚡</span>
             </Link>
 
             <Link href="/dashboard/aula/2" className="p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group block">
@@ -112,10 +112,10 @@ export default function DashboardPage() {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${lessonTwoCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>{lessonTwoCompleted ? '✓' : '2'}</div>
                 <div>
                   <h4 className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">Variáveis e Atribuição: As Caixas de Memória</h4>
-                  <p className="text-xs text-gray-400">Console real de código e missão prática guiada (+20 XP)</p>
+                  <p className="text-xs text-gray-400">Console real de código e missão prática guiada</p>
                 </div>
               </div>
-              <span className="text-xs text-gray-400 group-hover:text-emerald-400">Assistir →</span>
+              <span className="text-xs font-semibold text-emerald-400 group-hover:underline shrink-0">Fazer Aula ⚡</span>
             </Link>
           </div>
         </div>
