@@ -279,7 +279,7 @@ export default function AulaDoisPage() {
               <div className="space-y-2">
                 <textarea
                   rows={3}
-                  placeholder='const cidadeNatal = "São Paulo";'
+                  placeholder='Digite seu script aqui...'
                   value={codeAnswer}
                   onChange={(e) => setCodeAnswer(e.target.value)}
                   className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"

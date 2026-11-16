@@ -397,7 +397,7 @@ export default function ArenaPage() {
                   <label className="text-xs text-gray-400 font-medium">Editor de Código:</label>
                   <textarea
                     rows={3}
-                    placeholder=';'
+                    placeholder='Digite seu script aqui...'
                     value={codeAnswer2}
                     onChange={(e) => setCodeAnswer2(e.target.value)}
                     className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-amber-400 font-mono focus:outline-none focus:border-amber-500 transition"
