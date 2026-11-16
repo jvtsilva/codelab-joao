@@ -6,7 +6,6 @@ import Link from 'next/link'
 
 interface LeaderboardUser {
   user_id: string
-  full_name?: string
   total_xp: number
 }
 
@@ -18,17 +17,21 @@ export default function RankingPage() {
   useEffect(() => {
     async function fetchLeaderboard() {
       try {
-        // Busca o XP acumulado na tabela user_challenges
+        // Busca todos os registros de XP da tabela user_challenges
         const { data, error } = await supabase
           .from('user_challenges')
           .select('user_id, xp_earned')
 
-        if (error) throw error
+        if (error) {
+          console.error('Erro do Supabase:', error.message)
+          throw error
+        }
 
-        if (data) {
-          // Agrupa o XP por user_id somando os pontos
+        if (data && data.length > 0) {
+          // Agrupa o XP somando por user_id
           const xpMap: { [key: string]: number } = {}
           data.forEach((item) => {
+            if (!item.user_id) return
             if (!xpMap[item.user_id]) {
               xpMap[item.user_id] = 0
             }
