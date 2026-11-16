@@ -67,6 +67,24 @@ export default function CadastroPage() {
     setLoading(true)
 
     try {
+      // 1. Valida Turnstile e Trava de IP no servidor antes de criar a conta
+      const apiResponse = await fetch('/api/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          token: turnstileToken,
+        }),
+      })
+
+      const apiResult = await apiResponse.json()
+
+      if (!apiResponse.ok) {
+        throw new Error(apiResult.error || 'Erro na verificação de segurança.')
+      }
+
+      // 2. Cria a conta no Supabase após aprovação da API
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -108,7 +126,7 @@ export default function CadastroPage() {
           href="/"
           className="text-xs font-semibold text-gray-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 flex items-center gap-1.5 cursor-pointer"
         >
-         Início
+          Início
         </Link>
       </header>
 
