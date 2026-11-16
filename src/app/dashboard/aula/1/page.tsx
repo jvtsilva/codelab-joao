@@ -51,9 +51,7 @@ export default function AulaUmPage() {
     if (!completed) {
       setCompleted(true)
 
-      if (typeof window !== 'undefined') {
-        const currentXp = Number(localStorage.getItem('codelab_user_xp') || '0')
-        localStorage.setItem('codelab_user_xp', String(currentXp + 20))
+      if (!userId && typeof window !== 'undefined') {
         localStorage.setItem('codelab_visitante_aula_1', 'true')
       }
 
@@ -72,18 +70,17 @@ export default function AulaUmPage() {
     const text = userConcept.trim().toLowerCase()
 
     if (!text) {
-      setConsoleOutput('❌ Erro: Escreva sua definição no campo acima.')
+      setConsoleOutput('💬 Escreva sua explicação no campo acima para continuarmos.')
       setMissionSuccess(false)
       return
     }
 
-    // Valida se o aluno entendeu a lógica de dar instruções / passo a passo
     if (text.includes('passo') || text.includes('instrução') || text.includes('ordem') || text.includes('lógica') || text.includes('tarefa')) {
-      setConsoleOutput(`> Analisando conceito: "${userConcept}"\n-> Perfeito! O computador seguiu sua lógica.\n🎉 Missão Teórica Concluída com Sucesso!`)
+      setConsoleOutput(`> Analisando: "${userConcept}"\n✨ Perfeito! Você pegou a essência de como o computador funciona.\n💚 Missão teórica concluída com sucesso!`)
       setMissionSuccess(true)
       handleCompleteLesson()
     } else {
-      setConsoleOutput(`> Analisando conceito: "${userConcept}"\n❌ Quase lá! Pense na programação como uma sequência de passos lógicos para o computador.`)
+      setConsoleOutput(`> Analisando: "${userConcept}"\n💡 Quase lá! Pense na programação como uma sequência organizada de passos. Tente de novo!`)
       setMissionSuccess(false)
     }
   }
@@ -92,11 +89,11 @@ export default function AulaUmPage() {
     setQuizAnswer(option)
     if (option === 'b') {
       setQuizSuccess(true)
-      setQuizFeedback('🎉 Resposta Correta! Programação é exatamente dar instruções lógicas passo a passo.')
+      setQuizFeedback('✨ Isso aí! Programação é exatamente dar instruções lógicas passo a passo para o computador.')
       handleCompleteLesson()
     } else {
       setQuizSuccess(false)
-      setQuizFeedback('❌ Incorreto. Pense na programação como uma receita lógica passo a passo.')
+      setQuizFeedback('💡 Quase! Pense na programação como uma receita lógica passo a passo. Tente outra alternativa!')
     }
   }
 
@@ -183,11 +180,11 @@ export default function AulaUmPage() {
         <div className="space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-5 sm:p-6 rounded-2xl">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="px-2.5 py-1 bg-emerald-500 text-gray-950 font-extrabold text-[11px] sm:text-xs rounded-md">
-              MÓDULO 1 • AULA 1 (+20 XP ⚡)
+              MÓDULO 1 • AULA 1
             </span>
             {completed && (
               <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-[11px] sm:text-xs rounded-md border border-emerald-500/30">
-                Concluída ✓
+                Aula Concluída ✓
               </span>
             )}
           </div>
@@ -195,7 +192,7 @@ export default function AulaUmPage() {
             O que é Programação e Como o Computador Pensa?
           </h2>
           <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Descubra do absoluto zero os fundamentos da lógica de programação e qual o papel do JavaScript na web.
+            Vamos conversar do zero sobre lógica, raciocínio e como dar vida às nossas ideias através da tecnologia.
           </p>
         </div>
 
@@ -232,15 +229,15 @@ export default function AulaUmPage() {
             <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4 text-gray-300 text-xs sm:text-sm leading-relaxed">
               <h3 className="text-sm sm:text-base font-bold text-white">1. Afinal, o que é programar?</h3>
               <p>
-                Programar não é mágica e nem exige superpoderes matemáticos. <strong className="text-emerald-400">Programar é dar instruções lógicas passo a passo</strong> para o computador executar tarefas.
+                Sabe aquela ideia de que programação é um bicho de sete cabeças? Pode esquecer. <strong className="text-emerald-400">Programar é apenas conversar com o computador através de instruções lógicas passo a passo</strong>.
               </p>
               <p>
-                Pense em uma receita de bolo: se você colocar o fermento antes de misturar a massa ou esquecer de assar, o bolo estraga. Para o computador, a lógica é idêntica: ele faz exatamente o que você mandar, na ordem exata.
+                Pense em como você explica para alguém como fazer um café ou uma receita de bolo. Se você trocar a ordem dos fatores, o resultado sai errado. Com o computador é igualzinho: ele é extremamente obediente e executa exatamente o que você manda, na ordem exata.
               </p>
 
-              <h3 className="text-sm sm:text-base font-bold text-white pt-2">2. Onde o JavaScript entra nisso?</h3>
+              <h3 className="text-sm sm:text-base font-bold text-white pt-2">2. Por que o JavaScript?</h3>
               <p>
-                O <strong>JavaScript</strong> é a linguagem responsável por dar inteligência e interatividade à internet. Enquanto o HTML monta a estrutura e o CSS cuida da beleza, o JavaScript faz os cálculos, valida dados e anima as telas.
+                O <strong>JavaScript</strong> é a linguagem que dá alma e interatividade à internet. Enquanto o HTML monta a estrutura e o CSS cuida da beleza, o JavaScript faz as coisas acontecerem de verdade na tela.
               </p>
             </div>
 
@@ -258,15 +255,15 @@ export default function AulaUmPage() {
         {activeTab === 'pratica' && (
           <div className="space-y-5 animate-fadeIn">
             <div className="p-5 sm:p-6 bg-gray-900 border border-gray-800 rounded-2xl space-y-4">
-              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Teórica: Explicando a Lógica</h3>
+              <h3 className="text-sm sm:text-base font-bold text-white">🎯 Missão Teórica: Exercitando o Raciocínio</h3>
               <p className="text-xs text-gray-300 leading-relaxed">
-                Com suas próprias palavras, descreva brevemente como você explicaria para um amigo o que significa dar instruções passo a passo para o computador (use palavras como <em>passo, ordem ou lógica</em>):
+                Com suas próprias palavras, escreva brevemente como você explicaria o conceito de dar instruções passo a passo para resolver algo (tente usar termos como <em>passo, ordem ou lógica</em>):
               </p>
 
               <div className="space-y-2">
                 <textarea
                   rows={3}
-                  placeholder='Ex: É dar uma sequência de passos lógicos para resolver algo...'
+                  placeholder='Ex: É organizar os passos de forma lógica para o computador entender...'
                   value={userConcept}
                   onChange={(e) => setUserConcept(e.target.value)}
                   className="w-full bg-gray-950 border border-gray-800 p-4 rounded-xl text-xs sm:text-sm text-emerald-400 font-mono focus:outline-none focus:border-emerald-500 transition"
@@ -278,13 +275,13 @@ export default function AulaUmPage() {
                   onClick={handleRunCode}
                   className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer text-center"
                 >
-                  ⚡ Validar Raciocínio
+                  ✨ Testar Raciocínio
                 </button>
               </div>
 
               {consoleOutput && (
-                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
-                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Simulador de Avaliação:</div>
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 overflow-x-auto ${missionSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
+                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Feedback do Mentor:</div>
                   <pre className="whitespace-pre-wrap">{consoleOutput}</pre>
                 </div>
               )}
@@ -322,7 +319,7 @@ export default function AulaUmPage() {
                     quizAnswer === 'a' ? (quizSuccess ? 'bg-emerald-500/20 border-emerald-500 text-emerald-300' : 'bg-red-500/20 border-red-500 text-red-300') : 'bg-gray-950 border-gray-800 hover:border-gray-700 text-gray-300'
                   }`}
                 >
-                  A) Um componente de hardware que gera energia para a placa-mãe.
+                  A) Um componente físico que alimenta a placa-mãe de energia elétrica.
                 </button>
                 <button
                   onClick={() => handleQuizSubmit('b')}
@@ -335,8 +332,8 @@ export default function AulaUmPage() {
               </div>
 
               {quizFeedback && (
-                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-red-950/40 border-red-500/30 text-red-400'}`}>
-                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Resultado:</div>
+                <div className={`p-4 rounded-xl border font-mono text-xs space-y-1.5 ${quizSuccess ? 'bg-emerald-950/40 border-emerald-500/30 text-emerald-400' : 'bg-amber-950/40 border-amber-500/30 text-amber-300'}`}>
+                  <div className="text-gray-500 text-[10px] uppercase tracking-wider">Feedback do Mentor:</div>
                   <p>{quizFeedback}</p>
                 </div>
               )}
