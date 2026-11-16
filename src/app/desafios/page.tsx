@@ -75,6 +75,9 @@ export default function ArenaPage() {
           <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-xl flex items-center gap-1.5">
             <span>⭐</span> {userXp} XP
           </div>
+          <Link href="/ranking" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-amber-400 border border-amber-500/30 font-semibold text-xs rounded-xl transition flex items-center gap-1.5">
+            🏆 Ranking
+          </Link>
           <Link href="/dashboard" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition">
             Trilha
           </Link>
@@ -101,6 +104,9 @@ export default function ArenaPage() {
 
       {menuOpen && (
         <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
+          <Link href="/ranking" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-amber-500/30 rounded-xl text-xs font-semibold text-amber-400">
+            🏆 Ver Placar de Ranking
+          </Link>
           <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300">
             📖 Voltar para a Trilha
           </Link>
@@ -124,12 +130,17 @@ export default function ArenaPage() {
 
       {/* Vitrine dos Desafios */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 pb-20">
-        <div className="space-y-2.5 bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl">
-          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Arena de Desafios • Modo Jogo ⚔️</span>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Teste sua Lógica de Programação</h2>
-          <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-            Escolha um desafio abaixo para entrar na sala de missão, escrever código e acumular XP.
-          </p>
+        <div className="space-y-3 bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Arena de Desafios • Modo Jogo ⚔️</span>
+            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Teste sua Lógica de Programação</h2>
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed max-w-xl">
+              Escolha um desafio abaixo para entrar na sala de missão, escrever código e acumular XP para subir no ranking.
+            </p>
+          </div>
+          <Link href="/ranking" className="px-4 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-extrabold text-xs rounded-xl transition flex items-center gap-2 shrink-0">
+            🏆 Ver Ranking Geral
+          </Link>
         </div>
 
         <div className="space-y-3">
