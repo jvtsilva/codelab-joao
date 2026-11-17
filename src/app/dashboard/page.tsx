@@ -36,6 +36,14 @@ export default function DashboardPage() {
   }, [])
 
   const handleLogout = async () => {
+    if (typeof window !== 'undefined') {
+      // Limpa todas as chaves antigas de XP e progresso do visitante no navegador
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
     await supabase.auth.signOut()
     window.location.href = '/'
   }
