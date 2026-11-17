@@ -87,17 +87,17 @@ export default function LoginPage() {
       </header>
 
       {/* Formulário Centralizado */}
-      <main className="flex-1 flex items-center justify-center my-auto py-6">
+      <main className="flex-1 flex items-center justify-center my-auto py-4">
         <form 
           onSubmit={handleLogin} 
-          className="max-w-md w-full bg-gray-900 border border-gray-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-4 transition-all duration-300"
+          className="max-w-md w-full bg-gray-900 border border-gray-800 px-6 pb-6 pt-4 sm:px-8 sm:pb-8 sm:pt-5 rounded-3xl shadow-2xl space-y-4 transition-all duration-300"
         >
-          <div className="text-center space-y-1">
-            <span className="inline-block px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full mb-1">
+          <div className="text-center">
+            <span className="inline-block px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full mb-3.5">
               BEM-VINDO DE VOLTA 🚀
             </span>
             <h2 className="text-2xl font-black tracking-tight text-white">Acesse sua Conta</h2>
-            <p className="text-xs text-gray-400">Entre com sua conta para acessar a trilha</p>
+            <p className="text-xs text-gray-400 mt-1">Entre com sua conta para acessar a trilha</p>
           </div>
           
           {errorMessage && (

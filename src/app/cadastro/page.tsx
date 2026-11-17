@@ -136,12 +136,12 @@ export default function CadastroPage() {
           onSubmit={handleCadastro} 
           className="max-w-md w-full bg-gray-900 border border-gray-800 px-6 pb-6 pt-4 sm:px-8 sm:pb-8 sm:pt-5 rounded-3xl shadow-2xl space-y-4 transition-all duration-300"
         >
-          <div className="text-center space-y-1">
-            <span className="inline-block px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full">
+          <div className="text-center">
+            <span className="inline-block px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full mb-3.5">
               COMECE DO ZERO ⚡
             </span>
             <h2 className="text-2xl font-black tracking-tight text-white">Criar Conta Gratuita</h2>
-            <p className="text-xs text-gray-400">Crie sua conta para acessar a trilha de estudos</p>
+            <p className="text-xs text-gray-400 mt-1">Crie sua conta para acessar a trilha de estudos</p>
           </div>
           
           {errorMessage && (
