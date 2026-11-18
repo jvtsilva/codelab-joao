@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+}
+
+/* Fundo padrão escuro para o corpo da página */
 body {
   background-color: #030712;
   color: #f9fafb;
@@ -7,18 +14,19 @@ body {
   min-height: 100vh;
 }
 
-/* Força o fundo escuro padrão se a classe dark estiver ativa ou ausente do jeito certo */
-html.dark body {
-  background-color: #030712;
-  color: #f9fafb;
-}
-
+/* Quando a classe dark NÃO estiver ativa, força o fundo claro */
 html:not(.dark) body {
-  background-color: #f9fafb;
-  color: #030712;
+  background-color: #f9fafb !important;
+  color: #030712 !important;
 }
 
-/* Animação suave e limpa entre as páginas (sem flashs) */
+/* Quando a classe dark estiver ativa, força o fundo escuro */
+html.dark body {
+  background-color: #030712 !important;
+  color: #f9fafb !important;
+}
+
+/* Animação suave de transição entre telas (sem flashs de print) */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -29,5 +37,5 @@ html:not(.dark) body {
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s ease-out forwards;
+  animation: fadeIn 0.15s ease-out forwards;
 }
