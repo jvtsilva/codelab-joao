@@ -39,6 +39,9 @@ export default function MedalhasPage() {
     getProgress()
   }, [router])
 
+  // Cálculo de XP (50 XP por aula concluída)
+  const totalXP = completedCount * 50
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center text-white">
@@ -83,21 +86,36 @@ export default function MedalhasPage() {
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Painel de Medalhas</h1>
           <p className="text-xs sm:text-sm text-gray-400 pt-1">
-            Parabéns, <strong className="text-white">{userName}</strong>! Conclua mais aulas na trilha para desbloquear novas medalhas e evoluir seu perfil.
+            Parabéns, <strong className="text-white">{userName}</strong>! Conclua aulas e acumule XP para desbloquear todas as medalhas da trilha.
           </p>
         </div>
 
-        {/* Resumo do Progresso */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center justify-between gap-4">
-          <div>
-            <h3 className="text-sm font-bold text-white">Progresso Geral</h3>
-            <p className="text-xs text-gray-400 mt-0.5">Você concluiu {completedCount} de {totalLessonsCount} aulas disponíveis.</p>
+        {/* Resumo do Progresso e XP */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-bold text-white">Progresso Módulo 1</h3>
+              <p className="text-xs text-gray-400 mt-0.5">{completedCount} de {totalLessonsCount} aulas concluídas.</p>
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-black text-emerald-400">
+                {Math.round((completedCount / totalLessonsCount) * 100)}%
+              </span>
+              <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Concluído</span>
+            </div>
           </div>
-          <div className="text-right">
-            <span className="text-lg font-black text-emerald-400">
-              {Math.round((completedCount / totalLessonsCount) * 100)}%
-            </span>
-            <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Concluído</span>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-sm font-bold text-white">XP Acumulado</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Pontuação total na plataforma.</p>
+            </div>
+            <div className="text-right">
+              <span className="text-lg font-black text-amber-400">
+                {totalXP} XP
+              </span>
+              <span className="block text-[10px] text-gray-500 uppercase tracking-wider">Total</span>
+            </div>
           </div>
         </div>
 
@@ -126,36 +144,16 @@ export default function MedalhasPage() {
 
           {/* Medalha 2 */}
           <div className={`border rounded-2xl p-5 flex items-center gap-4 transition-all ${
-            completedCount >= 5 ? 'bg-emerald-500/10 border-emerald-500/30 text-white' : 'bg-gray-900/60 border-gray-800 text-gray-500 opacity-60'
-          }`}>
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 ${
-              completedCount >= 5 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-600'
-            }`}>
-              ⚡
-            </div>
-            <div className="space-y-1">
-              <h4 className="text-sm font-bold">Ritmo Acelerado</h4>
-              <p className="text-xs text-gray-400">Concluir pelo menos 5 aulas.</p>
-              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 ${
-                completedCount >= 5 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-500'
-              }`}>
-                {completedCount >= 5 ? '✓ Conquistada' : 'Bloqueada'}
-              </span>
-            </div>
-          </div>
-
-          {/* Medalha 3 */}
-          <div className={`border rounded-2xl p-5 flex items-center gap-4 transition-all ${
             completedCount >= 7 ? 'bg-emerald-500/10 border-emerald-500/30 text-white' : 'bg-gray-900/60 border-gray-800 text-gray-500 opacity-60'
           }`}>
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 ${
               completedCount >= 7 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-600'
             }`}>
-              🎯
+              ⚙️
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold">Meio do Caminho</h4>
-              <p className="text-xs text-gray-400">Concluir pelo menos 7 aulas.</p>
+              <h4 className="text-sm font-bold">Lógica Afiada</h4>
+              <p className="text-xs text-gray-400">Concluir pelo menos 7 aulas (Metade do Módulo 1).</p>
               <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 ${
                 completedCount >= 7 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-500'
               }`}>
@@ -164,7 +162,7 @@ export default function MedalhasPage() {
             </div>
           </div>
 
-          {/* Medalha 4 */}
+          {/* Medalha 3 */}
           <div className={`border rounded-2xl p-5 flex items-center gap-4 transition-all ${
             completedCount >= 14 ? 'bg-emerald-500/10 border-emerald-500/30 text-white' : 'bg-gray-900/60 border-gray-800 text-gray-500 opacity-60'
           }`}>
@@ -174,12 +172,32 @@ export default function MedalhasPage() {
               🎓
             </div>
             <div className="space-y-1">
-              <h4 className="text-sm font-bold">Mestre JS</h4>
-              <p className="text-xs text-gray-400">Concluir todas as 14 aulas do módulo.</p>
+              <h4 className="text-sm font-bold">Mestre dos Fundamentos</h4>
+              <p className="text-xs text-gray-400">Concluir todas as 14 aulas do Módulo 1.</p>
               <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 ${
                 completedCount >= 14 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-800 text-gray-500'
               }`}>
                 {completedCount >= 14 ? '✓ Conquistada' : 'Bloqueada'}
+              </span>
+            </div>
+          </div>
+
+          {/* Medalha 4 (Preparada para os próximos módulos / Nível Máximo) */}
+          <div className={`border rounded-2xl p-5 flex items-center gap-4 transition-all ${
+            totalXP >= 1500 ? 'bg-amber-500/10 border-amber-500/30 text-white' : 'bg-gray-900/60 border-gray-800 text-gray-500 opacity-60'
+          }`}>
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner shrink-0 ${
+              totalXP >= 1500 ? 'bg-amber-500/20 text-amber-400' : 'bg-gray-800 text-gray-600'
+            }`}>
+              👑
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold">Mestre do Código</h4>
+              <p className="text-xs text-gray-400">Atingir 1.500+ XP ao longo de toda a trilha.</p>
+              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-md mt-1 ${
+                totalXP >= 1500 ? 'bg-amber-500/20 text-amber-400' : 'bg-gray-800 text-gray-500'
+              }`}>
+                {totalXP >= 1500 ? '✓ Conquistada' : 'Bloqueada (1500 XP)'}
               </span>
             </div>
           </div>
