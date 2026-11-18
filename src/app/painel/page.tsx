@@ -225,6 +225,13 @@ export default function PainelPage() {
           >
             Voltar para a Trilha de Aulas
           </Link>
+          <Link 
+            href="/medalhas" 
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center gap-2 px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-amber-400"
+          >
+            🏆 Ver Painel de Medalhas
+          </Link>
           <button
             onClick={() => { setMenuOpen(false); handleLogout(); }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs cursor-pointer"
@@ -250,109 +257,48 @@ export default function PainelPage() {
           </div>
         </div>
 
-        {/* Card de Progresso Geral na Trilha */}
-        <div className="bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Módulo 1 • JavaScript do Zero ao Avançado</span>
-            <h3 className="text-base sm:text-lg font-bold text-white">Seu Desempenho na Trilha de Aulas</h3>
-            <p className="text-xs text-gray-300">
-              Você já concluiu <strong className="text-emerald-400">{completedCount} de {totalLessonsCount}</strong> aulas oficiais do curso.
-            </p>
+        {/* Grid Superior: Progresso Geral na Trilha + Atalho para Medalhas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Card de Progresso Geral na Trilha */}
+          <div className="bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between gap-4 lg:col-span-2">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Módulo 1 • JavaScript do Zero ao Avançado</span>
+              <h3 className="text-base sm:text-lg font-bold text-white">Seu Desempenho na Trilha de Aulas</h3>
+              <p className="text-xs text-gray-300">
+                Você já concluiu <strong className="text-emerald-400">{completedCount} de {totalLessonsCount}</strong> aulas oficiais do curso.
+              </p>
+            </div>
+            <div>
+              <Link
+                href="/dashboard"
+                className="inline-block px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition text-center cursor-pointer shadow-lg shadow-emerald-500/20"
+              >
+                Continuar Estudos ⚡
+              </Link>
+            </div>
           </div>
+
+          {/* Atalho para a Página de Medalhas */}
           <Link
-            href="/dashboard"
-            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition text-center cursor-pointer shrink-0 shadow-lg shadow-emerald-500/20"
+            href="/medalhas"
+            className="bg-gray-900 hover:bg-gray-800/80 border border-gray-800 rounded-2xl p-5 sm:p-6 flex flex-col justify-between gap-4 transition cursor-pointer shadow-xl group lg:col-span-1"
           >
-            Continuar Estudos ⚡
+            <div className="space-y-1">
+              <div className="w-10 h-10 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl flex items-center justify-center text-lg mb-3">
+                🏆
+              </div>
+              <h3 className="text-base font-bold text-white group-hover:text-amber-400 transition">Painel de Medalhas</h3>
+              <p className="text-xs text-gray-400">
+                Acompanhe seus emblemas conquistados e veja o que falta para desbloquear novos.
+              </p>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-bold text-amber-400">
+              <span>Ver conquistas</span>
+              <span className="group-hover:translate-x-1 transition-transform">→</span>
+            </div>
           </Link>
-        </div>
 
-        {/* 🏆 Painel de Medalhas Dinâmico */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
-          <div>
-            <h3 className="text-base sm:text-lg font-bold">Painel de Medalhas 🏆</h3>
-            <p className="text-xs text-gray-400 mt-0.5">Conquiste emblemas exclusivos conforme avança na sua jornada de programação.</p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
-            
-            {/* Medalha 1: Primeiro Passo (Requisito: >= 1 aula) */}
-            <div className={`border rounded-2xl p-4 text-center space-y-2 flex flex-col items-center justify-center transition-all ${
-              completedCount >= 1 
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-white shadow-md' 
-                : 'bg-gray-950 border-gray-800/80 text-gray-500 opacity-50'
-            }`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${
-                completedCount >= 1 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-900 text-gray-600'
-              }`}>
-                🚀
-              </div>
-              <div>
-                <h4 className="text-xs font-bold">Primeiro Passo</h4>
-                <p className={`text-[10px] mt-0.5 ${completedCount >= 1 ? 'text-emerald-400 font-medium' : 'text-gray-500'}`}>
-                  {completedCount >= 1 ? 'Conquistada' : 'Concluir 1 aula'}
-                </p>
-              </div>
-            </div>
-
-            {/* Medalha 2: Ritmo Acelerado (Requisito: >= 5 aulas) */}
-            <div className={`border rounded-2xl p-4 text-center space-y-2 flex flex-col items-center justify-center transition-all ${
-              completedCount >= 5 
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-white shadow-md' 
-                : 'bg-gray-950 border-gray-800/80 text-gray-500 opacity-50'
-            }`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${
-                completedCount >= 5 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-900 text-gray-600'
-              }`}>
-                ⚡
-              </div>
-              <div>
-                <h4 className="text-xs font-bold">Ritmo Acelerado</h4>
-                <p className={`text-[10px] mt-0.5 ${completedCount >= 5 ? 'text-emerald-400 font-medium' : 'text-gray-500'}`}>
-                  {completedCount >= 5 ? 'Conquistada' : 'Concluir 5 aulas'}
-                </p>
-              </div>
-            </div>
-
-            {/* Medalha 3: Metade do Caminho (Requisito: >= 7 aulas) */}
-            <div className={`border rounded-2xl p-4 text-center space-y-2 flex flex-col items-center justify-center transition-all ${
-              completedCount >= 7 
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-white shadow-md' 
-                : 'bg-gray-950 border-gray-800/80 text-gray-500 opacity-50'
-            }`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${
-                completedCount >= 7 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-900 text-gray-600'
-              }`}>
-                🎯
-              </div>
-              <div>
-                <h4 className="text-xs font-bold">Meio do Caminho</h4>
-                <p className={`text-[10px] mt-0.5 ${completedCount >= 7 ? 'text-emerald-400 font-medium' : 'text-gray-500'}`}>
-                  {completedCount >= 7 ? 'Conquistada' : 'Concluir 7 aulas'}
-                </p>
-              </div>
-            </div>
-
-            {/* Medalha 4: Mestre do JavaScript (Requisito: 14 aulas) */}
-            <div className={`border rounded-2xl p-4 text-center space-y-2 flex flex-col items-center justify-center transition-all ${
-              completedCount >= 14 
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-white shadow-md' 
-                : 'bg-gray-950 border-gray-800/80 text-gray-500 opacity-50'
-            }`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-inner ${
-                completedCount >= 14 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-gray-900 text-gray-600'
-              }`}>
-                🎓
-              </div>
-              <div>
-                <h4 className="text-xs font-bold">Mestre JS</h4>
-                <p className={`text-[10px] mt-0.5 ${completedCount >= 14 ? 'text-emerald-400 font-medium' : 'text-gray-500'}`}>
-                  {completedCount >= 14 ? 'Conquistada' : 'Concluir 14 aulas'}
-                </p>
-              </div>
-            </div>
-
-          </div>
         </div>
 
         {/* Grid de Informações, Perfil e Segurança */}
