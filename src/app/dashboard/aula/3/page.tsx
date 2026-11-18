@@ -66,7 +66,7 @@ export default function AulaTresPage() {
     }
   }
 
-  // Validação do console.log real
+  // Validação segura do console.log real
   const handleRunCode = () => {
     const cleanCode = codeAnswer.trim()
     const hasConsoleLog = cleanCode.includes('console.log')
@@ -83,14 +83,12 @@ export default function AulaTresPage() {
       return
     }
 
+    let logs: string[] = []
+    const originalLog = console.log
+
     try {
-      let logs: string[] = []
-      const originalLog = console.log
       console.log = (...args) => logs.push(args.join(' '))
-
       eval(cleanCode)
-
-      console.log = originalLog
 
       if (logs.length === 0) {
         logs.push("Comando executado, mas nenhum texto foi enviado para impressão.")
@@ -102,6 +100,8 @@ export default function AulaTresPage() {
     } catch (err: any) {
       setConsoleOutput(`> ${cleanCode}\n❌ Erro de sintaxe no interpretador: ${err.message}`)
       setMissionSuccess(false)
+    } finally {
+      console.log = originalLog
     }
   }
 
@@ -120,6 +120,13 @@ export default function AulaTresPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
     window.location.href = '/'
   }
 
@@ -424,12 +431,20 @@ export default function AulaTresPage() {
                 ← Voltar para Laboratório
               </button>
 
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer order-1 sm:order-2"
-              >
-                Concluir Aula e Voltar à Trilha 🚀
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-5 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-bold text-xs rounded-xl transition text-center cursor-pointer"
+                >
+                  Voltar à Trilha
+                </Link>
+                <Link
+                  href="/dashboard/aula/4"
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer"
+                >
+                  Ir para o Bloco B (Aula 4) 🚀
+                </Link>
+              </div>
             </div>
           </div>
         )}

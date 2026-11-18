@@ -10,12 +10,12 @@ export default function AulaUmPage() {
   const [activeTab, setActiveTab] = useState<'teoria' | 'pratica' | 'quiz'>('teoria')
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Estados da missão lógica interativa (Ordenação do algoritmo do café)
+  // Estados da missão lógica interativa (Textos limpos para o aluno raciocinar de verdade)
   const [steps, setSteps] = useState([
-    { id: 1, text: '2. Ferver a água no fogão' },
-    { id: 2, text: '3. Passar a água quente pelo coador com pó' },
-    { id: 3, text: '1. Colocar o pó de café no coador' },
-    { id: 4, text: '4. Servir a xícara de café quente' }
+    { id: 1, text: 'Ferver a água no fogão' },
+    { id: 2, text: 'Passar a água quente pelo coador com pó' },
+    { id: 3, text: 'Colocar o pó de café no coador' },
+    { id: 4, text: 'Servir a xícara de café quente' }
   ])
   const [missionOutput, setMissionOutput] = useState<string | null>(null)
   const [missionSuccess, setMissionSuccess] = useState(false)
@@ -86,7 +86,7 @@ export default function AulaUmPage() {
     setMissionOutput(null)
   }
 
-  // Validação da ordem correta do algoritmo (IDs esperados: 3, 1, 2, 4)
+  // Validação da ordem correta do algoritmo (IDs esperados na ordem correta: 3, 1, 2, 4)
   const handleValidateAlgorithm = () => {
     const currentOrder = steps.map(s => s.id)
     const expectedOrder = [3, 1, 2, 4]
@@ -98,7 +98,7 @@ export default function AulaUmPage() {
       setMissionSuccess(true)
       handleCompleteLesson()
     } else {
-      setMissionOutput('❌ Ops! A ordem dos passos está invertida. Pense: o que vem primeiro antes de ferver a água? Tente reorganizar!')
+      setMissionOutput('❌ Ops! A ordem dos passos está invertida. Pense: o que vem primeiro antes de ferver a água ou passar pelo coador? Tente reorganizar!')
       setMissionSuccess(false)
     }
   }
@@ -118,6 +118,13 @@ export default function AulaUmPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
     window.location.href = '/'
   }
 
@@ -430,12 +437,20 @@ export default function AulaUmPage() {
                 ← Voltar para Missão
               </button>
 
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer order-1 sm:order-2"
-              >
-                Concluir Aula e Voltar à Trilha 🚀
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-5 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-bold text-xs rounded-xl transition text-center cursor-pointer"
+                >
+                  Voltar à Trilha
+                </Link>
+                <Link
+                  href="/dashboard/aula/2"
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer"
+                >
+                  Próxima Aula (Aula 2) →
+                </Link>
+              </div>
             </div>
           </div>
         )}

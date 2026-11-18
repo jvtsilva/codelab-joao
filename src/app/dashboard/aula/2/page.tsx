@@ -119,6 +119,13 @@ export default function AulaDoisPage() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
     window.location.href = '/'
   }
 
@@ -421,12 +428,20 @@ export default function AulaDoisPage() {
                 ← Voltar para Missão
               </button>
 
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer order-1 sm:order-2"
-              >
-                Concluir Aula e Voltar à Trilha 🚀
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto order-1 sm:order-2">
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-5 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 font-bold text-xs rounded-xl transition text-center cursor-pointer"
+                >
+                  Voltar à Trilha
+                </Link>
+                <Link
+                  href="/dashboard/aula/3"
+                  className="w-full sm:w-auto px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition shadow-lg shadow-emerald-500/20 text-center cursor-pointer"
+                >
+                  Próxima Aula (Aula 3) →
+                </Link>
+              </div>
             </div>
           </div>
         )}
