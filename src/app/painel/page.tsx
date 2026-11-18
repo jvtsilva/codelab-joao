@@ -32,12 +32,6 @@ export default function PainelPage() {
   const hasNumber = /[0-9]/.test(newPassword)
   const hasSpecialChar = /[^A-Za-z0-9]/.test(newPassword)
 
-  // Estados para exclusão de conta
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleteLoading, setDeleteLoading] = useState(false)
-  const [deleteSuccess, setDeleteSuccess] = useState(false)
-  const [deleteError, setDeleteError] = useState('')
-
   const router = useRouter()
   const totalLessonsCount = 14 // Total de aulas do Módulo 1
 
@@ -153,41 +147,6 @@ export default function PainelPage() {
       setPasswordMessage({ text: error.message || 'Erro ao alterar a senha.', type: 'error' })
     } finally {
       setPasswordLoading(false)
-    }
-  }
-
-  // Função para excluir a conta
-  const handleDeleteAccount = async () => {
-    if (!userId) return
-    setDeleteLoading(true)
-    setDeleteError('')
-
-    try {
-      const response = await fetch('/api/delete-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
-
-      if (typeof window !== 'undefined') {
-        Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith('codelab_')) {
-            localStorage.removeItem(key)
-          }
-        })
-      }
-
-      await supabase.auth.signOut()
-      setDeleteLoading(false)
-      setDeleteSuccess(true)
-
-    } catch (error: any) {
-      setDeleteError(error.message || 'Não foi possível excluir a conta.')
-      setDeleteLoading(false)
     }
   }
 
@@ -472,12 +431,12 @@ export default function PainelPage() {
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
                 <span className="text-xs text-gray-400">Excluir permanentemente sua conta e todos os dados associados.</span>
-                <button
-                  onClick={() => setShowDeleteModal(true)}
+                <Link
+                  href="/painel/excluir-conta"
                   className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-semibold rounded-lg text-xs transition cursor-pointer shrink-0 text-center"
                 >
                   Excluir Conta
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -485,75 +444,6 @@ export default function PainelPage() {
 
         </div>
       </main>
-
-      {/* Modal Fixo e Centralizado para Exclusão */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-3xl space-y-4 shadow-2xl animate-fadeIn my-auto">
-            
-            {deleteSuccess ? (
-              <div className="py-4 text-center space-y-4">
-                <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-xl font-bold">
-                  ✓
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-bold text-white">Até logo, {userName}! 👋</h3>
-                  <p className="text-xs text-gray-400 leading-relaxed">
-                    Sua conta foi excluída com sucesso. Foi incrível ter você com a gente no Codelab João. Sucesso na sua jornada e até a próxima! 🚀
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => router.push('/login')}
-                  className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg text-xs transition cursor-pointer mt-2"
-                >
-                  Voltar para a Página de Login
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-base sm:text-lg font-bold text-red-400">Deseja realmente excluir sua conta?</h3>
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  Esta ação é <strong className="text-white">definitiva e irreversível</strong>, {userName}. Todos os seus dados e acessos serão apagados permanentemente do Codelab João.
-                </p>
-
-                {deleteError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg">
-                    {deleteError}
-                  </div>
-                )}
-
-                <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteModal(false)}
-                    disabled={deleteLoading}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg text-xs transition cursor-pointer text-center"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleDeleteAccount}
-                    disabled={deleteLoading}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs transition cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {deleteLoading ? (
-                      <>
-                        <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                        Excluindo...
-                      </>
-                    ) : (
-                      'Sim, excluir conta'
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-          </div>
-        </div>
-      )}
     </div>
   )
 }
