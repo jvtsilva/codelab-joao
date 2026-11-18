@@ -99,8 +99,9 @@ export default function CadastroPage() {
 
       setSuccessMessage(true)
 
+      // Redireciona para a tela de boas-vindas na primeira vez!
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/bem-vindo')
       }, 2000)
 
     } catch (error: any) {
