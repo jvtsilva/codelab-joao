@@ -10,7 +10,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Total de aulas criadas na trilha (14 aulas)
+  // Total de aulas criadas na trilha do Módulo 1 (14 aulas)
   const totalLessonsCount = 14
 
   useEffect(() => {
@@ -63,29 +63,34 @@ export default function DashboardPage() {
   // Calcula quantas aulas o usuário já concluiu no total
   const totalCompletedCount = Object.values(completedLessons).filter(Boolean).length
 
-  // 🌟 Lógica de XP e Níveis (Cada aula concluída = 50 XP)
+  // 🌟 Sistema de XP e Níveis (50 XP por aula concluída)
   const totalXP = totalCompletedCount * 50
 
-  // Definição dos Níveis
+  // Definição dos Níveis estruturados para a escala de 5 módulos
   let currentLevel = 'Iniciante JS'
   let levelNumber = 1
   let nextLevelXP = 200
   let prevLevelXP = 0
 
-  if (totalXP >= 800) {
-    currentLevel = 'Mestre do Código'
+  if (totalXP >= 1500) {
+    currentLevel = 'Mestre do Código 👑'
+    levelNumber = 5
+    nextLevelXP = 2000
+    prevLevelXP = 1500
+  } else if (totalXP >= 1000) {
+    currentLevel = 'Desenvolvedor Front-End'
     levelNumber = 4
-    nextLevelXP = 1000
-    prevLevelXP = 800
-  } else if (totalXP >= 400) {
+    nextLevelXP = 1500
+    prevLevelXP = 1000
+  } else if (totalXP >= 500) {
     currentLevel = 'Programador Júnior'
     levelNumber = 3
-    nextLevelXP = 800
-    prevLevelXP = 400
+    nextLevelXP = 1000
+    prevLevelXP = 500
   } else if (totalXP >= 200) {
     currentLevel = 'Codificador'
     levelNumber = 2
-    nextLevelXP = 400
+    nextLevelXP = 500
     prevLevelXP = 200
   }
 
@@ -94,7 +99,7 @@ export default function DashboardPage() {
   const xpNeededForNext = nextLevelXP - prevLevelXP
   const levelProgressPercent = Math.min(Math.round((xpInCurrentLevel / xpNeededForNext) * 100), 100)
 
-  // Estrutura completa dos blocos e aulas da trilha
+  // Estrutura completa dos blocos e aulas da trilha (Módulo 1)
   const blocks = [
     {
       id: 'bloco-a',
