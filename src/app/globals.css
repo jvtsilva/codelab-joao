@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 :root {
+  --background: #f9fafb; /* Fundo padrão claro (gray-50) */
+  --foreground: #030712; /* Texto padrão escuro (gray-950) */
+}
+
+/* Quando a classe dark estiver ativa no HTML, muda as variáveis para o escuro */
+.dark {
   --background: #030712; /* cinza bem escuro (gray-950) */
   --foreground: #f9fafb; /* quase branco (gray-50) */
 }
@@ -17,6 +23,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Animação de transição suave para as telas */
