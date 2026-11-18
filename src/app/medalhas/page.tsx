@@ -76,11 +76,13 @@ export default function MedalhasPage() {
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6">
         
         <div className="text-center space-y-2 py-4">
-          <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full">
-            SUAS CONQUISTAS 🏆
-          </span>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">Painel de Medalhas</h1>
-          <p className="text-xs sm:text-sm text-gray-400">
+          <div>
+            <span className="inline-block mt-1 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-[11px] rounded-full">
+              SUAS CONQUISTAS 🏆
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-gray-400 pt-1">
             Parabéns, <strong className="text-white">{userName}</strong>! Conclua mais aulas na trilha para desbloquear novas medalhas e evoluir seu perfil.
           </p>
         </div>
