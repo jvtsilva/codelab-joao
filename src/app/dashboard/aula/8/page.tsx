@@ -134,35 +134,39 @@ export default function AulaOitoPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative animate-fadeIn">
       
-      {/* Header Responsivo */}
+      {/* Header Padronizado e Unificado */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30 select-none">
             JS
           </div>
-          <h1 className="font-bold text-xs sm:text-sm tracking-wide truncate">
-            Módulo 1 • Aula 8 (Bloco C)
+          <h1 className="font-bold text-sm sm:text-base tracking-wide truncate">
+            Módulo 1 • Aula 8
           </h1>
         </div>
 
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
-          <Link 
-            href="/dashboard"
-            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
-          >
-            Voltar à Trilha
-          </Link>
-          {userId && (
-            <Link
-              href="/painel"
-              className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 transition font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>⚙️</span> Painel
-            </Link>
+        {/* Menu Desktop Unificado */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          <Link href="/dashboard" className="px-3 py-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold">📖 Trilha</Link>
+          <Link href="/desafios" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">⚔️ Arena</Link>
+          <Link href="/ranking" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">🏆 Ranking</Link>
+          <Link href="/medalhas" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">🎖️ Medalhas</Link>
+          <Link href="/contato" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">💬 Contato</Link>
+          {userId ? (
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
+              <Link href="/painel" className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold">⚙️ Painel</Link>
+              <button onClick={handleLogout} className="px-3.5 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold cursor-pointer">Sair</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
+              <Link href="/login" className="px-3.5 py-2 bg-gray-900 text-gray-300 border border-gray-800 rounded-xl text-xs">Entrar</Link>
+              <Link href="/cadastro" className="px-3.5 py-2 bg-emerald-500 text-gray-950 font-extrabold rounded-xl text-xs">Criar Conta</Link>
+            </div>
           )}
         </div>
 
-        <div className="flex sm:hidden items-center">
+        {/* Botão Hambúrguer Mobile */}
+        <div className="flex md:hidden items-center">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold transition cursor-pointer active:scale-95"
@@ -173,33 +177,25 @@ export default function AulaOitoPage() {
         </div>
       </header>
 
-      {/* Menu Dropdown Mobile */}
+      {/* Menu Dropdown Mobile Unificado */}
       {menuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
-          <Link 
-            href="/dashboard" 
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 hover:text-white"
-          >
-            <span>Voltar para a Trilha de Aulas</span>
-            <span>→</span>
-          </Link>
-          {userId && (
-            <Link
-              href="/painel"
-              onClick={() => setMenuOpen(false)}
-              className="flex items-center justify-between px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs font-semibold text-emerald-400"
-            >
-              <span>⚙️ Meu Painel de Controle</span>
-              <span>→</span>
-            </Link>
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2 z-50 shadow-2xl animate-fadeIn">
+          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs text-emerald-400 font-semibold">📖 Ir para a Trilha</Link>
+          <Link href="/desafios" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">⚔️ Arena de Desafios</Link>
+          <Link href="/ranking" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">🏆 Ranking Geral</Link>
+          <Link href="/medalhas" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">🎖️ Painel de Medalhas</Link>
+          <Link href="/contato" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-medium">💬 Contato</Link>
+          {userId ? (
+            <>
+              <Link href="/painel" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs text-emerald-400 font-medium">⚙️ Meu Painel</Link>
+              <button onClick={() => { setMenuOpen(false); handleLogout(); }} className="w-full text-left px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs">🚪 Sair da Conta</button>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300">Entrar</Link>
+              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs">Criar Conta</Link>
+            </div>
           )}
-          <button
-            onClick={() => { setMenuOpen(false); handleLogout(); }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs cursor-pointer"
-          >
-            <span>🚪 Sair da Conta</span>
-          </button>
         </div>
       )}
 
