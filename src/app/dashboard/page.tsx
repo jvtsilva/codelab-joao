@@ -6,30 +6,43 @@ import Link from 'next/link'
 
 export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
-  const [lessonOneCompleted, setLessonOneCompleted] = useState(false)
-  const [lessonTwoCompleted, setLessonTwoCompleted] = useState(false)
-  const [lessonThreeCompleted, setLessonThreeCompleted] = useState(false)
+  const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  // Total de aulas criadas na trilha (14 aulas)
+  const totalLessonsCount = 14
 
   useEffect(() => {
     async function checkUserAndProgress() {
       const { data: { session } } = await supabase.auth.getSession()
+      const progressMap: Record<string, boolean> = {}
+
       if (session) {
         setUserId(session.user.id)
-        const { data } = await supabase.from('user_progress').select('lesson_id, completed').eq('user_id', session.user.id)
+        const { data } = await supabase
+          .from('user_progress')
+          .select('lesson_id, completed')
+          .eq('user_id', session.user.id)
+
         if (data) {
-          if (data.find(i => i.lesson_id === 'lesson-1')?.completed) setLessonOneCompleted(true)
-          if (data.find(i => i.lesson_id === 'lesson-2')?.completed) setLessonTwoCompleted(true)
-          if (data.find(i => i.lesson_id === 'lesson-3')?.completed) setLessonThreeCompleted(true)
+          data.forEach(item => {
+            if (item.completed) {
+              progressMap[item.lesson_id] = true
+            }
+          })
         }
       } else {
         if (typeof window !== 'undefined') {
-          if (localStorage.getItem('codelab_visitante_aula_1')) setLessonOneCompleted(true)
-          if (localStorage.getItem('codelab_visitante_aula_2')) setLessonTwoCompleted(true)
-          if (localStorage.getItem('codelab_visitante_aula_3')) setLessonThreeCompleted(true)
+          for (let i = 1; i <= totalLessonsCount; i++) {
+            if (localStorage.getItem(`codelab_visitante_aula_${i}`)) {
+              progressMap[`lesson-${i}`] = true
+            }
+          }
         }
       }
+
+      setCompletedLessons(progressMap)
       setLoading(false)
     }
     checkUserAndProgress()
@@ -37,7 +50,6 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     if (typeof window !== 'undefined') {
-      // Limpa todas as chaves antigas de XP e progresso do visitante no navegador
       Object.keys(localStorage).forEach((key) => {
         if (key.startsWith('codelab_')) {
           localStorage.removeItem(key)
@@ -48,12 +60,61 @@ export default function DashboardPage() {
     window.location.href = '/'
   }
 
-  const totalCompleted = (lessonOneCompleted ? 1 : 0) + (lessonTwoCompleted ? 1 : 0) + (lessonThreeCompleted ? 1 : 0)
+  // Calcula quantas aulas o usuário já concluiu no total
+  const totalCompletedCount = Object.values(completedLessons).filter(Boolean).length
+
+  // Estrutura completa dos blocos e aulas da trilha
+  const blocks = [
+    {
+      id: 'bloco-a',
+      title: 'Módulo 1 • Bloco A (Fundamentos)',
+      lessons: [
+        { id: 'lesson-1', number: 1, title: 'O Que É Programação de Verdade?', desc: 'Desmistificando a lógica e hardware vs software' },
+        { id: 'lesson-2', number: 2, title: 'O Pensamento Algorítmico', desc: 'Decomposição e missão prática do robô' },
+        { id: 'lesson-3', number: 3, title: 'Onde o Código Vive? (Console)', desc: 'Trio da web e comando console.log()' }
+      ]
+    },
+    {
+      id: 'bloco-b',
+      title: 'Módulo 1 • Bloco B (Memória e Variáveis)',
+      lessons: [
+        { id: 'lesson-4', number: 4, title: 'Como o Computador Lembra das Coisas?', desc: 'Memória RAM e variáveis com let' },
+        { id: 'lesson-5', number: 5, title: 'Constantes vs Variáveis', desc: 'Quando usar const e let com segurança' },
+        { id: 'lesson-6', number: 6, title: 'Os Tipos de Dados do Mundo Real', desc: 'Strings, Numbers e Booleans' }
+      ]
+    },
+    {
+      id: 'bloco-c',
+      title: 'Módulo 1 • Bloco C (Operadores e Interação)',
+      lessons: [
+        { id: 'lesson-7', number: 7, title: 'Fazendo Contas e Operações Matemáticas', desc: 'Adição, subtração, multiplicação e divisão' },
+        { id: 'lesson-8', number: 8, title: 'Operadores de Comparação e Relacionais', desc: 'Maior, menor, igual e estrito (===)' },
+        { id: 'lesson-9', number: 9, title: 'Combinando Condições (Operadores Lógicos)', desc: 'Conectando regras com && (E) e || (OU)' },
+        { id: 'lesson-10', number: 10, title: 'Tomando Decisões com if e else', desc: 'Criando caminhos condicionais (Se / Senão)' }
+      ]
+    },
+    {
+      id: 'bloco-d',
+      title: 'Módulo 1 • Bloco D (Laços de Repetição)',
+      lessons: [
+        { id: 'lesson-11', number: 11, title: 'O Poder da Repetição Automática', desc: 'O loop while e prevenção de loops infinitos' },
+        { id: 'lesson-12', number: 12, title: 'O Loop Mais Usado do Mundo', desc: 'Contagens controladas com o comando for' }
+      ]
+    },
+    {
+      id: 'bloco-e',
+      title: 'Módulo 1 • Bloco E (Coleções de Dados)',
+      lessons: [
+        { id: 'lesson-13', number: 13, title: 'O Armazém de Múltiplos Itens (Arrays)', desc: 'Listas ordenadas e índices iniciados em zero' },
+        { id: 'lesson-14', number: 14, title: 'Manipulando Listas Dinamicamente', desc: 'Adicionando e removendo com .push() e .pop()' }
+      ]
+    }
+  ]
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
       
-      {/* Header Responsivo com quebra segura */}
+      {/* Header Responsivo */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-3.5 sm:px-6 py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="px-2 py-1 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg shrink-0 border border-emerald-500/30">JS</div>
@@ -82,7 +143,7 @@ export default function DashboardPage() {
         <div className="flex sm:hidden items-center shrink-0">
           <button 
             onClick={() => setMenuOpen(!menuOpen)} 
-            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold text-lg active:scale-95 transition"
+            className="p-2 bg-gray-900 border border-gray-800 rounded-xl text-emerald-400 font-bold text-lg active:scale-95 transition cursor-pointer"
             aria-label="Abrir Menu"
           >
             {menuOpen ? '✕' : '☰'}
@@ -108,15 +169,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Conteúdo Principal com espaçamento seguro para mobile */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-3.5 sm:p-6 space-y-5 pb-20 overflow-hidden">
+      {/* Conteúdo Principal */}
+      <main className="flex-1 max-w-5xl w-full mx-auto p-3.5 sm:p-6 space-y-6 pb-24 overflow-hidden">
         
         {/* Banner de Boas-vindas e Arena em Grid responsivo */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div className="sm:col-span-2 space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-4 sm:p-6 rounded-2xl">
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase block">Trilha de Ensino • Módulo 1 🚀</span>
-            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Fundamentos de JavaScript</h2>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">Aprenda a lógica de programação passo a passo nas aulas práticas e teste suas habilidades na Arena.</p>
+            <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase block">Trilha Completa • Módulo 1 🚀</span>
+            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Fundamentos de JavaScript ao Avançado</h2>
+            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
+              Você concluiu <strong className="text-emerald-400">{loading ? '...' : `${totalCompletedCount} de ${totalLessonsCount}`}</strong> aulas. Continue avançando na trilha prática!
+            </p>
           </div>
 
           <div className="bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-3">
@@ -129,75 +192,44 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Lista de Aulas do Bloco A */}
-        <div className="space-y-3.5 pt-1">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[11px] sm:text-xs font-semibold tracking-wider text-gray-400 uppercase">Módulo 1 • Bloco A (Fundamentos)</h3>
-            <span className="text-[11px] sm:text-xs text-gray-500 font-medium">{loading ? 'Carregando...' : `${totalCompleted}/3 Concluídas`}</span>
-          </div>
-
-          <div className="space-y-2.5">
-            
-            {/* Aula 1 */}
-            <Link href="/dashboard/aula/1" className="p-3.5 sm:p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${lessonOneCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>
-                  {lessonOneCompleted ? '✓' : '1'}
-                </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-xs sm:text-base text-white group-hover:text-emerald-400 transition truncate">O Que É Programação de Verdade?</h4>
-                  <p className="text-[11px] sm:text-xs text-gray-400 truncate">Desmistificando a lógica e hardware vs software</p>
-                </div>
+        {/* Renderização Dinâmica de todos os Blocos e Aulas */}
+        <div className="space-y-8">
+          {blocks.map((block) => (
+            <div key={block.id} className="space-y-3.5">
+              <div className="flex items-center justify-between px-1 border-b border-gray-800 pb-2">
+                <h3 className="text-[11px] sm:text-xs font-bold tracking-wider text-emerald-400 uppercase">{block.title}</h3>
+                <span className="text-[11px] sm:text-xs text-gray-500 font-medium">
+                  {loading ? '...' : `${block.lessons.filter(l => completedLessons[l.id]).length}/${block.lessons.length} Concluídas`}
+                </span>
               </div>
-              <span className="text-[11px] sm:text-xs font-semibold text-emerald-400 group-hover:underline shrink-0 pl-1">Fazer ⚡</span>
-            </Link>
 
-            {/* Aula 2 */}
-            <Link href="/dashboard/aula/2" className="p-3.5 sm:p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${lessonTwoCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>
-                  {lessonTwoCompleted ? '✓' : '2'}
-                </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-xs sm:text-base text-white group-hover:text-emerald-400 transition truncate">O Pensamento Algorítmico</h4>
-                  <p className="text-[11px] sm:text-xs text-gray-400 truncate">Decomposição e missão prática do robô</p>
-                </div>
-              </div>
-              <span className="text-[11px] sm:text-xs font-semibold text-emerald-400 group-hover:underline shrink-0 pl-1">Fazer ⚡</span>
-            </Link>
-
-            {/* Aula 3 */}
-            <Link href="/dashboard/aula/3" className="p-3.5 sm:p-4 rounded-2xl border bg-gray-900/80 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 ${lessonThreeCompleted ? 'bg-emerald-500 text-gray-950' : 'bg-gray-800 text-gray-300'}`}>
-                  {lessonThreeCompleted ? '✓' : '3'}
-                </div>
-                <div className="min-w-0">
-                  <h4 className="font-bold text-xs sm:text-base text-white group-hover:text-emerald-400 transition truncate">Onde o Código Vive? (Console)</h4>
-                  <p className="text-[11px] sm:text-xs text-gray-400 truncate">Trio da web e comando console.log()</p>
-                </div>
-              </div>
-              <span className="text-[11px] sm:text-xs font-semibold text-emerald-400 group-hover:underline shrink-0 pl-1">Fazer ⚡</span>
-            </Link>
-
-          </div>
-        </div>
-
-        {/* Próximos Blocos (Em Breve) */}
-        <div className="space-y-3 pt-2 opacity-75">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-[11px] sm:text-xs font-semibold tracking-wider text-gray-500 uppercase">Bloco B • Memória e Variáveis (Em Breve 🔒)</h3>
-          </div>
-          <div className="p-3.5 sm:p-4 rounded-2xl border bg-gray-900/40 border-gray-800/80 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gray-800/50 text-gray-500 flex items-center justify-center font-bold text-xs sm:text-sm shrink-0">4+</div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-xs sm:text-base text-gray-400 truncate">Variáveis, let, const e Tipos de Dados</h4>
-                <p className="text-[11px] text-gray-600 truncate">Próximas aulas em desenvolvimento</p>
+              <div className="space-y-2.5">
+                {block.lessons.map((lesson) => {
+                  const isCompleted = completedLessons[lesson.id]
+                  return (
+                    <Link 
+                      key={lesson.id} 
+                      href={`/dashboard/aula/${lesson.number}`} 
+                      className="p-3.5 sm:p-4 rounded-2xl border bg-gray-900/85 border-gray-800 hover:border-emerald-500/50 transition flex items-center justify-between gap-3 cursor-pointer group shadow-md"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold text-xs sm:text-sm shrink-0 transition ${isCompleted ? 'bg-emerald-500 text-gray-950 font-black shadow-lg shadow-emerald-500/20' : 'bg-gray-800 text-gray-300 group-hover:bg-gray-700'}`}>
+                          {isCompleted ? '✓' : lesson.number}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-bold text-xs sm:text-base text-white group-hover:text-emerald-400 transition truncate">{lesson.title}</h4>
+                          <p className="text-[11px] sm:text-xs text-gray-400 truncate">{lesson.desc}</p>
+                        </div>
+                      </div>
+                      <span className={`text-[11px] sm:text-xs font-semibold shrink-0 pl-1 ${isCompleted ? 'text-emerald-400' : 'text-emerald-400 group-hover:underline'}`}>
+                        {isCompleted ? 'Revisar ⚡' : 'Fazer ⚡'}
+                      </span>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
-            <span className="text-[10px] sm:text-xs text-gray-600 font-bold uppercase shrink-0">Em Breve</span>
-          </div>
+          ))}
         </div>
 
       </main>
