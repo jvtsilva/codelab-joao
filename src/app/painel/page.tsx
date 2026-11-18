@@ -5,12 +5,19 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+interface RecentActivity {
+  lesson_id: string
+  updated_at: string
+  completed: boolean
+}
+
 export default function PainelPage() {
   const [userName, setUserName] = useState<string>('Usuário')
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [lastSignIn, setLastSignIn] = useState<string | null>(null)
   const [deviceInfo, setDeviceInfo] = useState<string>('Detectando...')
   const [completedCount, setCompletedCount] = useState<number>(0)
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -58,12 +65,20 @@ export default function PainelPage() {
         // Buscar progresso de aulas concluídas do usuário no Supabase
         const { data: progressData } = await supabase
           .from('user_progress')
-          .select('lesson_id, completed')
+          .select('lesson_id, completed, updated_at')
           .eq('user_id', session.user.id)
 
         if (progressData) {
           const count = progressData.filter(item => item.completed).length
           setCompletedCount(count)
+
+          // Filtrar apenas concluídas e ordenar pelas mais recentes (últimas 3)
+          const sortedActivities = progressData
+            .filter(item => item.completed)
+            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            .slice(0, 3)
+
+          setRecentActivities(sortedActivities)
         }
 
         // Dispositivo e Navegador
@@ -301,36 +316,68 @@ export default function PainelPage() {
 
         </div>
 
-        {/* Grid de Informações, Perfil e Segurança */}
+        {/* Grid de Informações, Perfil, Linha do Tempo e Segurança */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 lg:col-span-1 shadow-lg">
-            <h3 className="text-base sm:text-lg font-bold">Informações</h3>
-            <div className="space-y-3 text-xs">
-              <div>
-                <span className="text-gray-500 block mb-1">Nome Cadastrado</span>
-                <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
-                  {userName}
-                </span>
+          <div className="space-y-6 lg:col-span-1">
+            {/* Bloco de Informações */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
+              <h3 className="text-base sm:text-lg font-bold">Informações</h3>
+              <div className="space-y-3 text-xs">
+                <div>
+                  <span className="text-gray-500 block mb-1">Nome Cadastrado</span>
+                  <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                    {userName}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">E-mail</span>
+                  <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                    {userEmail}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">Dispositivo / Navegador</span>
+                  <span className="text-blue-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                    {deviceInfo}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block mb-1">Último Acesso</span>
+                  <span className="text-emerald-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
+                    {lastSignIn}
+                  </span>
+                </div>
               </div>
+            </div>
+
+            {/* Linha do Tempo de Atividades Recentes */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
               <div>
-                <span className="text-gray-500 block mb-1">E-mail</span>
-                <span className="text-white font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
-                  {userEmail}
-                </span>
+                <h3 className="text-base font-bold">Atividades Recentes ⏳</h3>
+                <p className="text-[11px] text-gray-400 mt-0.5">Seus últimos passos na trilha.</p>
               </div>
-              <div>
-                <span className="text-gray-500 block mb-1">Dispositivo / Navegador</span>
-                <span className="text-blue-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
-                  {deviceInfo}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-500 block mb-1">Último Acesso</span>
-                <span className="text-emerald-400 font-medium bg-gray-800/60 px-3 py-2 rounded-lg block border border-gray-800 truncate">
-                  {lastSignIn}
-                </span>
-              </div>
+
+              {recentActivities.length === 0 ? (
+                <p className="text-xs text-gray-500 italic py-2">Nenhuma atividade recente registrada ainda. Conclua sua primeira aula!</p>
+              ) : (
+                <div className="space-y-3 pt-1 relative before:absolute before:inset-0 before:left-3 before:w-0.5 before:bg-gray-800">
+                  {recentActivities.map((act, idx) => (
+                    <div key={idx} className="relative flex items-start gap-3 group">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center text-[10px] shrink-0 z-10 shadow-sm">
+                        ✓
+                      </div>
+                      <div className="bg-gray-950/60 border border-gray-800/80 rounded-xl p-2.5 flex-1 space-y-0.5">
+                        <div className="flex items-center justify-between text-[10px] text-gray-500">
+                          <span className="uppercase">{act.lesson_id}</span>
+                          <span>{new Date(act.updated_at).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                        <p className="text-xs font-semibold text-white">Aula concluída na trilha</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
