@@ -11,6 +11,7 @@ export default function PainelPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [lastSignIn, setLastSignIn] = useState<string | null>(null)
   const [deviceInfo, setDeviceInfo] = useState<string>('Detectando...')
+  const [completedCount, setCompletedCount] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -33,9 +34,10 @@ export default function PainelPage() {
   const [deleteError, setDeleteError] = useState('')
 
   const router = useRouter()
+  const totalLessonsCount = 14 // Total de aulas do Módulo 1
 
   useEffect(() => {
-    async function getUser() {
+    async function getUserAndProgress() {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (!session) {
@@ -55,6 +57,18 @@ export default function PainelPage() {
           setLastSignIn('Sessão ativa recente')
         }
 
+        // Buscar progresso de aulas concluídas do usuário no Supabase
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('lesson_id, completed')
+          .eq('user_id', session.user.id)
+
+        if (progressData) {
+          const count = progressData.filter(item => item.completed).length
+          setCompletedCount(count)
+        }
+
+        // Dispositivo e Navegador
         const ua = navigator.userAgent
         let browser = 'Navegador Desconhecido'
         let os = 'Dispositivo Desconhecido'
@@ -77,7 +91,7 @@ export default function PainelPage() {
       }
     }
 
-    getUser()
+    getUserAndProgress()
   }, [router])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -129,8 +143,14 @@ export default function PainelPage() {
 
       if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
 
-      localStorage.removeItem('codelab_user_xp')
-      localStorage.removeItem('codelab_visitante_desafio_1')
+      // Limpeza de chaves locais do Codelab
+      if (typeof window !== 'undefined') {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith('codelab_')) {
+            localStorage.removeItem(key)
+          }
+        })
+      }
 
       await supabase.auth.signOut()
       setDeleteLoading(false)
@@ -143,7 +163,13 @@ export default function PainelPage() {
   }
 
   const handleLogout = async () => {
-    localStorage.removeItem('codelab_user_xp')
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
     await supabase.auth.signOut()
     router.push('/login')
   }
@@ -169,9 +195,9 @@ export default function PainelPage() {
           <div className="flex items-center gap-3">
             <Link 
               href="/dashboard" 
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700/60 rounded-lg text-xs font-medium text-emerald-400 transition shrink-0 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-xl text-xs font-semibold text-emerald-400 transition shrink-0 cursor-pointer"
             >
-              <span>Voltar para os estudos</span>
+              <span>⚡ Voltar para a Trilha de Aulas</span>
             </Link>
           </div>
 
@@ -224,17 +250,35 @@ export default function PainelPage() {
 
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+        
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Painel de Controle 🚀</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações e a segurança da sua conta, {userName}.</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações, segurança e acompanhe seu progresso na trilha, {userName}.</p>
           </div>
-          <div className="flex items-center self-start md:self-auto">
+          <div className="flex items-center self-start md:self-auto gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               Sessão Autenticada
             </span>
           </div>
+        </div>
+
+        {/* Card de Progresso Geral na Trilha */}
+        <div className="bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Módulo 1 • JavaScript do Zero ao Avançado</span>
+            <h3 className="text-base sm:text-lg font-bold text-white">Seu Desempenho na Trilha de Aulas</h3>
+            <p className="text-xs text-gray-300">
+              Você já concluiu <strong className="text-emerald-400">{completedCount} de {totalLessonsCount}</strong> aulas oficiais do curso.
+            </p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="px-5 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl transition text-center cursor-pointer shrink-0 shadow-lg shadow-emerald-500/20"
+          >
+            Continuar Estudos ⚡
+          </Link>
         </div>
 
         {/* Grid de Informações e Segurança */}
@@ -372,7 +416,7 @@ export default function PainelPage() {
         </div>
       </main>
 
-      {/* Modal Fixo e Centralizado na Tela (Travado e sem rolar junto) */}
+      {/* Modal Fixo e Centralizado na Tela */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-3xl space-y-4 shadow-2xl animate-fadeIn my-auto">
