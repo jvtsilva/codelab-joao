@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import ThemeToggle from '@/components/ThemeToggle' // <--- Importa o botão de alternar tema
 
 interface LeaderboardUser {
   user_id: string
@@ -74,43 +73,41 @@ export default function RankingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white flex flex-col selection:bg-amber-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn transition-colors duration-200">
+    <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-amber-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
       
       {/* Header Responsivo */}
-      <header className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
+          <div className="w-9 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
             🏆
           </div>
           <h1 className="font-bold text-sm sm:text-base tracking-wide truncate">
-            Ranking <span className="text-amber-600 dark:text-amber-400 font-normal">Codelab</span>
+            Ranking <span className="text-amber-400 font-normal">Codelab</span>
           </h1>
         </div>
 
         <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <ThemeToggle />
-          <Link href="/desafios" className="px-4 py-2 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-800 font-semibold text-xs rounded-xl transition">
+          <Link href="/desafios" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition">
             ⚔️ Arena
           </Link>
-          <Link href="/dashboard" className="px-4 py-2 bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-gray-800 font-semibold text-xs rounded-xl transition">
+          <Link href="/dashboard" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition">
             📖 Trilha
           </Link>
         </div>
 
         <div className="flex sm:hidden items-center gap-2">
-          <ThemeToggle />
-          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-amber-600 dark:text-amber-400 font-bold">
+          <button onClick={() => setMenuOpen(!menuOpen)} className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-amber-400 font-bold">
             {menuOpen ? '✕' : '☰'}
           </button>
         </div>
       </header>
 
       {menuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
-          <Link href="/desafios" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300">
+        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
+          <Link href="/desafios" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300">
             ⚔️ Ir para a Arena
           </Link>
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-300">
+          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300">
             📖 Voltar para a Trilha
           </Link>
         </div>
@@ -119,16 +116,16 @@ export default function RankingPage() {
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 pb-20">
         
-        <div className="space-y-2.5 bg-gradient-to-r from-amber-500/10 via-white dark:via-gray-900 to-white dark:to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl text-center shadow-sm">
-          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">Placar de Líderes 🏆</span>
-          <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white tracking-tight">Os Melhores Programadores</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
+        <div className="space-y-2.5 bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl text-center shadow-sm">
+          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Placar de Líderes 🏆</span>
+          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Os Melhores Programadores</h2>
+          <p className="text-gray-300 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
             Veja quem está acumulando mais XP resolvendo desafios na Arena. Responda missões para garantir o seu lugar no pódio!
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-xl">
-          <div className="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider">
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="p-4 sm:p-5 border-b border-gray-800 flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider">
             <span>Posição / Aluno</span>
             <span>XP Acumulado</span>
           </div>
@@ -139,35 +136,35 @@ export default function RankingPage() {
             </div>
           ) : ranking.length === 0 ? (
             <div className="p-8 text-center space-y-3">
-              <p className="text-xs text-gray-500 dark:text-gray-400">Ainda não há pontuações registradas no ranking.</p>
+              <p className="text-xs text-gray-400">Ainda não há pontuações registradas no ranking.</p>
               <Link href="/desafios" className="inline-block px-4 py-2 bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl">
                 Seja o primeiro a pontuar ⚡
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800/60">
+            <div className="divide-y divide-gray-800/60">
               {ranking.map((user, index) => {
                 const position = index + 1
-                let badgeColor = 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                let badgeColor = 'bg-gray-800 text-gray-300 border-gray-700'
                 if (position === 1) badgeColor = 'bg-amber-500 text-gray-950 border-amber-400 font-black'
                 if (position === 2) badgeColor = 'bg-gray-300 text-gray-950 border-gray-200 font-bold'
                 if (position === 3) badgeColor = 'bg-amber-700 text-white border-amber-600 font-bold'
 
                 return (
-                  <div key={user.user_id} className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-gray-50 dark:hover:bg-gray-850 transition">
+                  <div key={user.user_id} className="p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-gray-850 transition">
                     <div className="flex items-center gap-3.5 min-w-0">
                       <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs shrink-0 border ${badgeColor}`}>
                         {position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `#${position}`}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="font-bold text-xs sm:text-sm text-gray-900 dark:text-white truncate">
+                        <h4 className="font-bold text-xs sm:text-sm text-white truncate">
                           {user.name}
                         </h4>
                         <p className="text-[11px] text-gray-400 truncate">Membro ativo da Arena</p>
                       </div>
                     </div>
 
-                    <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold text-xs rounded-xl shrink-0">
+                    <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-xs rounded-xl shrink-0">
                       ⭐ {user.total_xp} XP
                     </div>
                   </div>
