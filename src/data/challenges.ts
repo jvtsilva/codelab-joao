@@ -1,17 +1,15 @@
 export interface ArenaChallenge {
-  id: string // Ex: 'challenge-1', 'challenge-2'
-  slug: string // URL amigável: '1', '2', '3'...
-  number: string // Ex: '#1', '#2'
+  id: string
+  slug: string
+  number: string
   title: string
   subtitle: string
   difficulty: 'Iniciante' | 'Fácil' | 'Médio' | 'Difícil'
   xp: number
   type: 'quiz' | 'code'
   prompt: string
-  // Para desafios de múltipla escolha (quiz)
   options?: { id: string; text: string }[]
   correctOptionId?: string
-  // Para desafios de código (code)
   placeholder?: string
   validationPattern?: RegExp
   requiredKeyword?: string
@@ -20,6 +18,7 @@ export interface ArenaChallenge {
 }
 
 export const ARENA_CHALLENGES: ArenaChallenge[] = [
+  // --- MÓDULO 1: Fundamentos & Lógica ---
   {
     id: 'challenge-1',
     slug: '1',
@@ -67,49 +66,35 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     difficulty: 'Fácil',
     xp: 40,
     type: 'code',
-    prompt: 'Utilize o comando `console.log()` para exibir a frase `"Olá, Arena!"` no terminal.',
-    placeholder: '// Escreva seu código aqui...',
+    prompt: 'Utilize o comando `console.log()` para exibir a frase `"Olá, Mundo!"` no terminal.',
+    placeholder: '',
     validationPattern: /console\.log\s*\(\s*['"`].+['"`]\s*\)\s*;?/i,
     requiredKeyword: 'console.log',
     successMessage: '🎉 Excelente! Seu comando `console.log()` foi executado com sucesso.',
     errorMessage: '❌ Faltou usar `console.log("sua mensagem")` com o texto entre aspas.'
   },
+
+  // --- MÓDULO 2: Variáveis & Operadores ---
   {
     id: 'challenge-4',
     slug: '4',
     number: '#4',
     title: 'Armazenando a Idade do Usuário',
-    subtitle: 'Prática de Variável Numérica',
+    subtitle: 'Prática de Variável Numérica • Aula 5',
     difficulty: 'Fácil',
     xp: 50,
     type: 'code',
-    prompt: 'Escreva um código em JavaScript declarando uma constante chamada `idade` contendo um valor numérico (ex: `const idade = 25;`).',
-    placeholder: '// Declare sua constante aqui...',
-    validationPattern: /const\s+idade\s*=\s*\d+\s*;?/i,
+    prompt: 'Escreva um código em JavaScript declarando uma constante chamada `idade` contendo o valor numérico `25`.',
+    placeholder: '',
+    validationPattern: /const\s+idade\s*=\s*25\s*;?/i,
     requiredKeyword: 'idade',
-    successMessage: '🎉 Parabéns! Resposta correta. Variável "idade" criada com sucesso na Arena!',
-    errorMessage: '❌ Incorreto. Lembre-se de utilizar a palavra-chave `const` e nomear a variável exatamente como `idade`.'
+    successMessage: '🎉 Parabéns! Variável "idade" criada com sucesso.',
+    errorMessage: '❌ Incorreto. Utilize a palavra-chave `const idade = 25;`.'
   },
   {
     id: 'challenge-5',
     slug: '5',
     number: '#5',
-    title: 'Calculadora Rápida no Console',
-    subtitle: 'Operações Básicas no Terminal',
-    difficulty: 'Fácil',
-    xp: 60,
-    type: 'code',
-    prompt: 'Peça para o JavaScript calcular e exibir no console a soma de `15 + 25` usando `console.log()`.',
-    placeholder: '// Faça a soma dentro do console.log...',
-    validationPattern: /console\.log\s*\(\s*15\s*\+\s*25\s*\)\s*;?/i,
-    requiredKeyword: '15 + 25',
-    successMessage: '🎉 Perfeito! O JavaScript calculou e exibiu 40 no console.',
-    errorMessage: '❌ Quase! Escreva `console.log(15 + 25)` sem aspas para o computador realizar a soma.'
-  },
-  {
-    id: 'challenge-6',
-    slug: '6',
-    number: '#6',
     title: 'Constantes vs Variáveis Reutilizáveis',
     subtitle: 'Memória e Variáveis • Aula 5',
     difficulty: 'Fácil',
@@ -126,15 +111,15 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     errorMessage: '❌ Incorreto. Lembre-se: `const` vem de constante, ou seja, seu valor não pode ser reatribuído.'
   },
   {
-    id: 'challenge-7',
-    slug: '7',
-    number: '#7',
+    id: 'challenge-6',
+    slug: '6',
+    number: '#6',
     title: 'Operador de Comparação Estrita',
     subtitle: 'Lógica Relacional • Aula 8',
     difficulty: 'Médio',
     xp: 70,
     type: 'quiz',
-    prompt: 'Por que recomendamos utilizar o operador estrito de igualdade tripla (`===`) em vez de apenas dois sinais de igual (`==`) em JavaScript?',
+    prompt: 'Por que recomendamos utilizar o operador estrito de igualdade tripla (`===`) em vez de apenas dois sinais de igual (`==`)?',
     options: [
       { id: 'a', text: 'a) Porque o `===` verifica tanto se os valores são iguais quanto se os tipos de dados são idênticos.' },
       { id: 'b', text: 'b) Porque o `==` gera erros de vírus no console da web.' },
@@ -144,52 +129,401 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     successMessage: '🎉 Mandou muito bem! O operador `===` evita conversões automáticas indesejadas de tipo.',
     errorMessage: '❌ Quase! O `===` garante rigor total comparando tanto o valor quanto o tipo do dado.'
   },
+
+  // --- MÓDULO 3: Condicionais, Loops & Arrays ---
   {
-    id: 'challenge-8',
-    slug: '8',
-    number: '#8',
+    id: 'challenge-7',
+    slug: '7',
+    number: '#7',
     title: 'Tomando Decisões com If / Else',
     subtitle: 'Estrutura Condicional • Aula 10',
     difficulty: 'Médio',
     xp: 80,
     type: 'code',
-    prompt: 'Escreva um bloco condicional simples utilizando `if` que verifique se uma variável chamada `pontos` é maior que 10, exibindo `"Passou de fase"` no console caso seja verdadeiro.',
-    placeholder: '// Escreva sua estrutura condicional...',
+    prompt: 'Escreva um bloco condicional simples utilizando `if` que verifique se uma variável chamada `pontos` é maior que 10, exibindo `"Passou de fase"` no console.',
+    placeholder: '',
     validationPattern: /if\s*\(\s*pontos\s*>\s*10\s*\)\s*\{\s*console\.log\s*\(\s*['"`].+['"`]\s*\)\s*;?\s*\}/i,
     requiredKeyword: 'if',
     successMessage: '🎉 Perfeito! Sua estrutura condicional avaliou a pontuação perfeitamente.',
     errorMessage: '❌ Verifique a sintaxe: utilize `if (pontos > 10) { console.log("sua mensagem"); }`.'
   },
   {
-    id: 'challenge-9',
-    slug: '9',
-    number: '#9',
+    id: 'challenge-8',
+    slug: '8',
+    number: '#8',
     title: 'O Loop For Controlado',
     subtitle: 'Laços de Repetição • Aula 12',
     difficulty: 'Médio',
     xp: 90,
     type: 'code',
     prompt: 'Escreva um loop `for` padrão em JavaScript que inicialize um contador `i = 1` e execute enquanto `i <= 3`, incrementando `i++`. Dentro do loop, coloque um `console.log(i)`.',
-    placeholder: '// Monte seu loop for...',
+    placeholder: '',
     validationPattern: /for\s*\(\s*let\s+i\s*=\s*1\s*;\s*i\s*<=\s*3\s*;\s*i\+\+\s*\)\s*\{\s*console\.log\s*\(\s*i\s*\)\s*;?\s*\}/i,
     requiredKeyword: 'for',
     successMessage: '🎉 Espetacular! O loop `for` automatizou a contagem em segundos.',
     errorMessage: '❌ Certifique-se de seguir o padrão do cabeçalho do `for` com inicialização, condição e incremento.'
   },
   {
-    id: 'challenge-10',
-    slug: '10',
-    number: '#10',
+    id: 'challenge-9',
+    slug: '9',
+    number: '#9',
     title: 'Manipulando Arrays (.push)',
     subtitle: 'Coleções de Dados • Aula 14',
     difficulty: 'Difícil',
     xp: 100,
     type: 'code',
-    prompt: 'Dado um array existente chamado `inventario`, utilize o método `.push()` para adicionar a string `"Escudo"` ao final dele e imprima o array atualizado no console.',
-    placeholder: '// Adicione o item e exiba no console...',
-    validationPattern: /inventario\.push\s*\(\s*['"`]Escudo['"`]\s*\)\s*;?.*console\.log\s*\(\s*inventario\s*\)/i,
+    prompt: 'Dado um array existente chamado `inventario`, utilize o método `.push()` para adicionar a string `"Escudo"` ao final dele.',
+    placeholder: '',
+    validationPattern: /inventario\.push\s*\(\s*['"`]Escudo['"`]\s*\)\s*;?/i,
     requiredKeyword: '.push(',
-    successMessage: '🎉 Desafio Mestre Concluído! O método `.push()` adicionou o item com sucesso ao array.',
-    errorMessage: '❌ Lembre-se de usar `inventario.push("Escudo")` e exibir o array no console.'
+    successMessage: '🎉 Desafio Concluído! O método `.push()` adicionou o item com sucesso ao array.',
+    errorMessage: '❌ Lembre-se de usar `inventario.push("Escudo");`.'
+  },
+  {
+    id: 'challenge-10',
+    slug: '10',
+    number: '#10',
+    title: 'Criando sua Primeira Função',
+    subtitle: 'Funções e Parâmetros • Aula 18',
+    difficulty: 'Fácil',
+    xp: 60,
+    type: 'code',
+    prompt: 'Escreva uma função chamada `somar` que receba dois parâmetros `a` e `b` e retorne a soma deles (`return a + b;`).',
+    placeholder: '',
+    validationPattern: /function\s+somar\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*return\s+a\s*\+\s*b\s*;?\s*\}/i,
+    requiredKeyword: 'function somar',
+    successMessage: '🎉 Show! Função criada com sucesso.',
+    errorMessage: '❌ Verifique a sintaxe: `function somar(a, b) { return a + b; }`.'
+  },
+  {
+    id: 'challenge-11',
+    slug: '11',
+    number: '#11',
+    title: 'Selecionando Elementos do DOM',
+    subtitle: 'Interface Web • Aula 22',
+    difficulty: 'Médio',
+    xp: 80,
+    type: 'code',
+    prompt: 'Utilize o método nativo do navegador para selecionar um elemento HTML pelo seu ID `"meu-botao"` e guarde-o em uma constante `botao`.',
+    placeholder: '',
+    validationPattern: /const\s+botao\s*=\s*document\.getElementById\s*\(\s*['"`]meu-botao['"`]\s*\)\s*;?/i,
+    requiredKeyword: 'document.getElementById',
+    successMessage: '🎉 Muito bem! O `getElementById` é a porta de entrada para interagir com a página.',
+    errorMessage: '❌ Lembre-se de usar `const botao = document.getElementById("meu-botao");`.'
+  },
+  {
+    id: 'challenge-12',
+    slug: '12',
+    number: '#12',
+    title: 'Ouvindo Cliques com Event Listener',
+    subtitle: 'Interatividade Web • Aula 24',
+    difficulty: 'Médio',
+    xp: 85,
+    type: 'code',
+    prompt: 'Adicione um ouvinte de eventos de clique (`addEventListener`) em um botão chamado `botao` para executar uma função que exibe `"Clicado!"` no console.',
+    placeholder: '',
+    validationPattern: /botao\.addEventListener\s*\(\s*['"`]click['"`]\s*,\s*(?:\(\)\s*=>|function\s*\(\)\s*)\s*\{[\s\S]*console\.log\s*\(\s*['"`].*['"`]\s*\)[\s\S]*\}\s*\)\s*;?/i,
+    requiredKeyword: 'addEventListener',
+    successMessage: '🎉 Fantástico! Eventos de clique tornam aplicações web dinâmicas.',
+    errorMessage: '❌ Certifique-se de usar `botao.addEventListener("click", () => { ... })`.'
+  },
+  {
+    id: 'challenge-13',
+    slug: '13',
+    number: '#13',
+    title: 'Salvando no LocalStorage',
+    subtitle: 'Persistência Local • Aula 28',
+    difficulty: 'Difícil',
+    xp: 95,
+    type: 'code',
+    prompt: 'Utilize o objeto global `localStorage` para salvar um dado com a chave `"usuario"` e o valor `"Joao"`.',
+    placeholder: '',
+    validationPattern: /localStorage\.setItem\s*\(\s*['"`]usuario['"`]\s*,\s*['"`]Joao['"`]\s*\)\s*;?/i,
+    requiredKeyword: 'localStorage.setItem',
+    successMessage: '🎉 Show de bola! O localStorage garante que os dados fiquem salvos.',
+    errorMessage: '❌ Use o método `localStorage.setItem("usuario", "Joao");`.'
+  },
+
+  // --- MÓDULO 4: Assincronicidade & APIs ---
+  {
+    id: 'challenge-14',
+    slug: '14',
+    number: '#14',
+    title: 'Consumindo APIs com Fetch',
+    subtitle: 'Requisições Assíncronas • Aula 30',
+    difficulty: 'Difícil',
+    xp: 110,
+    type: 'code',
+    prompt: 'Escreva uma chamada assíncrona utilizando `fetch` para buscar dados de uma URL genérica `"https://api.dados.com/item"`.',
+    placeholder: '',
+    validationPattern: /await\s+fetch\s*\(\s*['"`]https:\/\/api\.dados\.com\/item['"`]\s*\)/i,
+    requiredKeyword: 'fetch',
+    successMessage: '🎉 Excelente! O `fetch` conectado ao `await` abre portas para consumir APIs.',
+    errorMessage: '❌ Lembre-se de utilizar `await fetch("https://api.dados.com/item");`.'
+  },
+  {
+    id: 'challenge-15',
+    slug: '15',
+    number: '#15',
+    title: 'Tratando Erros com Try / Catch',
+    subtitle: 'Segurança de Código • Aula 31',
+    difficulty: 'Difícil',
+    xp: 100,
+    type: 'code',
+    prompt: 'Estruture um bloco de tratamento de exceções contendo um `try` que lance um erro com `throw new Error("Falha!")` e um `catch (erro)` que imprima a mensagem no console.',
+    placeholder: '',
+    validationPattern: /try\s*\{\s*throw\s+new\s+Error\s*\(\s*['"`].+['"`]\s*\)\s*;?\s*\}\s*catch\s*\(\s*\w+\s*\)\s*\{\s*console\.log\s*\([\s\S]*\)\s*;?\s*\}/i,
+    requiredKeyword: 'try',
+    successMessage: '🎉 Perfeito! O bloco try/catch protege seu app contra falhas inesperadas.',
+    errorMessage: '❌ Verifique a estrutura básica de `try { throw new Error(...); } catch (err) { console.log(...); }`.'
+  },
+
+  // --- MÓDULO 5: React & Projeto Final ---
+  {
+    id: 'challenge-16',
+    slug: '16',
+    number: '#16',
+    title: 'O Conceito de JSX no React',
+    subtitle: 'Introdução ao React • Aula 33',
+    difficulty: 'Iniciante',
+    xp: 50,
+    type: 'quiz',
+    prompt: 'O que o JSX permite que o desenvolvedor faça dentro do ecossistema React?',
+    options: [
+      { id: 'a', text: 'a) Escrever marcações visuais semelhantes ao HTML diretamente dentro do código JavaScript.' },
+      { id: 'b', text: 'b) Compilar arquivos de áudio MP3 em servidores Node.js.' },
+      { id: 'c', text: 'c) Criar tabelas relacionais em bancos de dados SQL.' }
+    ],
+    correctOptionId: 'a',
+    successMessage: '🎉 Correto! O JSX unifica a lógica do JavaScript com a estrutura visual do HTML.',
+    errorMessage: '❌ Incorreto. O JSX é a sintaxe visual do React.'
+  },
+  {
+    id: 'challenge-17',
+    slug: '17',
+    number: '#17',
+    title: 'Passando Dados com Props',
+    subtitle: 'Componentes Reutilizáveis • Aula 34',
+    difficulty: 'Médio',
+    xp: 80,
+    type: 'quiz',
+    prompt: 'Qual é o objetivo principal das `props` passadas para um componente funcional no React?',
+    options: [
+      { id: 'a', text: 'a) Destruir o componente pai após a renderização.' },
+      { id: 'b', text: 'b) Enviar dados e propriedades de um componente pai para um componente filho, tornando-o reutilizável.' },
+      { id: 'c', text: 'c) Substituir o protocolo HTTPS por HTTP.' }
+    ],
+    correctOptionId: 'b',
+    successMessage: '🎉 Exato! As props funcionam como parâmetros que alimentam os componentes.',
+    errorMessage: '❌ Incorreto. Lembre-se que props transportam dados para reutilização de componentes.'
+  },
+  {
+    id: 'challenge-18',
+    slug: '18',
+    number: '#18',
+    title: 'Reatividade com useState',
+    subtitle: 'Gerenciamento de Estado • Aula 35',
+    difficulty: 'Difícil',
+    xp: 120,
+    type: 'code',
+    prompt: 'Escreva a declaração padrão de um hook `useState` inicializando uma variável de estado chamada `contador` com o valor numérico `0` e sua função modificadora `setContador`.',
+    placeholder: '',
+    validationPattern: /const\s+\[\s*contador\s*,\s*setContador\s*\]\s*=\s*useState\s*\(\s*0\s*\)\s*;?/i,
+    requiredKeyword: 'useState',
+    successMessage: '🎉 Parabéns! Você dominou a reatividade básica do React!',
+    errorMessage: '❌ A sintaxe esperada é `const [contador, setContador] = useState(0);`.'
+  },
+  {
+    id: 'challenge-19',
+    slug: '19',
+    number: '#19',
+    title: 'O Hook useEffect',
+    subtitle: 'Ciclo de Vida e Efeitos • Aula 35',
+    difficulty: 'Difícil',
+    xp: 125,
+    type: 'code',
+    prompt: 'Escreva a estrutura básica de um `useEffect` recebendo uma função de callback vazia e um array de dependências vazio `[]`.',
+    placeholder: '',
+    validationPattern: /useEffect\s*\(\s*\(\s*\)\s*=>\s*\{\s*\}\s*,\s*\[\s*\]\s*\)\s*;?/i,
+    requiredKeyword: 'useEffect',
+    successMessage: '🎉 Espetacular! O useEffect controla os efeitos colaterais nos componentes.',
+    errorMessage: '❌ Siga a estrutura padrão: `useEffect(() => {}, []);`.'
+  },
+  {
+    id: 'challenge-20',
+    slug: '20',
+    number: '#20',
+    title: 'O Grande Projeto Final • App de Clima',
+    subtitle: 'Mestria Codelab João • Aula 36',
+    difficulty: 'Difícil',
+    xp: 200,
+    type: 'code',
+    prompt: 'Escreva um componente funcional React chamado `AppClima` que utilize o hook `useState` para armazenar o valor de um input de cidade e retorne um formulário JSX.',
+    placeholder: '',
+    validationPattern: /function\s+AppClima\s*\(\s*\)\s*\{\s*const\s+\[[\s\S]*\]\s*=\s*useState[\s\S]*return\s*\(?\s*<form[\s\S]*<\/\s*form>\s*\)?\s*\}/i,
+    requiredKeyword: 'useState',
+    successMessage: '🏆 LENDÁRIO! Você concluiu todos os desafios oficiais baseados exatamente na trilha do Codelab João!',
+    errorMessage: '❌ Certifique-se de declarar a função AppClima, instanciar o useState e retornar um formulário JSX.'
+  },
+  {
+    id: 'challenge-21',
+    slug: '21',
+    number: '#21',
+    title: 'Operador Lógico E (&&)',
+    subtitle: 'Lógica Booleana • Módulo 2',
+    difficulty: 'Fácil',
+    xp: 50,
+    type: 'code',
+    prompt: 'Escreva uma condição utilizando o operador lógico E (`&&`) para verificar se `logado` é verdadeiro e `isAdmin` é verdadeiro.',
+    placeholder: '',
+    validationPattern: /logado\s*&&\s*isAdmin/i,
+    requiredKeyword: '&&',
+    successMessage: '🎉 Show! O operador && exige que todas as condições sejam verdadeiras.',
+    errorMessage: '❌ Utilize `logado && isAdmin`.'
+  },
+  {
+    id: 'challenge-22',
+    slug: '22',
+    number: '#22',
+    title: 'Operador Lógico OU (||)',
+    subtitle: 'Lógica Booleana • Módulo 2',
+    difficulty: 'Fácil',
+    xp: 50,
+    type: 'code',
+    prompt: 'Escreva uma condição utilizando o operador lógico OU (`||`) para verificar se `temCartao` ou `temDinheiro` é verdadeiro.',
+    placeholder: '',
+    validationPattern: /temCartao\s*\|\|\s*temDinheiro/i,
+    requiredKeyword: '||',
+    successMessage: '🎉 Perfeito! O operador || exige que pelo menos uma condição seja verdadeira.',
+    errorMessage: '❌ Utilize `temCartao || temDinheiro`.'
+  },
+  {
+    id: 'challenge-23',
+    slug: '23',
+    number: '#23',
+    title: 'Tamanho de Strings (.length)',
+    subtitle: 'Manipulação de Textos • Módulo 3',
+    difficulty: 'Fácil',
+    xp: 50,
+    type: 'code',
+    prompt: 'Utilize a propriedade `.length` em uma string chamada `senha` para verificar quantos caracteres ela possui, guardando em uma constante `tamanho`.',
+    placeholder: '',
+    validationPattern: /const\s+tamanho\s*=\s*senha\.length\s*;?/i,
+    requiredKeyword: '.length',
+    successMessage: '🎉 Muito bem! A propriedade length conta os caracteres de qualquer texto.',
+    errorMessage: '❌ Utilize `const tamanho = senha.length;`.'
+  },
+  {
+    id: 'challenge-24',
+    slug: '24',
+    number: '#24',
+    title: 'Convertendo para Maiúsculas (.toUpperCase)',
+    subtitle: 'Manipulação de Textos • Módulo 3',
+    difficulty: 'Fácil',
+    xp: 60,
+    type: 'code',
+    prompt: 'Utilize o método `.toUpperCase()` em uma string chamada `cidade` para deixá-la toda em letras maiúsculas, armazenando em `cidadeMaiuscula`.',
+    placeholder: '',
+    validationPattern: /const\s+cidadeMaiuscula\s*=\s*cidade\.toUpperCase\s*\(\s*\)\s*;?/i,
+    requiredKeyword: '.toUpperCase()',
+    successMessage: '🎉 Show! O toUpperCase padroniza textos para letras maiúsculas.',
+    errorMessage: '❌ Utilize `const cidadeMaiuscula = cidade.toUpperCase();`.'
+  },
+  {
+    id: 'challenge-25',
+    slug: '25',
+    number: '#25',
+    title: 'Condicionais Múltiplas (If / Else If)',
+    subtitle: 'Tomada de Decisão • Módulo 3',
+    difficulty: 'Médio',
+    xp: 85,
+    type: 'code',
+    prompt: 'Escreva uma estrutura condicional utilizando `if` e `else if` para verificar se `nota >= 7` (exibindo `"Aprovado"`) ou caso contrário verificando se `nota >= 5` (exibindo `"Recuperação"`).',
+    placeholder: '',
+    validationPattern: /if\s*\(\s*nota\s*>\s*=\s*7\s*\)\s*\{[\s\S]*\}\s*else\s+if\s*\(\s*nota\s*>\s*=\s*5\s*\)\s*\{/i,
+    requiredKeyword: 'else if',
+    successMessage: '🎉 Perfeito! O else if permite testar múltiplos cenários em sequência.',
+    errorMessage: '❌ Verifique a estrutura do if / else if.'
+  },
+  {
+    id: 'challenge-26',
+    slug: '26',
+    number: '#26',
+    title: 'Encontrando Elementos por Classe (querySelector)',
+    subtitle: 'Manipulação do DOM • Módulo 3',
+    difficulty: 'Médio',
+    xp: 80,
+    type: 'code',
+    prompt: 'Utilize o método `document.querySelector()` para selecionar o primeiro elemento com a classe CSS `".meu-botao"` e armazene em uma constante `elemento`.',
+    placeholder: '',
+    validationPattern: /const\s+elemento\s*=\s*document\.querySelector\s*\(\s*['"`]\.meu-botao['"`]\s*\)\s*;?/i,
+    requiredKeyword: 'document.querySelector',
+    successMessage: '🎉 Show! O querySelector é extremamente versátil para buscar seletores CSS.',
+    errorMessage: '❌ Utilize `const elemento = document.querySelector(".meu-botao");`.'
+  },
+  {
+    id: 'challenge-27',
+    slug: '27',
+    number: '#27',
+    title: 'Prevenindo o Recarregamento (preventDefault)',
+    subtitle: 'Eventos de Formulário • Módulo 3',
+    difficulty: 'Médio',
+    xp: 85,
+    type: 'code',
+    prompt: 'Dentro de uma função de evento de formulário que recebe o parâmetro `e`, chame o método `e.preventDefault()` para impedir o recarregamento padrão da página.',
+    placeholder: '',
+    validationPattern: /e\.preventDefault\s*\(\s*\)\s*;?/i,
+    requiredKeyword: 'preventDefault',
+    successMessage: '🎉 Muito bem! O preventDefault é obrigatório ao lidar com submits em formulários web.',
+    errorMessage: '❌ Utilize `e.preventDefault();`.'
+  },
+  {
+    id: 'challenge-28',
+    slug: '28',
+    number: '#28',
+    title: 'Lendo o Response em JSON no Fetch',
+    subtitle: 'Requisições Assíncronas • Módulo 4',
+    difficulty: 'Difícil',
+    xp: 110,
+    type: 'code',
+    prompt: 'Após realizar um `await fetch(...)` guardado em `res`, escreva a linha seguinte utilizando `await res.json()` para converter os dados brutos em um objeto JavaScript.',
+    placeholder: '',
+    validationPattern: /const\s+dados\s*=\s*await\s+res\.json\s*\(\s*\)\s*;?/i,
+    requiredKeyword: 'res.json()',
+    successMessage: '🎉 Excelente! O método .json() traduz a resposta da API para um formato legível.',
+    errorMessage: '❌ Utilize `const dados = await res.json();`.'
+  },
+  {
+    id: 'challenge-29',
+    slug: '29',
+    number: '#29',
+    title: 'Renderizando Variáveis no JSX do React',
+    subtitle: 'Introdução ao React • Módulo 5',
+    difficulty: 'Fácil',
+    xp: 60,
+    type: 'code',
+    prompt: 'Dentro de um elemento JSX no React, utilize chaves `{}` para exibir o valor de uma variável chamada `nomeUsuario` dentro de um parágrafo `<p>`.',
+    placeholder: '',
+    validationPattern: /<\s*p\s*>\s*\{\s*nomeUsuario\s*\}\s*<\/\s*p\s*>/i,
+    requiredKeyword: '{',
+    successMessage: '🎉 Perfeito! As chaves no JSX permitem injetar variáveis e expressões JavaScript no HTML.',
+    errorMessage: '❌ Utilize `<p>{nomeUsuario}</p>`.'
+  },
+  {
+    id: 'challenge-30',
+    slug: '30',
+    number: '#30',
+    title: 'Atualizando o Estado com useState',
+    subtitle: 'Gerenciamento de Estado • Módulo 5',
+    difficulty: 'Difícil',
+    xp: 120,
+    type: 'code',
+    prompt: 'Utilize a função modificadora de estado `setContador` para atualizar o valor do contador somando `1` ao valor atual (`contador + 1`).',
+    placeholder: '',
+    validationPattern: /setContador\s*\(\s*contador\s*\+\s*1\s*\)\s*;?/i,
+    requiredKeyword: 'setContador',
+    successMessage: '🏆 Sensacional! Você chegou ao desafio 30 dominando perfeitamente a reatividade do Codelab João!',
+    errorMessage: '❌ Utilize `setContador(contador + 1);`.'
   }
+
 ]

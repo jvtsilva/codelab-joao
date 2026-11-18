@@ -127,6 +127,8 @@ export default function ArenaPage() {
 
       {/* Vitrine dos Desafios */}
       <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 pb-20">
+        
+        {/* Banner de Boas-vindas */}
         <div className="space-y-3 bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-5 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-2">
             <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Arena de Desafios • Modo Jogo ⚔️</span>
@@ -135,11 +137,28 @@ export default function ArenaPage() {
               Escolha um desafio abaixo para entrar na sala de missão, escrever código e acumular XP para subir no ranking.
             </p>
           </div>
-          <Link href="/ranking" className="px-4 py-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-extrabold text-xs rounded-xl transition flex items-center gap-2 shrink-0">
+          <Link href="/ranking" className="px-4 py-3 bg-amber-500/25 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-extrabold text-xs rounded-xl transition flex items-center gap-2 shrink-0 shadow-lg shadow-amber-500/10">
             🏆 Ver Ranking Geral
           </Link>
         </div>
 
+        {/* Barra de Progresso Geral da Arena */}
+        <div className="bg-gray-900/90 border border-gray-800 p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="text-xs text-gray-400 font-medium">Seu Progresso na Arena Oficial</span>
+            <p className="text-sm font-bold text-white">
+              {completedIds.length} de {ARENA_CHALLENGES.length} desafios concluídos
+            </p>
+          </div>
+          <div className="w-full sm:w-48 bg-gray-950 h-3 rounded-full overflow-hidden border border-gray-800 p-0.5">
+            <div 
+              className="bg-amber-500 h-full rounded-full transition-all duration-500 shadow-sm shadow-amber-500/50" 
+              style={{ width: `${(completedIds.length / ARENA_CHALLENGES.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Lista de Desafios */}
         <div className="space-y-3">
           {ARENA_CHALLENGES.map((challenge) => {
             const isDone = completedIds.includes(challenge.id)
