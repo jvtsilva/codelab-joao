@@ -14,6 +14,7 @@ export default function RankingPage() {
   const [ranking, setRanking] = useState<LeaderboardUser[]>([])
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchLeaderboard() {
@@ -53,6 +54,7 @@ export default function RankingPage() {
 
         if (sessionData?.session?.user) {
           currentUserId = sessionData.session.user.id
+          setUserId(currentUserId)
           const meta = sessionData.session.user.user_metadata
           currentUserName = meta?.full_name || meta?.name || 'Estudante Codelab'
         }
@@ -83,10 +85,22 @@ export default function RankingPage() {
     fetchLeaderboard()
   }, [])
 
+  const handleLogout = async () => {
+    if (typeof window !== 'undefined') {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('codelab_')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
+
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-amber-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
       
-      {/* Header Responsivo */}
+      {/* Header Padronizado e Unificado */}
       <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 bg-amber-500/20 text-amber-400 font-bold text-sm rounded-xl shrink-0 border border-amber-500/30 flex items-center justify-center select-none shadow-lg shadow-amber-500/10">
@@ -97,30 +111,53 @@ export default function RankingPage() {
           </h1>
         </div>
 
-        <div className="hidden sm:flex items-center gap-3 shrink-0">
-          <Link href="/desafios" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition">
-            ⚔️ Arena
-          </Link>
-          <Link href="/dashboard" className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white border border-gray-800 font-semibold text-xs rounded-xl transition">
-            📖 Trilha
-          </Link>
+        {/* Menu Desktop Unificado */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          <Link href="/dashboard" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">📖 Trilha</Link>
+          <Link href="/desafios" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">⚔️ Arena</Link>
+          <Link href="/ranking" className="px-3 py-2 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-xl text-xs font-semibold">🏆 Ranking</Link>
+          <Link href="/medalhas" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">🎖️ Medalhas</Link>
+          <Link href="/contato" className="px-3 py-2 bg-gray-900 hover:bg-gray-800 text-gray-300 border border-gray-800 rounded-xl text-xs font-semibold">💬 Contato</Link>
+          {userId ? (
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
+              <Link href="/painel" className="px-3.5 py-2 bg-gray-900 hover:bg-gray-800 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-semibold">⚙️ Painel</Link>
+              <button onClick={handleLogout} className="px-3.5 py-2 bg-red-500/10 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold cursor-pointer">Sair</button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-800">
+              <Link href="/login" className="px-3.5 py-2 bg-gray-900 text-gray-300 border border-gray-800 rounded-xl text-xs">Entrar</Link>
+              <Link href="/cadastro" className="px-3.5 py-2 bg-emerald-500 text-gray-950 font-extrabold rounded-xl text-xs">Criar Conta</Link>
+            </div>
+          )}
         </div>
 
-        <div className="flex sm:hidden items-center gap-2">
+        {/* Botão Hambúrguer Mobile */}
+        <div className="flex md:hidden items-center gap-2">
           <button onClick={() => setMenuOpen(!menuOpen)} className="p-2.5 bg-gray-900 border border-gray-800 rounded-xl text-amber-400 font-bold">
             {menuOpen ? '✕' : '☰'}
           </button>
         </div>
       </header>
 
+      {/* Menu Dropdown Mobile Unificado */}
       {menuOpen && (
-        <div className="sm:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2.5 z-50 shadow-2xl animate-fadeIn">
-          <Link href="/desafios" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300">
-            ⚔️ Ir para a Arena
-          </Link>
-          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300">
-            📖 Voltar para a Trilha
-          </Link>
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 space-y-2 z-50 shadow-2xl animate-fadeIn">
+          <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">📖 Ir para a Trilha</Link>
+          <Link href="/desafios" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">⚔️ Arena de Desafios</Link>
+          <Link href="/ranking" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-amber-500/30 rounded-xl text-xs text-amber-400 font-semibold">🏆 Ranking Geral</Link>
+          <Link href="/medalhas" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-semibold">🎖️ Painel de Medalhas</Link>
+          <Link href="/contato" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-gray-800 rounded-xl text-xs text-gray-300 font-medium">💬 Contato</Link>
+          {userId ? (
+            <>
+              <Link href="/painel" onClick={() => setMenuOpen(false)} className="block px-4 py-3 bg-gray-950 border border-emerald-500/30 rounded-xl text-xs text-emerald-400 font-medium">⚙️ Meu Painel</Link>
+              <button onClick={() => { setMenuOpen(false); handleLogout(); }} className="w-full text-left px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 font-semibold rounded-xl text-xs">🚪 Sair da Conta</button>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="px-4 py-3 bg-gray-950 border border-gray-800 text-center font-semibold rounded-xl text-xs text-gray-300">Entrar</Link>
+              <Link href="/cadastro" onClick={() => setMenuOpen(false)} className="px-4 py-3 bg-emerald-500 text-gray-950 text-center font-extrabold rounded-xl text-xs">Criar Conta</Link>
+            </div>
+          )}
         </div>
       )}
 
