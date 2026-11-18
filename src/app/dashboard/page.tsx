@@ -111,6 +111,10 @@ export default function DashboardPage() {
     }
   ]
 
+  // Lógica inteligente para encontrar a próxima aula a ser estudada
+  const allLessonsFlat = blocks.flatMap(b => b.lessons)
+  const nextLessonToStudy = allLessonsFlat.find(l => !completedLessons[l.id]) || allLessonsFlat[0]
+
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col selection:bg-emerald-500 selection:text-gray-950 relative overflow-x-hidden animate-fadeIn">
       
@@ -172,14 +176,36 @@ export default function DashboardPage() {
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-3.5 sm:p-6 space-y-6 pb-24 overflow-hidden">
         
-        {/* Banner de Boas-vindas e Arena em Grid responsivo */}
+        {/* Banner de Boas-vindas, Arena e Card Inteligente de "Continuar de Onde Parou" */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div className="sm:col-span-2 space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-4 sm:p-6 rounded-2xl">
-            <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase block">Trilha Completa • Módulo 1 🚀</span>
-            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Fundamentos de JavaScript ao Avançado</h2>
-            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
-              Você concluiu <strong className="text-emerald-400">{loading ? '...' : `${totalCompletedCount} de ${totalLessonsCount}`}</strong> aulas. Continue avançando na trilha prática!
-            </p>
+          <div className="sm:col-span-2 space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-4 sm:p-6 rounded-2xl flex flex-col justify-between">
+            <div className="space-y-1">
+              <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase block">Trilha Completa • Módulo 1 🚀</span>
+              <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Fundamentos de JavaScript ao Avançado</h2>
+              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                Você concluiu <strong className="text-emerald-400">{loading ? '...' : `${totalCompletedCount} de ${totalLessonsCount}`}</strong> aulas. Continue avançando na trilha prática!
+              </p>
+            </div>
+
+            {/* ⚡ CARD INTELIGENTE: Continuar de Onde Parou */}
+            {!loading && (
+              <div className="pt-2">
+                <Link
+                  href={`/dashboard/aula/${nextLessonToStudy.number}`}
+                  className="flex items-center justify-between gap-3 p-3.5 bg-gray-950/80 hover:bg-gray-950 border border-emerald-500/30 rounded-xl transition group shadow-md"
+                >
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">Continuar de Onde Parou ⚡</span>
+                    <p className="text-xs sm:text-sm font-bold text-white group-hover:text-emerald-400 transition truncate">
+                      Aula {nextLessonToStudy.number}: {nextLessonToStudy.title}
+                    </p>
+                  </div>
+                  <span className="px-3 py-2 bg-emerald-500 text-gray-950 font-extrabold text-xs rounded-lg shrink-0 group-hover:bg-emerald-400 transition">
+                    Estudar →
+                  </span>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="bg-gradient-to-r from-amber-500/10 via-gray-900 to-gray-900 border border-amber-500/20 p-4 sm:p-6 rounded-2xl flex flex-col justify-between space-y-3">
