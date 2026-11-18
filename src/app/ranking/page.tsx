@@ -18,50 +18,61 @@ export default function RankingPage() {
   useEffect(() => {
     async function fetchLeaderboard() {
       try {
-        const { data, error } = await supabase
+        const xpMap: { [key: string]: number } = {}
+
+        // 1. Busca o XP dos desafios da Arena (tabela user_challenges)
+        const { data: challengesData } = await supabase
           .from('user_challenges')
           .select('user_id, xp_earned')
 
-        if (error) throw error
-
-        if (data && data.length > 0) {
-          const xpMap: { [key: string]: number } = {}
-          data.forEach((item) => {
+        if (challengesData) {
+          challengesData.forEach((item) => {
             if (!item.user_id) return
-            if (!xpMap[item.user_id]) {
-              xpMap[item.user_id] = 0
-            }
+            if (!xpMap[item.user_id]) xpMap[item.user_id] = 0
             xpMap[item.user_id] += item.xp_earned || 0
           })
+        }
 
-          const uniqueUserIds = Object.keys(xpMap)
-          const { data: sessionData } = await supabase.auth.getSession()
-          let currentUserName = 'Estudante Codelab'
-          let currentUserId = ''
+        // 2. Busca as aulas concluídas na Trilha (tabela user_progress -> 50 XP por aula)
+        const { data: progressData } = await supabase
+          .from('user_progress')
+          .select('user_id, completed')
 
-          if (sessionData?.session?.user) {
-            currentUserId = sessionData.session.user.id
-            const meta = sessionData.session.user.user_metadata
-            currentUserName = meta?.full_name || meta?.name || 'Estudante Codelab'
+        if (progressData) {
+          progressData.forEach((item) => {
+            if (!item.user_id || !item.completed) return
+            if (!xpMap[item.user_id]) xpMap[item.user_id] = 0
+            xpMap[item.user_id] += 50 // Cada aula concluída vale 50 XP
+          })
+        }
+
+        const uniqueUserIds = Object.keys(xpMap)
+        const { data: sessionData } = await supabase.auth.getSession()
+        let currentUserName = 'Estudante Codelab'
+        let currentUserId = ''
+
+        if (sessionData?.session?.user) {
+          currentUserId = sessionData.session.user.id
+          const meta = sessionData.session.user.user_metadata
+          currentUserName = meta?.full_name || meta?.name || 'Estudante Codelab'
+        }
+
+        const formattedRanking: LeaderboardUser[] = uniqueUserIds.map((id) => {
+          let name = 'Estudante Codelab'
+          if (id === currentUserId) {
+            name = currentUserName
+          } else if (id === 'a7ee38e0-6a2a-4b76-88b3-9a7eae68c2d9') {
+            name = 'João'
           }
 
-          const formattedRanking: LeaderboardUser[] = uniqueUserIds.map((id) => {
-            let name = 'Estudante Codelab'
-            if (id === currentUserId) {
-              name = currentUserName
-            } else if (id === 'a7ee38e0-6a2a-4b76-88b3-9a7eae68c2d9') {
-              name = 'João'
-            }
+          return {
+            user_id: id,
+            name: name,
+            total_xp: xpMap[id],
+          }
+        }).sort((a, b) => b.total_xp - a.total_xp)
 
-            return {
-              user_id: id,
-              name: name,
-              total_xp: xpMap[id],
-            }
-          }).sort((a, b) => b.total_xp - a.total_xp)
-
-          setRanking(formattedRanking)
-        }
+        setRanking(formattedRanking)
       } catch (err) {
         console.error('Erro ao carregar ranking:', err)
       } finally {
@@ -120,25 +131,25 @@ export default function RankingPage() {
           <span className="text-xs font-bold text-amber-400 uppercase tracking-wider block">Placar de Líderes 🏆</span>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">Os Melhores Programadores</h2>
           <p className="text-gray-300 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
-            Veja quem está acumulando mais XP resolvendo desafios na Arena. Responda missões para garantir o seu lugar no pódio!
+            Pontuação unificada somando o XP das aulas concluídas na trilha e dos desafios resolvidos na Arena!
           </p>
         </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden shadow-xl">
           <div className="p-4 sm:p-5 border-b border-gray-800 flex items-center justify-between text-xs font-bold text-gray-500 uppercase tracking-wider">
             <span>Posição / Aluno</span>
-            <span>XP Acumulado</span>
+            <span>XP Total</span>
           </div>
 
           {loading ? (
             <div className="p-8 text-center text-xs text-gray-400">
-              Carregando placar...
+              Carregando placar unificado...
             </div>
           ) : ranking.length === 0 ? (
             <div className="p-8 text-center space-y-3">
               <p className="text-xs text-gray-400">Ainda não há pontuações registradas no ranking.</p>
-              <Link href="/desafios" className="inline-block px-4 py-2 bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl">
-                Seja o primeiro a pontuar ⚡
+              <Link href="/dashboard" className="inline-block px-4 py-2 bg-amber-500 text-gray-950 font-extrabold text-xs rounded-xl">
+                Começar a estudar ⚡
               </Link>
             </div>
           ) : (
@@ -160,7 +171,7 @@ export default function RankingPage() {
                         <h4 className="font-bold text-xs sm:text-sm text-white truncate">
                           {user.name}
                         </h4>
-                        <p className="text-[11px] text-gray-400 truncate">Membro ativo da Arena</p>
+                        <p className="text-[11px] text-gray-400 truncate">Estudante Codelab</p>
                       </div>
                     </div>
 
