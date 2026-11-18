@@ -15,6 +15,11 @@ export default function PainelPage() {
   const [loading, setLoading] = useState(true)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  // Estados para alteração de nome
+  const [editableName, setEditableName] = useState('')
+  const [nameLoading, setNameLoading] = useState(false)
+  const [nameMessage, setNameMessage] = useState({ text: '', type: '' })
+
   // Estados para alteração de senha
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -47,6 +52,7 @@ export default function PainelPage() {
         const nameFromMeta = metadata?.full_name || metadata?.name || 'Aluno'
         
         setUserName(nameFromMeta)
+        setEditableName(nameFromMeta)
         setUserEmail(session.user.email ?? 'E-mail não informado')
         setUserId(session.user.id)
         
@@ -94,6 +100,29 @@ export default function PainelPage() {
     getUserAndProgress()
   }, [router])
 
+  // Função para atualizar o nome
+  const handleUpdateName = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setNameMessage({ text: '', type: '' })
+    setNameLoading(true)
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: editableName }
+      })
+
+      if (error) throw error
+
+      setUserName(editableName)
+      setNameMessage({ text: 'Nome de exibição alterado com sucesso!', type: 'success' })
+    } catch (error: any) {
+      setNameMessage({ text: error.message || 'Erro ao alterar o nome.', type: 'error' })
+    } finally {
+      setNameLoading(false)
+    }
+  }
+
+  // Função para atualizar a senha
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
     setPasswordMessage({ text: '', type: '' })
@@ -127,6 +156,7 @@ export default function PainelPage() {
     }
   }
 
+  // Função para excluir a conta
   const handleDeleteAccount = async () => {
     if (!userId) return
     setDeleteLoading(true)
@@ -143,7 +173,6 @@ export default function PainelPage() {
 
       if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
 
-      // Limpeza de chaves locais do Codelab
       if (typeof window !== 'undefined') {
         Object.keys(localStorage).forEach((key) => {
           if (key.startsWith('codelab_')) {
@@ -254,7 +283,7 @@ export default function PainelPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Painel de Controle 🚀</h1>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie as configurações, segurança e acompanhe seu progresso na trilha, {userName}.</p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1">Gerencie seu perfil, segurança e acompanhe seu progresso na trilha, {userName}.</p>
           </div>
           <div className="flex items-center self-start md:self-auto gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -281,7 +310,7 @@ export default function PainelPage() {
           </Link>
         </div>
 
-        {/* Grid de Informações e Segurança */}
+        {/* Grid de Informações, Perfil e Segurança */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 lg:col-span-1 shadow-lg">
@@ -316,6 +345,46 @@ export default function PainelPage() {
 
           <div className="space-y-6 lg:col-span-2">
             
+            {/* Bloco de Alteração de Nome */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
+              <div>
+                <h3 className="text-base sm:text-lg font-bold">Nome de Exibição</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Atualize como você aparece para os outros alunos na plataforma e no Ranking.</p>
+              </div>
+
+              {nameMessage.text && (
+                <div className={`p-3 text-xs rounded-lg border ${
+                  nameMessage.type === 'success' 
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                }`}>
+                  {nameMessage.text}
+                </div>
+              )}
+
+              <form onSubmit={handleUpdateName} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-400 mb-1">Seu Nome</label>
+                  <input
+                    type="text"
+                    value={editableName}
+                    onChange={(e) => setEditableName(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={nameLoading}
+                  className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition font-bold rounded-lg text-xs disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {nameLoading ? 'Salvando...' : 'Salvar Nome'}
+                </button>
+              </form>
+            </div>
+
+            {/* Bloco de Segurança (Senha) */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 sm:p-6 space-y-4 shadow-lg">
               <div>
                 <h3 className="text-base sm:text-lg font-bold">Segurança</h3>
@@ -395,6 +464,7 @@ export default function PainelPage() {
               </form>
             </div>
 
+            {/* Zona de Perigo */}
             <div className="bg-gray-900 border border-red-500/20 rounded-2xl p-5 sm:p-6 space-y-3 shadow-lg">
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-red-400">Zona de Perigo</h3>
@@ -416,7 +486,7 @@ export default function PainelPage() {
         </div>
       </main>
 
-      {/* Modal Fixo e Centralizado na Tela */}
+      {/* Modal Fixo e Centralizado para Exclusão */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-gray-900 border border-gray-800 max-w-md w-full p-5 sm:p-6 rounded-3xl space-y-4 shadow-2xl animate-fadeIn my-auto">
