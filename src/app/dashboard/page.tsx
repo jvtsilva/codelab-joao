@@ -63,6 +63,37 @@ export default function DashboardPage() {
   // Calcula quantas aulas o usuário já concluiu no total
   const totalCompletedCount = Object.values(completedLessons).filter(Boolean).length
 
+  // 🌟 Lógica de XP e Níveis (Cada aula concluída = 50 XP)
+  const totalXP = totalCompletedCount * 50
+
+  // Definição dos Níveis
+  let currentLevel = 'Iniciante JS'
+  let levelNumber = 1
+  let nextLevelXP = 200
+  let prevLevelXP = 0
+
+  if (totalXP >= 800) {
+    currentLevel = 'Mestre do Código'
+    levelNumber = 4
+    nextLevelXP = 1000
+    prevLevelXP = 800
+  } else if (totalXP >= 400) {
+    currentLevel = 'Programador Júnior'
+    levelNumber = 3
+    nextLevelXP = 800
+    prevLevelXP = 400
+  } else if (totalXP >= 200) {
+    currentLevel = 'Codificador'
+    levelNumber = 2
+    nextLevelXP = 400
+    prevLevelXP = 200
+  }
+
+  // Progresso em porcentagem para o próximo nível
+  const xpInCurrentLevel = totalXP - prevLevelXP
+  const xpNeededForNext = nextLevelXP - prevLevelXP
+  const levelProgressPercent = Math.min(Math.round((xpInCurrentLevel / xpNeededForNext) * 100), 100)
+
   // Estrutura completa dos blocos e aulas da trilha
   const blocks = [
     {
@@ -176,9 +207,39 @@ export default function DashboardPage() {
       {/* Conteúdo Principal */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-3.5 sm:p-6 space-y-6 pb-24 overflow-hidden">
         
-        {/* Banner de Boas-vindas, Arena e Card Inteligente de "Continuar de Onde Parou" */}
+        {/* 🌟 Card de Nível e XP */}
+        <div className="bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">
+                ⭐
+              </div>
+              <div>
+                <h4 className="text-sm sm:text-base font-bold text-white">
+                  Nível {levelNumber} • {currentLevel}
+                </h4>
+                <p className="text-[11px] text-gray-400">
+                  Total acumulado: <strong className="text-emerald-400">{totalXP} XP</strong> (50 XP por aula concluída)
+                </p>
+              </div>
+            </div>
+            <span className="px-3 py-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs rounded-xl self-start sm:self-auto">
+              {levelProgressPercent}% rumo ao Próximo Nível
+            </span>
+          </div>
+
+          {/* Barrinha de Progresso de XP */}
+          <div className="w-full bg-gray-950 border border-gray-800 rounded-full h-2.5 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-500" 
+              style={{ width: `${levelProgressPercent}%` }}
+            ></div>
+          </div>
+        </div>
+
+        {/* Banner de Trilha e Card Inteligente de "Continuar de Onde Parou" + Arena */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-          <div className="sm:col-span-2 space-y-2.5 bg-gradient-to-r from-emerald-500/10 via-gray-900 to-gray-900 border border-emerald-500/20 p-4 sm:p-6 rounded-2xl flex flex-col justify-between">
+          <div className="sm:col-span-2 space-y-2.5 bg-gray-900 border border-gray-800 p-4 sm:p-6 rounded-2xl flex flex-col justify-between">
             <div className="space-y-1">
               <span className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase block">Trilha Completa • Módulo 1 🚀</span>
               <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight leading-tight">Fundamentos de JavaScript ao Avançado</h2>
