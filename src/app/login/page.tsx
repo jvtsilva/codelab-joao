@@ -165,7 +165,17 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-400 mb-1">Senha</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium text-gray-400">Senha</label>
+              <a 
+                href="https://wa.me/5519995200014?text=Professor,%20esqueci%20minha%20senha%20do%20Codelab!" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[11px] text-emerald-400 hover:underline transition font-medium"
+              >
+                Esqueceu a senha?
+              </a>
+            </div>
             <input
               type="password"
               value={password}
