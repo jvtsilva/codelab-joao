@@ -5,16 +5,19 @@ export async function POST(request: Request) {
   try {
     const { email, newPassword, adminSecret } = await request.json()
 
-    if (adminSecret !== 'joao123codelab') {
+    // Validação usando a variável de ambiente segura (não exposta no GitHub)
+    if (adminSecret !== process.env.ADMIN_SECRET_KEY) {
       return NextResponse.json({ error: 'Senha mestra do admin inválida!' }, { status: 401 })
     }
 
+    // Cliente Supabase com privilégios de Admin (Service Role)
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { persistSession: false } }
     )
 
+    // 1. Achar o usuário pelo e-mail
     const { data: usersData, error: listError } = await supabaseAdmin.auth.admin.listUsers()
     if (listError) throw listError
 
@@ -24,6 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Usuário não encontrado com esse e-mail.' }, { status: 404 })
     }
 
+    // 2. Atualizar a senha do usuário pelo ID
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       targetUser.id,
       { password: newPassword }
