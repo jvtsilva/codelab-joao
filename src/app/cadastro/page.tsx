@@ -196,7 +196,7 @@ export default function CadastroPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-400 mb-1">Nome Completo</label>
+            <label className="block text-xs font-medium text-gray-400 mb-1">Nome de usuário</label>
             <input
               type="text"
               value={name}
