@@ -6,6 +6,7 @@ import Link from 'next/link'
 
 interface LeaderboardUser {
   user_id: string
+  name: string
   total_xp: number
 }
 
@@ -17,31 +18,40 @@ export default function RankingPage() {
   useEffect(() => {
     async function fetchLeaderboard() {
       try {
-        // Busca todos os registros de XP da tabela user_challenges
+        // Busca os desafios e faz um join com a tabela pública de perfis (profiles) para pegar o nome
         const { data, error } = await supabase
           .from('user_challenges')
-          .select('user_id, xp_earned')
+          .select(`
+            user_id,
+            xp_earned,
+            profiles (
+              full_name
+            )
+          `)
 
-        if (error) {
-          console.error('Erro do Supabase:', error.message)
-          throw error
-        }
+        if (error) throw error
 
         if (data && data.length > 0) {
-          // Agrupa o XP somando por user_id
-          const xpMap: { [key: string]: number } = {}
-          data.forEach((item) => {
+          // Agrupa o XP somando por user_id e guarda o nome
+          const userMap: { [key: string]: { name: string; xp: number } } = {}
+
+          data.forEach((item: any) => {
             if (!item.user_id) return
-            if (!xpMap[item.user_id]) {
-              xpMap[item.user_id] = 0
+
+            // Pega o nome da tabela profiles ou define um padrão caso não encontre
+            const rawName = item.profiles?.full_name || 'Estudante Codelab'
+
+            if (!userMap[item.user_id]) {
+              userMap[item.user_id] = { name: rawName, xp: 0 }
             }
-            xpMap[item.user_id] += item.xp_earned || 0
+            userMap[item.user_id].xp += item.xp_earned || 0
           })
 
           // Transforma em array e ordena do maior para o menor XP
-          const formattedRanking: LeaderboardUser[] = Object.keys(xpMap).map((id) => ({
+          const formattedRanking: LeaderboardUser[] = Object.keys(userMap).map((id) => ({
             user_id: id,
-            total_xp: xpMap[id],
+            name: userMap[id].name,
+            total_xp: userMap[id].xp,
           })).sort((a, b) => b.total_xp - a.total_xp)
 
           setRanking(formattedRanking)
@@ -142,7 +152,7 @@ export default function RankingPage() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="font-bold text-xs sm:text-sm text-white truncate">
-                          Programador(a) #{user.user_id.slice(0, 6)}...
+                          {user.name}
                         </h4>
                         <p className="text-[11px] text-gray-500 truncate">Membro ativo da Arena</p>
                       </div>
