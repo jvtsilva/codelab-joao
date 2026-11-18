@@ -6,30 +6,32 @@ export default function ThemeToggle() {
   const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
-    // Verifica o que está salvo no navegador ao carregar a página
     const savedTheme = localStorage.getItem('codelab_theme')
-    
     if (savedTheme === 'light') {
       setDarkMode(false)
       document.documentElement.classList.remove('dark')
+      document.body.style.backgroundColor = '#f9fafb'
+      document.body.style.color = '#030712'
     } else {
-      // Padrão é escuro
       setDarkMode(true)
       document.documentElement.classList.add('dark')
-      localStorage.setItem('codelab_theme', 'dark')
+      document.body.style.backgroundColor = '#030712'
+      document.body.style.color = '#f9fafb'
     }
   }, [])
 
   const toggleTheme = () => {
     if (darkMode) {
-      // Muda para o modo claro
       document.documentElement.classList.remove('dark')
       localStorage.setItem('codelab_theme', 'light')
+      document.body.style.backgroundColor = '#f9fafb'
+      document.body.style.color = '#030712'
       setDarkMode(false)
     } else {
-      // Muda para o modo escuro
       document.documentElement.classList.add('dark')
       localStorage.setItem('codelab_theme', 'dark')
+      document.body.style.backgroundColor = '#030712'
+      document.body.style.color = '#f9fafb'
       setDarkMode(true)
     }
   }
