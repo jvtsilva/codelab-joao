@@ -27,7 +27,7 @@ export default function AulaDetalhePage() {
   const [copied, setCopied] = useState(false)
   const [praticaFeitaLocal, setPraticaFeitaLocal] = useState(false)
   const [mostrarExemplo, setMostrarExemplo] = useState(false)
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({})
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | undefined>>({})
   const [submittedAnswers, setSubmittedAnswers] = useState<Record<number, boolean>>({})
   const [completed, setCompleted] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -229,7 +229,7 @@ export default function AulaDetalhePage() {
 
       <div className="sticky top-[57px] z-40 h-1 w-full bg-stone-200 dark:bg-gray-800">
         <div
-          className="h-full bg-emerald-500 transition-all duration-150"
+          className="h-full bg-emerald-500"
           style={{ width: `${progressoLeitura}%` }}
         />
       </div>
@@ -249,74 +249,98 @@ export default function AulaDetalhePage() {
           )}
         </div>
 
-        {/* 01 · Introdução */}
+        {/* Topo da Aula */}
         <section
           className={`${caixa} border-emerald-600/25 bg-emerald-50/40 dark:border-emerald-500/20 dark:bg-gray-900`}
         >
           <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            01 · Introdução · Aula {aula.numero}
+            Aula {aula.numero}
           </span>
           <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
             {aula.titulo}
           </h2>
-          <p className={`${texto} mt-3`}>{aula.resumo}</p>
-          <div className={`${subcaixa} mt-5`}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              O que você vai aprender
-            </h3>
-            <p className={`${texto} mt-2`}>{aula.introducao.objetivo}</p>
-            <p className={`${texto} mt-3`}>{aula.introducao.contexto}</p>
-          </div>
+          {aula.resumo && <p className={`${texto} mt-2`}>{aula.resumo}</p>}
+
+          {aula.introducao.imagemUrl ? (
+            <img
+              src={aula.introducao.imagemUrl}
+              alt={aula.introducao.imagemAlt || `Objetivo da aula ${aula.numero}`}
+              className="mt-4 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+            />
+          ) : (
+            (aula.introducao.objetivo || aula.introducao.contexto) && (
+              <div className={`${subcaixa} mt-4 space-y-2`}>
+                {aula.introducao.objetivo && (
+                  <p className={texto}>{aula.introducao.objetivo}</p>
+                )}
+                {aula.introducao.contexto && (
+                  <p className={texto}>{aula.introducao.contexto}</p>
+                )}
+              </div>
+            )
+          )}
         </section>
 
-        {/* 02 · Teoria */}
+        {/* Teoria */}
         <section className={caixa}>
           <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            02 · Teoria
+            Teoria
           </span>
           <h2 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
             Entenda o conceito
           </h2>
 
-          <div className="mt-5 space-y-5">
+          <div className="mt-5 space-y-6">
             {aula.teoria.topicos.map((topico, index) => (
               <article key={`${index}-${topico.titulo}`} className="space-y-2">
                 <h3 className="font-bold">{topico.titulo}</h3>
-                <p className={`${texto} whitespace-pre-line`}>{topico.explicacao}</p>
+                {topico.explicacao && (
+                  <p className={`${texto} whitespace-pre-line`}>{topico.explicacao}</p>
+                )}
+                {topico.imagemUrl && (
+                  <img
+                    src={topico.imagemUrl}
+                    alt={topico.imagemAlt || topico.titulo}
+                    className="mt-2 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+                  />
+                )}
               </article>
             ))}
           </div>
 
-          <div className={`${subcaixa} mt-6 space-y-2`}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              Exemplo do cotidiano
-            </h3>
-            <p className={`${texto} whitespace-pre-line`}>
-              {aula.teoria.exemploCotidiano}
-            </p>
-          </div>
+          {aula.teoria.exemploCotidiano && (
+            <div className={`${subcaixa} mt-6 space-y-2`}>
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+                Exemplo do cotidiano
+              </h3>
+              <p className={`${texto} whitespace-pre-line`}>
+                {aula.teoria.exemploCotidiano}
+              </p>
+            </div>
+          )}
 
-          <div className={`${subcaixa} mt-4 space-y-2`}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              Exemplo em código
-            </h3>
-            <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
-              <code>{aula.teoria.exemploCodigo}</code>
-            </pre>
-          </div>
+          {aula.teoria.exemploCodigo && (
+            <div className={`${subcaixa} mt-4 space-y-2`}>
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+                Exemplo em código
+              </h3>
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
+                <code>{aula.teoria.exemploCodigo}</code>
+              </pre>
+            </div>
+          )}
 
-          <div className="mt-5 border-l-4 border-emerald-500 pl-4">
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              Resumo da teoria
-            </h3>
-            <p className={`${texto} mt-1 font-medium`}>{aula.teoria.resumo}</p>
-          </div>
+          {aula.teoria.resumo && (
+            <div className="mt-5 border-l-4 border-emerald-500 pl-4">
+              <p className={`${texto} font-medium`}>{aula.teoria.resumo}</p>
+            </div>
+          )}
         </section>
 
-        {/* 03 · Prática */}
+        {/* Prática */}
         <section className={caixa}>
           <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            03 · Prática
+            Prática
           </span>
           <h2 className="mt-2 text-xl font-black">Agora é sua vez!</h2>
           <h3 className="mt-3 font-bold">{aula.pratica.titulo}</h3>
@@ -332,7 +356,7 @@ export default function AulaDetalhePage() {
               id="lesson-code"
               value={code}
               onChange={(event) => setCode(event.target.value)}
-              rows={9}
+              rows={7}
               spellCheck={false}
               className="w-full rounded-xl border border-gray-800 bg-gray-950 p-4 font-mono text-xs leading-relaxed text-emerald-300 focus:border-emerald-500 focus:outline-none sm:text-sm"
             />
@@ -371,10 +395,10 @@ export default function AulaDetalhePage() {
           )}
 
           <div className={`${subcaixa} mt-4 space-y-2`}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              Resultado esperado
-            </h3>
-            <p className={texto}>{aula.pratica.resultadoEsperado}</p>
+            <p className={texto}>
+              <strong className={destaque}>Resultado esperado:</strong>{' '}
+              {aula.pratica.resultadoEsperado}
+            </p>
             <p className={texto}>
               <strong className={destaque}>Dica:</strong> {aula.pratica.dica}
             </p>
@@ -388,21 +412,15 @@ export default function AulaDetalhePage() {
             >
               {praticaFeitaLocal ? '✓ Prática registrada' : 'Registrar prática feita'}
             </button>
-            <span className="text-xs text-stone-500 dark:text-gray-400">
-              A conclusão oficial da aula fica na seção 05 após o quiz.
-            </span>
           </div>
         </section>
 
-        {/* 04 · Quiz */}
+        {/* Quiz */}
         <section className={caixa}>
           <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            04 · Quiz
+            Quiz
           </span>
           <h2 className="mt-2 text-xl font-black">Teste seus conhecimentos</h2>
-          <p className={`${texto} mt-2`}>
-            Responda às perguntas e confira a explicação de cada resposta.
-          </p>
 
           <div className="mt-5 space-y-5">
             {aula.quiz.map((pergunta, questionIndex) => {
@@ -485,6 +503,10 @@ export default function AulaDetalhePage() {
                               ...current,
                               [questionIndex]: false,
                             }))
+                            setSelectedAnswers((current) => ({
+                              ...current,
+                              [questionIndex]: undefined,
+                            }))
                           }}
                           className={botao}
                         >
@@ -505,35 +527,43 @@ export default function AulaDetalhePage() {
               </p>
               <p className={`${texto} mt-1`}>
                 {quizAcertos === aula.quiz.length
-                  ? 'Excelente! Você demonstrou que entendeu o conteúdo.'
-                  : 'Revise os pontos explicados nas respostas e tente novamente nas próximas aulas.'}
+                  ? 'Excelente! Você mandou muito bem.'
+                  : 'Revise as explicações e tente novamente nas próximas aulas.'}
               </p>
             </div>
           )}
         </section>
 
-        {/* 05 · Conclusão */}
+        {/* Conclusão */}
         <section className={caixa}>
           <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            05 · Conclusão
+            Conclusão
           </span>
-          <h2 className="mt-2 text-xl font-black">O que fica desta aula?</h2>
 
-          <ul className="mt-4 space-y-2">
-            {aula.conclusao.aprendizados.map((item, index) => (
-              <li key={index} className="flex gap-3 text-sm leading-relaxed">
-                <span className={`font-black ${destaque}`}>✓</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          {aula.conclusao.imagemUrl ? (
+            <img
+              src={aula.conclusao.imagemUrl}
+              alt={aula.conclusao.imagemAlt || `Resumo da aula ${aula.numero}`}
+              className="mt-4 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+            />
+          ) : (
+            aula.conclusao.aprendizados.length > 0 && (
+              <ul className="mt-4 space-y-2">
+                {aula.conclusao.aprendizados.map((item, index) => (
+                  <li key={index} className="flex gap-3 text-sm leading-relaxed">
+                    <span className={`font-black ${destaque}`}>✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )
+          )}
 
-          <div className={`${subcaixa} mt-5`}>
-            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-              Pense sobre isso
-            </h3>
-            <p className={`${texto} mt-2`}>{aula.conclusao.reflexao}</p>
-          </div>
+          {aula.conclusao.reflexao && (
+            <div className={`${subcaixa} mt-4`}>
+              <p className={texto}>{aula.conclusao.reflexao}</p>
+            </div>
+          )}
 
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button

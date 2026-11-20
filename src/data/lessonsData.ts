@@ -1,6 +1,8 @@
 export interface TopicoTeoria {
   titulo: string
   explicacao: string
+  imagemUrl?: string
+  imagemAlt?: string
 }
 
 export interface PerguntaQuiz {
@@ -19,6 +21,8 @@ export interface AulaItem {
   introducao: {
     objetivo: string
     contexto: string
+    imagemUrl?: string
+    imagemAlt?: string
   }
   teoria: {
     topicos: TopicoTeoria[]
@@ -33,124 +37,121 @@ export interface AulaItem {
     exemploSolucao?: string
     resultadoEsperado: string
     dica: string
+    imagemUrl?: string
+    imagemAlt?: string
   }
   quiz: PerguntaQuiz[]
   conclusao: {
     aprendizados: string[]
     reflexao: string
     proximaAulaId: string | null
+    imagemUrl?: string
+    imagemAlt?: string
   }
 }
 
 export const aulasData: AulaItem[] = [
-  {
+ {
     id: 'lesson-1',
     numero: 1,
     modulo: 1,
     titulo: 'Como o Computador Segue Instruções',
-    resumo:
-      'Entenda o que significa programar e como transformar uma tarefa em uma sequência de instruções claras, organizadas e possíveis de executar.',
+    resumo: 'Entenda o que é programar e como organizar passos na ordem certa.',
 
     introducao: {
-      objetivo:
-        'Ao final desta aula, você será capaz de explicar o que é um algoritmo e organizar os passos necessários para realizar uma tarefa simples.',
-      contexto:
-        'Antes de aprender comandos e linguagens, todo programador precisa aprender a pensar na solução. O código vem depois: primeiro entendemos o problema e organizamos as instruções.'
+      objetivo: '',
+      contexto: '',
+      imagemUrl: '/aulas/aula-1/objetivo.jpg',
+      imagemAlt: 'Objetivo da aula: criar uma sequência lógica de passos para resolver uma tarefa simples',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que significa programar?',
-          explicacao:
-            'Programar é criar instruções para que um computador realize uma tarefa. Essas instruções precisam ser claras, porque o computador não adivinha o que você quis dizer: ele executa aquilo que foi definido.'
+          titulo: '1. Programar',
+          explicacao: '',
+          imagemUrl: '/aulas/aula-1/programar.jpg',
+          imagemAlt: '1. Programar: escrever instruções para o computador executar',
         },
         {
-          titulo: '2. O que é um algoritmo?',
+          titulo: '2. Algoritmo',
           explicacao:
-            'Algoritmo é uma sequência finita e organizada de passos criada para resolver um problema ou alcançar um objetivo. Uma receita, por exemplo, funciona como um algoritmo: ela apresenta ações que precisam ser realizadas em determinada ordem.'
+            'Sequência organizada de passos para cumprir uma tarefa — como uma receita.',
         },
         {
-          titulo: '3. Clareza e ordem fazem diferença',
-          explicacao:
-            'Um bom algoritmo tem instruções específicas, uma ordem que faça sentido e um objetivo definido. “Prepare tudo” é vago. “Pegue uma xícara e coloque-a sobre a mesa” descreve uma ação que pode ser executada. Além disso, algumas ações dependem de outras: não faz sentido enviar uma mensagem antes de escrevê-la.'
-        }
+          titulo: '3. Clareza e ordem',
+          explicacao: '',
+          imagemUrl: '/aulas/aula-1/clareza-ordem.jpg',
+          imagemAlt: '3. Clareza e ordem: passos vagos geram dúvida e passos fora de ordem quebram tudo',
+        },
       ],
 
-      exemploCotidiano:
-        'Objetivo: sair de casa levando a chave.\n\n1. Encontrar a chave.\n2. Pegar a chave.\n3. Guardá-la no bolso.\n4. Conferir se está com a chave antes de sair.\n\nSe você inverter os passos e sair antes de pegar a chave, poderá ficar trancado do lado de fora. A ordem faz parte da solução.',
-
-      exemploCodigo:
-        '// Um algoritmo escrito em pseudocódigo\nINÍCIO\n  pegar o celular\n  desbloquear o celular\n  abrir o aplicativo de mensagens\n  selecionar a conversa\n  escrever "Cheguei em casa!"\n  enviar a mensagem\nFIM',
-
-      resumo:
-        'Programar é escrever instruções. Algoritmo é uma sequência finita e organizada de passos. Para funcionar bem, cada passo precisa ser claro, estar na ordem correta e contribuir para o objetivo.'
+      exemploCotidiano: '',
+      exemploCodigo: '',
+      resumo: '',
     },
 
     pratica: {
-      titulo: 'Monte um algoritmo para preparar um café',
+      titulo: 'Algoritmo para preparar café',
       enunciado:
-        'Imagine que você precisa explicar para alguém como preparar uma xícara de café. A pessoa só poderá executar exatamente os passos que você escrever, sem adivinhar o que está faltando.\n\nUse o modelo abaixo como ponto de partida. Organize as ações em uma sequência lógica e acrescente ou ajuste os passos que considerar necessários. O objetivo é praticar a construção de um algoritmo; ainda não precisamos escrever JavaScript.',
+        'Organize os passos para fazer um café sem pular etapas importantes. Ajuste ou adicione o que achar necessário.',
 
       codigoInicial:
-        'INÍCIO\n  pegar uma xícara\n  colocar o pó de café no filtro\n  aquecer a água\n  despejar a água no filtro\n  servir o café na xícara\nFIM',
+        'INÍCIO\n  pegar uma xícara\n  colocar pó no filtro\n  aquecer a água\n  despejar a água\n  servir\nFIM',
 
       exemploSolucao:
-        'INÍCIO\n  pegar uma xícara limpa\n  colocar o filtro no suporte\n  colocar o pó de café no filtro\n  aquecer a água até o ponto ideal\n  despejar a água quente devagar sobre o pó\n  aguardar coar na xícara\n  servir o café\nFIM',
+        'INÍCIO\n  pegar xícara e filtro\n  colocar pó no filtro\n  aquecer a água\n  despejar água quente no filtro\n  servir na xícara\nFIM',
 
       resultadoEsperado:
-        'Uma sequência de passos claros, completos e em uma ordem que permita preparar o café sem precisar adivinhar nenhuma etapa.',
+        'Uma sequência completa e em ordem lógica do início ao fim.',
 
       dica:
-        'Leia seu algoritmo do começo ao fim como se estivesse executando cada instrução. Alguma ação depende de outra? Está faltando algum passo importante? A ordem permite chegar ao resultado?'
+        'Leia de cima para baixo: alguma ação depende de outra antes?',
     },
 
     quiz: [
       {
         pergunta: 'O que significa programar?',
         opcoes: [
-          'Criar instruções para que o computador realize tarefas',
-          'Fazer o computador descobrir sozinho o que queremos',
-          'Escrever qualquer texto em uma tela'
+          'Criar instruções para o computador executar tarefas',
+          'Fazer o computador adivinhar o que queremos',
+          'Escrever qualquer texto na tela',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Programar é definir instruções para o computador executar. Essas instruções precisam ser claras e seguir uma lógica.'
+          'Programar é escrever instruções claras para o computador seguir.',
       },
       {
         pergunta: 'O que é um algoritmo?',
         opcoes: [
-          'Uma linguagem de programação específica',
-          'Uma sequência finita e organizada de passos para alcançar um objetivo',
-          'Um erro que acontece durante a execução de um programa'
+          'Uma linguagem de programação',
+          'Uma sequência organizada de passos para alcançar um objetivo',
+          'Um erro de execução',
         ],
         respostaCorreta: 1,
         explicacao:
-          'Um algoritmo organiza as ações necessárias para resolver um problema ou realizar uma tarefa.'
+          'Algoritmo é a sequência organizada de passos para resolver uma tarefa.',
       },
       {
         pergunta: 'Por que a ordem das instruções é importante?',
         opcoes: [
-          'Porque o computador sempre ignora a primeira instrução',
-          'Porque a ordem deixa o código mais bonito',
-          'Porque algumas ações dependem de outras para serem executadas corretamente'
+          'Porque o computador ignora o primeiro passo',
+          'Porque algumas ações dependem de outras para funcionar',
+          'Apenas para deixar o código mais bonito',
         ],
-        respostaCorreta: 2,
+        respostaCorreta: 1,
         explicacao:
-          'Muitas tarefas possuem dependências. Por exemplo, precisamos escrever uma mensagem antes de enviá-la. Ações fora de ordem podem impedir que o objetivo seja alcançado.'
-      }
+          'Passos fora de ordem quebram o fluxo — como tentar enviar antes de escrever.',
+      },
     ],
 
     conclusao: {
-      aprendizados: [
-        'Programar é criar instruções claras para o computador executar.',
-        'Um algoritmo é uma sequência organizada de passos para alcançar um objetivo.',
-        'A ordem e a clareza das instruções ajudam a evitar erros.'
-      ],
-      reflexao:
-        'Escolha uma tarefa simples do seu dia a dia. Você conseguiria explicar cada etapa para alguém que nunca fez essa tarefa, sem deixar nada subentendido?',
-      proximaAulaId: 'lesson-2'
-    }
+      aprendizados: [],
+      reflexao: '',
+      imagemUrl: '/aulas/aula-1/resumo-aprendido.jpg',
+      imagemAlt: 'O que você aprendeu na aula 1',
+      proximaAulaId: 'lesson-2',
+    },
   },
   {
     id: 'lesson-2',
