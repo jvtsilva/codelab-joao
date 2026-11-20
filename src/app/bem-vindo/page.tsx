@@ -54,7 +54,7 @@ export default function WelcomePage() {
           type="button"
           onClick={alternarTema}
           suppressHydrationWarning
-          className={`px-3 py-2 border text-xs font-semibold rounded-xl transition cursor-pointer ${btnTemaClasses}`}
+          className={`px-3 py-2 border text-xs font-semibold rounded-xl cursor-pointer ${btnTemaClasses}`}
           title="Alternar modo claro e escuro"
           aria-label="Alternar modo claro e escuro"
         >
@@ -84,14 +84,14 @@ export default function WelcomePage() {
           <div className="space-y-2.5">
             <Link
               href="/dashboard"
-              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 transition-all font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-500/20 block cursor-pointer"
+              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-500/20 block cursor-pointer"
             >
               Ir para a Trilha ⚡
             </Link>
 
             <Link
               href="/desafios"
-              className={`w-full py-2.5 border transition font-semibold rounded-xl text-xs block cursor-pointer ${btnTemaClasses}`}
+              className={`w-full py-2.5 border font-semibold rounded-xl text-xs block cursor-pointer ${btnTemaClasses}`}
             >
               Explorar Desafios ⚔️
             </Link>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -19,6 +19,7 @@ export default function CadastroPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isDark, setIsDark] = useState(true)
   const turnstileRef = useRef<TurnstileInstance | null>(null)
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 
   const hasMinLength = password.length >= 8
@@ -32,6 +33,14 @@ export default function CadastroPage() {
     setIsDark(escuro)
     document.documentElement.classList.toggle('dark', escuro)
     document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current)
+      }
+    }
   }, [])
 
   const isValidEmail = (emailStr: string) => {
@@ -126,9 +135,9 @@ export default function CadastroPage() {
 
       setSuccessMessage(true)
 
-      setTimeout(() => {
-        router.push('/bem-vindo')
-      }, 2000)
+      redirectTimeoutRef.current = setTimeout(() => {
+        router.replace('/bem-vindo')
+      }, 1500)
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Erro ao criar conta. Tente novamente.'
       setErrorMessage(msg)
