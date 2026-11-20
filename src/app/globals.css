@@ -1,24 +1,10 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
-body {
-  background-color: #030712; /* Fundo cinza bem escuro (gray-950) */
-  color: #f9fafb; /* Texto quase branco (gray-50) */
-  font-family: var(--font-sans, Arial, sans-serif);
-  min-height: 100vh;
-}
-
-/* Animação suave de transição entre as páginas */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
+@layer base {
+  html,
+  body {
+    font-family: var(--font-sans, Arial, sans-serif);
+    min-height: 100vh;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.25s ease-out forwards;
 }

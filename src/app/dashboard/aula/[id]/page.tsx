@@ -1,222 +1,572 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useLayoutEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { LESSONS_DATABASE } from '@/data/lessonsData'
+import { aulasData } from '@/data/lessonsData'
+import { supabase } from '@/lib/supabase'
+import { Navbar } from '@/components/Navbar'
 
-export default function AulaMinimalistaPage() {
-  const params = useParams()
-  const router = useRouter()
-  const aulaNum = Number(params?.id || 1)
+const STORAGE_KEY = 'codelab_tema_aula'
 
-  const currentLesson = LESSONS_DATABASE[aulaNum] || {
-    number: aulaNum,
-    title: `Aula ${aulaNum}: Trilha Prática`,
-    module: "Módulo 1: Fundamentos",
-    description: "Estude os conceitos fundamentais e valide seus conhecimentos resolvendo o desafio direto no editor.",
-    estimatedTime: "20 min",
-    difficulty: "Prático",
-    topics: [
-      { title: "1. Introdução ao Conceito", desc: "Compreendendo a lógica essencial desta etapa.", codeSnippet: "console.log('Executando...');" }
-    ],
-    challenge: {
-      instruction: "Escreva um comando console.log com qualquer mensagem.",
-      initialCode: "// Digite seu código aqui:\n",
-      expectedKeywords: ["console.log"],
-      successMessage: "Desafio superado com sucesso!",
-      hint: "Use console.log(\"sua mensagem\");"
-    }
-  }
+export default function AulaDetalhePage() {
+  const params = useParams<{ id: string }>()
+  const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id
+  const aulaIdParam = rawId ?? '1'
+  const numeroAula = Number(aulaIdParam.replace('lesson-', '')) || 1
 
+  const aula =
+    aulasData.find(
+      (item) => item.numero === numeroAula || item.id === aulaIdParam,
+    ) ?? aulasData[0]
+
+  const [isDark, setIsDark] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
-  const [isCompleted, setIsCompleted] = useState(false)
-  const [codigoUsuario, setCodigoUsuario] = useState(currentLesson.challenge.initialCode)
-  const [feedbackTerminal, setFeedbackTerminal] = useState<string | null>(null)
-  const [sucessoDesafio, setSucessoDesafio] = useState(false)
+  const [userXp, setUserXp] = useState(0)
+  const [code, setCode] = useState(aula.pratica.codigoInicial)
+  const [copied, setCopied] = useState(false)
+  const [praticaFeitaLocal, setPraticaFeitaLocal] = useState(false)
+  const [mostrarExemplo, setMostrarExemplo] = useState(false)
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({})
+  const [submittedAnswers, setSubmittedAnswers] = useState<Record<number, boolean>>({})
+  const [completed, setCompleted] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
+  const [progressoLeitura, setProgressoLeitura] = useState(0)
+
+  useLayoutEffect(() => {
+    const savedTheme = localStorage.getItem(STORAGE_KEY)
+    const dark = savedTheme !== 'light'
+    setIsDark(dark)
+    document.documentElement.classList.toggle('dark', dark)
+    document.documentElement.style.backgroundColor = dark ? '#030712' : '#fafaf9'
+  }, [])
 
   useEffect(() => {
-    setCodigoUsuario(currentLesson.challenge.initialCode)
-    setFeedbackTerminal(null)
-    setSucessoDesafio(false)
-  }, [aulaNum, currentLesson])
+    const atualizarLeitura = () => {
+      const scrollTop = window.scrollY
+      const alturaTotal =
+        document.documentElement.scrollHeight - window.innerHeight
+      if (alturaTotal <= 0) {
+        setProgressoLeitura(100)
+        return
+      }
+      const pct = Math.min(100, Math.max(0, Math.round((scrollTop / alturaTotal) * 100)))
+      setProgressoLeitura(pct)
+    }
+
+    atualizarLeitura()
+    window.addEventListener('scroll', atualizarLeitura, { passive: true })
+    window.addEventListener('resize', atualizarLeitura)
+    return () => {
+      window.removeEventListener('scroll', atualizarLeitura)
+      window.removeEventListener('resize', atualizarLeitura)
+    }
+  }, [aula.id])
 
   useEffect(() => {
-    async function checkAuth() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        setUserId(session.user.id)
+    let active = true
+
+    const localDone =
+      localStorage.getItem(`codelab_visitante_aula_${aula.numero}`) === 'true'
+
+    setCode(aula.pratica.codigoInicial)
+    setCopied(false)
+    setPraticaFeitaLocal(localDone)
+    setMostrarExemplo(false)
+    setSelectedAnswers({})
+    setSubmittedAnswers({})
+    setSaveError('')
+    setCompleted(localDone)
+
+    async function loadProgress() {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+
+        if (!active) return
+
+        if (session) {
+          setUserId(session.user.id)
+
+          const { data: xpRows, error: xpError } = await supabase
+            .from('user_challenges')
+            .select('xp_earned')
+            .eq('user_id', session.user.id)
+
+          if (active && !xpError && xpRows) {
+            const totalXp = xpRows.reduce((total, row) => total + (row.xp_earned || 0), 0)
+            setUserXp(totalXp)
+            localStorage.setItem('codelab_user_xp', String(totalXp))
+          }
+        } else {
+          const savedXp = localStorage.getItem('codelab_user_xp')
+          if (savedXp) setUserXp(Number(savedXp))
+        }
+
+        if (!session) return
+
         const { data } = await supabase
           .from('user_progress')
           .select('completed')
           .eq('user_id', session.user.id)
-          .eq('lesson_id', `lesson-${aulaNum}`)
-          .single()
+          .eq('lesson_id', `lesson-${aula.numero}`)
+          .maybeSingle()
+
+        if (!active) return
 
         if (data?.completed) {
-          setIsCompleted(true)
-          setSucessoDesafio(true)
+          localStorage.setItem(`codelab_visitante_aula_${aula.numero}`, 'true')
+          setCompleted(true)
+          setPraticaFeitaLocal(true)
         }
-      } else if (typeof window !== 'undefined') {
-        if (localStorage.getItem(`codelab_aula_${aulaNum}_concluida`)) {
-          setIsCompleted(true)
-          setSucessoDesafio(true)
-        }
+      } catch (error) {
+        console.error('Não foi possível carregar o progresso:', error)
       }
     }
-    checkAuth()
-  }, [aulaNum])
 
-  const handleTestarCodigo = async () => {
-    const codigoLimpo = codigoUsuario.trim()
-    const palavrasChave = currentLesson.challenge.expectedKeywords
+    loadProgress()
+    return () => {
+      active = false
+    }
+  }, [aula.id, aula.numero, aula.pratica.codigoInicial])
 
-    // Valida se o usuário incluiu as palavras-chave obrigatórias da lógica
-    const passouEmTudo = palavrasChave.every(keyword => 
-      codigoLimpo.toLowerCase().includes(keyword.toLowerCase())
-    )
+  const alternarTema = () => {
+    setIsDark((current) => {
+      const next = !current
+      localStorage.setItem(STORAGE_KEY, next ? 'dark' : 'light')
+      document.documentElement.classList.toggle('dark', next)
+      document.documentElement.style.backgroundColor = next ? '#030712' : '#fafaf9'
+      return next
+    })
+  }
 
-    if (passouEmTudo) {
-      setSucessoDesafio(true)
-      setIsCompleted(true)
-      setFeedbackTerminal(`✓ ${currentLesson.challenge.successMessage}`)
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`codelab_aula_${aulaNum}_concluida`, 'true')
-      }
-
-      if (userId) {
-        await supabase.from('user_progress').upsert(
-          {
-            user_id: userId,
-            lesson_id: `lesson-${aulaNum}`,
-            completed: true,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,lesson_id' }
-        )
-      }
-    } else {
-      setFeedbackTerminal(`✗ Falha na validação: O código precisa conter as instruções corretas. Dica: ${currentLesson.challenge.hint}`)
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard?.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setCopied(false)
     }
   }
 
+  const marcarAulaConcluida = async () => {
+    setSaving(true)
+    setSaveError('')
+
+    try {
+      localStorage.setItem(`codelab_visitante_aula_${aula.numero}`, 'true')
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        const { error } = await supabase.from('user_progress').upsert(
+          {
+            user_id: session.user.id,
+            lesson_id: `lesson-${aula.numero}`,
+            completed: true,
+          },
+          { onConflict: 'user_id,lesson_id' },
+        )
+
+        if (error) throw error
+      }
+
+      setCompleted(true)
+      setPraticaFeitaLocal(true)
+    } catch (error) {
+      console.error('Erro ao salvar conclusão:', error)
+      setSaveError(
+        'Não foi possível sincronizar com sua conta. Seu progresso local foi mantido.',
+      )
+      setCompleted(true)
+      setPraticaFeitaLocal(true)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const quizCompleto =
+    aula.quiz.length > 0 &&
+    aula.quiz.every((_, index) => submittedAnswers[index] === true)
+
+  const quizAcertos = aula.quiz.reduce(
+    (total, pergunta, index) =>
+      total +
+      (selectedAnswers[index] === pergunta.respostaCorreta && submittedAnswers[index]
+        ? 1
+        : 0),
+    0,
+  )
+
+  const proximaAula = aula.conclusao.proximaAulaId
+    ? aulasData.find((item) => item.id === aula.conclusao.proximaAulaId)
+    : aulasData.find((item) => item.numero === aula.numero + 1)
+
+  const caixa =
+    'rounded-2xl border border-stone-200 bg-white p-5 text-stone-900 dark:border-gray-800 dark:bg-gray-900 dark:text-stone-100 sm:p-6'
+  const subcaixa =
+    'rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-gray-800 dark:bg-gray-950'
+  const texto = 'text-sm leading-relaxed text-stone-700 dark:text-stone-300'
+  const destaque = 'text-emerald-700 dark:text-emerald-400'
+  const botao =
+    'rounded-xl border border-stone-300 bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-800 hover:bg-stone-200 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 cursor-pointer'
+
   return (
-    <div className="min-h-screen bg-[#0a0a0c] text-gray-200 flex flex-col font-sans selection:bg-gray-700 selection:text-white pb-24">
-      
-      {/* Header Minimalista e Discreto */}
-      <header className="border-b border-gray-800/60 bg-[#0a0a0c]/80 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-        <Link href="/dashboard" className="text-xs font-medium text-gray-400 hover:text-white transition-colors flex items-center gap-2">
-          <span>←</span> Voltar
-        </Link>
-        <div className="text-xs font-mono text-gray-400 tracking-wider">
-          AULA <span className="text-white font-bold">{aulaNum}</span> / 14
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-stone-100">
+      <Navbar
+        activeTab="aula"
+        subtitle={`Aula ${aula.numero} • ${aula.titulo}`}
+        userId={userId}
+        userXp={userXp}
+        isDark={isDark}
+        onToggleTheme={alternarTema}
+      />
 
-      {/* Conteúdo Principal */}
-      <main className="max-w-3xl w-full mx-auto p-4 sm:p-8 space-y-8 mt-2">
-        
-        {/* Bloco de Título Minimalista */}
-        <div className="space-y-3">
-          <div className="inline-block text-[10px] font-mono tracking-widest text-gray-400 uppercase bg-gray-900 border border-gray-800 px-3 py-1 rounded-md">
-            {currentLesson.module}
+      <div className="sticky top-[57px] z-40 h-1 w-full bg-stone-200 dark:bg-gray-800">
+        <div
+          className="h-full bg-emerald-500 transition-all duration-150"
+          style={{ width: `${progressoLeitura}%` }}
+        />
+      </div>
+
+      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 pb-20 sm:p-6 md:p-8">
+        <div className="flex items-center justify-between gap-2">
+          <Link
+            href="/dashboard"
+            className="text-xs font-semibold text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+          >
+            ← Voltar para a trilha
+          </Link>
+          {completed && (
+            <span className="rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-xs font-semibold">
+              ✓ Aula concluída
+            </span>
+          )}
+        </div>
+
+        {/* 01 · Introdução */}
+        <section
+          className={`${caixa} border-emerald-600/25 bg-emerald-50/40 dark:border-emerald-500/20 dark:bg-gray-900`}
+        >
+          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+            01 · Introdução · Aula {aula.numero}
+          </span>
+          <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+            {aula.titulo}
+          </h2>
+          <p className={`${texto} mt-3`}>{aula.resumo}</p>
+          <div className={`${subcaixa} mt-5`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              O que você vai aprender
+            </h3>
+            <p className={`${texto} mt-2`}>{aula.introducao.objetivo}</p>
+            <p className={`${texto} mt-3`}>{aula.introducao.contexto}</p>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-white tracking-tight leading-snug">
-            {currentLesson.title}
-          </h1>
-          <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
-            {currentLesson.description}
-          </p>
-        </div>
+        </section>
 
-        {/* Teoria Raciocinada */}
-        <div className="space-y-6 pt-2">
-          <h2 className="text-xs font-mono tracking-widest text-gray-400 uppercase border-b border-gray-800/80 pb-2">
-            01. Fundamentos Teóricos
+        {/* 02 · Teoria */}
+        <section className={caixa}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+            02 · Teoria
+          </span>
+          <h2 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
+            Entenda o conceito
           </h2>
 
-          <div className="space-y-4">
-            {currentLesson.topics.map((topico, idx) => (
-              <div key={idx} className="bg-gray-900/40 border border-gray-800/60 p-5 rounded-xl space-y-3">
-                <h3 className="text-sm sm:text-base font-medium text-white">{topico.title}</h3>
-                <p className="text-xs sm:text-sm text-gray-400 leading-relaxed">{topico.desc}</p>
-                {topico.codeSnippet && (
-                  <pre className="bg-[#050507] border border-gray-800 p-3.5 rounded-lg font-mono text-xs text-gray-300 overflow-x-auto">
-                    <code>{topico.codeSnippet}</code>
-                  </pre>
-                )}
-              </div>
+          <div className="mt-5 space-y-5">
+            {aula.teoria.topicos.map((topico, index) => (
+              <article key={`${index}-${topico.titulo}`} className="space-y-2">
+                <h3 className="font-bold">{topico.titulo}</h3>
+                <p className={`${texto} whitespace-pre-line`}>{topico.explicacao}</p>
+              </article>
             ))}
           </div>
-        </div>
 
-        {/* Editor de Código Ativo (Substitui o Quiz) */}
-        <div className="space-y-4 pt-4">
-          <h2 className="text-xs font-mono tracking-widest text-gray-400 uppercase border-b border-gray-800/80 pb-2">
-            02. Desafio Prático de Código
-          </h2>
-
-          <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-5 space-y-4 shadow-sm">
-            <p className="text-xs sm:text-sm text-gray-300 font-medium">
-              🎯 <strong className="text-white">Missão:</strong> {currentLesson.challenge.instruction}
+          <div className={`${subcaixa} mt-6 space-y-2`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              Exemplo do cotidiano
+            </h3>
+            <p className={`${texto} whitespace-pre-line`}>
+              {aula.teoria.exemploCotidiano}
             </p>
+          </div>
 
-            {/* Caixa do Editor */}
-            <div className="rounded-lg border border-gray-800 overflow-hidden bg-[#050507]">
-              <div className="bg-gray-900/80 px-4 py-2 border-b border-gray-800 flex items-center justify-between text-[11px] font-mono text-gray-400">
-                <span>editor.js</span>
-                <span className="text-emerald-400">JavaScript Ativo</span>
-              </div>
-              <textarea
-                value={codigoUsuario}
-                onChange={(e) => setCodigoUsuario(e.target.value)}
-                disabled={sucessoDesafio}
-                rows={5}
-                className="w-full bg-transparent p-4 font-mono text-xs sm:text-sm text-gray-200 resize-none focus:outline-none leading-relaxed placeholder:text-gray-600"
-                placeholder="Escreva seu código aqui..."
-              />
-            </div>
+          <div className={`${subcaixa} mt-4 space-y-2`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              Exemplo em código
+            </h3>
+            <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
+              <code>{aula.teoria.exemploCodigo}</code>
+            </pre>
+          </div>
 
-            {/* Ações e Botão */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-              {!sucessoDesafio ? (
+          <div className="mt-5 border-l-4 border-emerald-500 pl-4">
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              Resumo da teoria
+            </h3>
+            <p className={`${texto} mt-1 font-medium`}>{aula.teoria.resumo}</p>
+          </div>
+        </section>
+
+        {/* 03 · Prática */}
+        <section className={caixa}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+            03 · Prática
+          </span>
+          <h2 className="mt-2 text-xl font-black">Agora é sua vez!</h2>
+          <h3 className="mt-3 font-bold">{aula.pratica.titulo}</h3>
+          <p className={`${texto} mt-2 whitespace-pre-line`}>
+            {aula.pratica.enunciado}
+          </p>
+
+          <div className={`${subcaixa} mt-4 space-y-2`}>
+            <label htmlFor="lesson-code" className="text-xs font-bold uppercase tracking-wider">
+              Seu espaço de prática
+            </label>
+            <textarea
+              id="lesson-code"
+              value={code}
+              onChange={(event) => setCode(event.target.value)}
+              rows={9}
+              spellCheck={false}
+              className="w-full rounded-xl border border-gray-800 bg-gray-950 p-4 font-mono text-xs leading-relaxed text-emerald-300 focus:border-emerald-500 focus:outline-none sm:text-sm"
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setCode(aula.pratica.codigoInicial)}
+                className={botao}
+              >
+                Restaurar modelo
+              </button>
+              <button type="button" onClick={handleCopyCode} className={botao}>
+                {copied ? '✓ Copiado!' : 'Copiar texto'}
+              </button>
+              {aula.pratica.exemploSolucao && (
                 <button
-                  onClick={handleTestarCodigo}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-gray-100 hover:bg-white text-gray-950 font-medium text-xs rounded-lg transition-all cursor-pointer"
+                  type="button"
+                  onClick={() => setMostrarExemplo((prev) => !prev)}
+                  className={botao}
                 >
-                  Executar & Validar Código →
+                  {mostrarExemplo ? 'Esconder exemplo de solução' : 'Ver exemplo de solução'}
                 </button>
-              ) : (
-                <div className="text-xs font-mono text-emerald-400 flex items-center gap-2">
-                  <span>✓</span> Desafio validado e concluído com sucesso.
-                </div>
-              )}
-
-              {sucessoDesafio && aulaNum < 14 && (
-                <Link
-                  href={`/dashboard/aula/${aulaNum + 1}`}
-                  className="w-full sm:w-auto text-center px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-semibold text-xs rounded-lg transition-all"
-                >
-                  Avançar para Aula {aulaNum + 1} →
-                </Link>
               )}
             </div>
+          </div>
 
-            {/* Terminal de Feedback Minimalista */}
-            {feedbackTerminal && (
-              <div className={`p-3.5 rounded-lg border font-mono text-xs ${
-                sucessoDesafio 
-                  ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-300' 
-                  : 'bg-red-950/20 border-red-800/40 text-red-300'
-              }`}>
-                {feedbackTerminal}
-              </div>
+          {mostrarExemplo && aula.pratica.exemploSolucao && (
+            <div className={`${subcaixa} mt-4 space-y-2 border-emerald-600/30 dark:border-emerald-500/30`}>
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+                Uma referência possível
+              </h3>
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
+                <code>{aula.pratica.exemploSolucao}</code>
+              </pre>
+            </div>
+          )}
+
+          <div className={`${subcaixa} mt-4 space-y-2`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              Resultado esperado
+            </h3>
+            <p className={texto}>{aula.pratica.resultadoEsperado}</p>
+            <p className={texto}>
+              <strong className={destaque}>Dica:</strong> {aula.pratica.dica}
+            </p>
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setPraticaFeitaLocal(true)}
+              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs font-extrabold text-gray-950 cursor-pointer"
+            >
+              {praticaFeitaLocal ? '✓ Prática registrada' : 'Registrar prática feita'}
+            </button>
+            <span className="text-xs text-stone-500 dark:text-gray-400">
+              A conclusão oficial da aula fica na seção 05 após o quiz.
+            </span>
+          </div>
+        </section>
+
+        {/* 04 · Quiz */}
+        <section className={caixa}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+            04 · Quiz
+          </span>
+          <h2 className="mt-2 text-xl font-black">Teste seus conhecimentos</h2>
+          <p className={`${texto} mt-2`}>
+            Responda às perguntas e confira a explicação de cada resposta.
+          </p>
+
+          <div className="mt-5 space-y-5">
+            {aula.quiz.map((pergunta, questionIndex) => {
+              const selected = selectedAnswers[questionIndex]
+              const submitted = submittedAnswers[questionIndex]
+              const acertou = selected === pergunta.respostaCorreta
+
+              return (
+                <div key={questionIndex} className={`${subcaixa} space-y-3`}>
+                  <h3 className="text-sm font-bold">
+                    {questionIndex + 1}. {pergunta.pergunta}
+                  </h3>
+                  <div className="space-y-2">
+                    {pergunta.opcoes.map((opcao, optionIndex) => {
+                      const isSelected = selected === optionIndex
+                      const isCorrect = optionIndex === pergunta.respostaCorreta
+                      let style =
+                        'border-stone-200 bg-white dark:border-gray-800 dark:bg-gray-900'
+
+                      if (submitted && isSelected) {
+                        style = isCorrect
+                          ? 'border-emerald-600 bg-emerald-500/10'
+                          : 'border-red-500 bg-red-500/10'
+                      } else if (!submitted && isSelected) {
+                        style = 'border-emerald-500 bg-emerald-500/10'
+                      }
+
+                      return (
+                        <button
+                          key={optionIndex}
+                          type="button"
+                          disabled={submitted}
+                          onClick={() =>
+                            setSelectedAnswers((current) => ({
+                              ...current,
+                              [questionIndex]: optionIndex,
+                            }))
+                          }
+                          className={`w-full rounded-xl border p-3 text-left text-sm ${style} ${
+                            !submitted ? 'hover:border-emerald-500 cursor-pointer' : ''
+                          }`}
+                        >
+                          {opcao}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {!submitted ? (
+                    <button
+                      type="button"
+                      disabled={selected === undefined}
+                      onClick={() =>
+                        setSubmittedAnswers((current) => ({
+                          ...current,
+                          [questionIndex]: true,
+                        }))
+                      }
+                      className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-xs font-bold text-gray-950 disabled:opacity-40 cursor-pointer"
+                    >
+                      Conferir resposta
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <p
+                        className={`text-sm font-medium ${
+                          acertou
+                            ? destaque
+                            : 'text-amber-700 dark:text-amber-400'
+                        }`}
+                      >
+                        {acertou ? 'Resposta correta! ' : 'Quase! '}
+                        {pergunta.explicacao}
+                      </p>
+                      {!acertou && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSubmittedAnswers((current) => ({
+                              ...current,
+                              [questionIndex]: false,
+                            }))
+                          }}
+                          className={botao}
+                        >
+                          Tentar novamente
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {quizCompleto && (
+            <div className={`${subcaixa} mt-5`}>
+              <p className="font-bold">
+                Resultado: {quizAcertos} de {aula.quiz.length} acertos
+              </p>
+              <p className={`${texto} mt-1`}>
+                {quizAcertos === aula.quiz.length
+                  ? 'Excelente! Você demonstrou que entendeu o conteúdo.'
+                  : 'Revise os pontos explicados nas respostas e tente novamente nas próximas aulas.'}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {/* 05 · Conclusão */}
+        <section className={caixa}>
+          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+            05 · Conclusão
+          </span>
+          <h2 className="mt-2 text-xl font-black">O que fica desta aula?</h2>
+
+          <ul className="mt-4 space-y-2">
+            {aula.conclusao.aprendizados.map((item, index) => (
+              <li key={index} className="flex gap-3 text-sm leading-relaxed">
+                <span className={`font-black ${destaque}`}>✓</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          <div className={`${subcaixa} mt-5`}>
+            <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
+              Pense sobre isso
+            </h3>
+            <p className={`${texto} mt-2`}>{aula.conclusao.reflexao}</p>
+          </div>
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              type="button"
+              onClick={marcarAulaConcluida}
+              disabled={saving || completed}
+              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-3 text-sm font-extrabold text-gray-950 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+            >
+              {saving
+                ? 'Salvando...'
+                : completed
+                  ? '✓ Aula concluída'
+                  : 'Marcar aula como concluída'}
+            </button>
+
+            {proximaAula ? (
+              <Link
+                href={`/dashboard/aula/${proximaAula.numero}`}
+                className={`text-center ${botao}`}
+              >
+                Próxima aula: {proximaAula.titulo} →
+              </Link>
+            ) : (
+              <Link href="/dashboard" className={botao}>
+                Voltar à trilha
+              </Link>
             )}
           </div>
-        </div>
 
+          {saveError && (
+            <p className="mt-3 text-xs text-amber-700 dark:text-amber-400">{saveError}</p>
+          )}
+        </section>
       </main>
     </div>
   )

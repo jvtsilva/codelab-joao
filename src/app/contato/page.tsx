@@ -1,53 +1,111 @@
 'use client'
 
+import { useLayoutEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+
+const STORAGE_KEY = 'codelab_tema_aula'
 
 export default function ContatoPage() {
   const router = useRouter()
+  const [isDark, setIsDark] = useState(true)
+  const [copiado, setCopiado] = useState(false)
 
   const whatsappNumber = '5519995200014'
   const instagramUser = 'jvsilva.dev'
   const emailContato = 'codelab.joao@gmail.com'
 
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Olá%20João,%20estou%20entrando%20em%20contato%20através%20da%20plataforma%20Codelab.`
+  const mensagemWhatsapp = encodeURIComponent(
+    'Olá João, estou entrando em contato através da plataforma Codelab.'
+  )
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${mensagemWhatsapp}`
   const instagramUrl = `https://instagram.com/${instagramUser}`
 
+  useLayoutEffect(() => {
+    const salvo = localStorage.getItem(STORAGE_KEY)
+    const escuro = salvo !== 'light'
+    setIsDark(escuro)
+    document.documentElement.classList.toggle('dark', escuro)
+    document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
+  }, [])
+
+  const alternarTema = () => {
+    setIsDark((atual) => {
+      const proximo = !atual
+      localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
+      document.documentElement.classList.toggle('dark', proximo)
+      document.documentElement.style.backgroundColor = proximo ? '#030712' : '#fafaf9'
+      return proximo
+    })
+  }
+
+  const handleVoltar = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.push('/dashboard')
+    }
+  }
+
+  const handleCopiarEmail = async () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(emailContato)
+      setCopiado(true)
+      setTimeout(() => setCopiado(false), 2000)
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden animate-fadeIn">
-      
-      {/* Top Bar / Header Ajustado e Elegante */}
-      <header className="border-b border-gray-800 bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2.5">
-          <div className="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold text-xs rounded-lg border border-emerald-500/30 select-none">
+    <div className="min-h-screen flex flex-col justify-between bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white selection:bg-emerald-500 selection:text-gray-950 overflow-x-hidden">
+      {/* Header */}
+      <header className="border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="px-2.5 py-1.5 font-bold text-xs rounded-lg border select-none shrink-0 bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
             JS
           </div>
           <h1 className="font-bold text-sm sm:text-base tracking-wide truncate">
-            Codelab <span className="text-emerald-400 font-normal">João</span>
+            Codelab <span className="text-emerald-700 dark:text-emerald-400 font-normal">João</span>
           </h1>
         </div>
 
-        {/* Botão Voltar Inteligente (Retorna à tela anterior de onde o usuário veio) */}
-        <button 
-          onClick={() => router.back()}
-          className="text-xs font-semibold text-gray-300 hover:text-white transition px-3.5 py-2 rounded-xl bg-gray-900 border border-gray-800 flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-md"
-        >
-          <span>Voltar à tela anterior</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={alternarTema}
+            suppressHydrationWarning
+            className="px-3 py-2 border text-xs font-semibold rounded-xl cursor-pointer bg-stone-100 hover:bg-stone-200 text-stone-800 hover:text-stone-950 border-stone-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-200 dark:hover:text-white dark:border-gray-800"
+            title="Alternar modo claro e escuro"
+            aria-label="Alternar modo claro e escuro"
+          >
+            <span suppressHydrationWarning className="hidden sm:inline">
+              {isDark ? '☀ Claro' : '🌙 Escuro'}
+            </span>
+            <span suppressHydrationWarning className="sm:hidden">
+              {isDark ? '☀' : '🌙'}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleVoltar}
+            className="text-xs font-semibold px-3.5 py-2 rounded-xl border flex items-center gap-1.5 cursor-pointer active:scale-95 bg-stone-100 hover:bg-stone-200 text-stone-800 hover:text-stone-950 border-stone-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-200 dark:hover:text-white dark:border-gray-800"
+          >
+            <span>Voltar</span>
+          </button>
+        </div>
       </header>
 
-      {/* Main Content */}
+      {/* Conteúdo Principal */}
       <main className="flex-1 max-w-xl w-full mx-auto p-4 sm:p-8 flex flex-col justify-center items-center">
-        <div className="w-full bg-gray-900 border border-gray-800 p-6 sm:p-8 rounded-3xl shadow-2xl space-y-6">
-          
+        <div className="w-full border p-6 sm:p-8 rounded-3xl space-y-6 bg-white border-stone-200 text-stone-900 shadow-xl dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-2xl">
           <div className="text-center space-y-3 flex flex-col items-center">
-            <span className="inline-block px-3.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs rounded-full">
-              SUPORTE E ATENDIMENTO 💬
+            <span className="inline-block px-3.5 py-1 border font-bold text-[11px] uppercase tracking-wider rounded-full bg-emerald-50 text-emerald-700 border-emerald-600/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+              Contato e Suporte 💬
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-              Central de Ajuda e Feedback
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
+              Fale com o Codelab
             </h2>
-            <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-sm mx-auto">
-              Em caso de dúvidas com o código, reporte de problemas ou envio de sugestões, utilize um dos canais oficiais de comunicação abaixo.
+            <p className="text-xs sm:text-sm leading-relaxed max-w-sm mx-auto text-stone-600 dark:text-gray-400">
+              Dúvidas sobre alguma aula, problemas na plataforma ou sugestões? Escolha o canal que preferir.
             </p>
           </div>
 
@@ -57,14 +115,18 @@ export default function ContatoPage() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-4 px-4 bg-emerald-500/5 hover:bg-emerald-500/15 border border-emerald-500/30 hover:border-emerald-500/60 text-emerald-300 rounded-2xl transition flex items-center gap-4 group shadow-lg cursor-pointer"
+              className="w-full py-4 px-4 border rounded-2xl flex items-center gap-4 group cursor-pointer bg-emerald-50/70 hover:bg-emerald-50 border-emerald-600/25 hover:border-emerald-600/50 text-emerald-900 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/15 dark:border-emerald-500/30 dark:hover:border-emerald-500/60 dark:text-emerald-300 dark:shadow-lg"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition">
+              <div className="w-10 h-10 rounded-xl border flex items-center justify-center text-xl shrink-0 group-hover:scale-105 bg-emerald-100 border-emerald-600/25 dark:bg-emerald-500/20 dark:border-emerald-500/30">
                 💬
               </div>
               <div className="text-left min-w-0">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Atendimento Rápido</p>
-                <p className="font-bold text-sm sm:text-base text-white group-hover:text-emerald-400 transition truncate">Contatos via WhatsApp</p>
+                <p className="text-[11px] uppercase tracking-wider font-semibold text-stone-600 dark:text-gray-400">
+                  Atendimento direto
+                </p>
+                <p className="font-bold text-sm sm:text-base truncate text-stone-900 group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
+                  WhatsApp
+                </p>
               </div>
             </a>
 
@@ -73,46 +135,62 @@ export default function ContatoPage() {
               href={instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-4 px-4 bg-pink-500/5 hover:bg-pink-500/15 border border-pink-500/30 hover:border-pink-500/60 text-pink-300 rounded-2xl transition flex items-center gap-4 group shadow-lg cursor-pointer"
+              className="w-full py-4 px-4 border rounded-2xl flex items-center gap-4 group cursor-pointer bg-pink-50/70 hover:bg-pink-50 border-pink-600/25 hover:border-pink-600/50 text-pink-900 dark:bg-pink-500/5 dark:hover:bg-pink-500/15 dark:border-pink-500/30 dark:hover:border-pink-500/60 dark:text-pink-300 dark:shadow-lg"
             >
-              <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition">
+              <div className="w-10 h-10 rounded-xl border flex items-center justify-center text-xl shrink-0 group-hover:scale-105 bg-pink-100 border-pink-600/25 dark:bg-pink-500/20 dark:border-pink-500/30">
                 📸
               </div>
               <div className="text-left min-w-0">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Redes Sociais</p>
-                <p className="font-bold text-sm sm:text-base text-white group-hover:text-pink-400 transition truncate">@{instagramUser}</p>
+                <p className="text-[11px] uppercase tracking-wider font-semibold text-stone-600 dark:text-gray-400">
+                  Instagram
+                </p>
+                <p className="font-bold text-sm sm:text-base truncate text-stone-900 group-hover:text-pink-700 dark:text-white dark:group-hover:text-pink-400">
+                  @{instagramUser}
+                </p>
               </div>
             </a>
 
-            {/* E-mail */}
-            <a
-              href={`mailto:${emailContato}`}
-              className="w-full py-4 px-4 bg-blue-500/5 hover:bg-blue-500/15 border border-blue-500/30 hover:border-blue-500/60 text-blue-300 rounded-2xl transition flex items-center gap-4 group shadow-lg cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition">
-                ✉️
-              </div>
-              <div className="text-left min-w-0">
-                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold">Envio de Sugestões</p>
-                <p className="font-bold text-xs sm:text-sm text-white group-hover:text-blue-400 transition truncate">{emailContato}</p>
-              </div>
-            </a>
+            {/* E-mail + Copiar */}
+            <div className="w-full py-4 px-4 border rounded-2xl flex items-center justify-between gap-3 bg-blue-50/70 border-blue-600/25 text-blue-900 dark:bg-blue-500/5 dark:border-blue-500/30 dark:text-blue-300 dark:shadow-lg">
+              <a
+                href={`mailto:${emailContato}`}
+                className="flex items-center gap-4 min-w-0 flex-1 group cursor-pointer"
+              >
+                <div className="w-10 h-10 rounded-xl border flex items-center justify-center text-xl shrink-0 group-hover:scale-105 bg-blue-100 border-blue-600/25 dark:bg-blue-500/20 dark:border-blue-500/30">
+                  ✉️
+                </div>
+                <div className="text-left min-w-0">
+                  <p className="text-[11px] uppercase tracking-wider font-semibold text-stone-600 dark:text-gray-400">
+                    E-mail
+                  </p>
+                  <p className="font-bold text-xs sm:text-sm truncate text-stone-900 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-400">
+                    {emailContato}
+                  </p>
+                </div>
+              </a>
+
+              <button
+                type="button"
+                onClick={handleCopiarEmail}
+                className="px-3 py-1.5 rounded-xl border text-xs font-semibold shrink-0 cursor-pointer bg-stone-100 hover:bg-stone-200 text-stone-800 hover:text-stone-950 border-stone-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-200 dark:hover:text-white dark:border-gray-800"
+              >
+                {copiado ? 'Copiado!' : 'Copiar'}
+              </button>
+            </div>
           </div>
 
-          <div className="pt-2 text-center border-t border-gray-800/80">
-            <p className="text-[11px] text-gray-500 pt-3">
-              Retornaremos o contato com brevidade. Bons estudos!
+          <div className="pt-2 text-center border-t border-stone-200 dark:border-gray-800/80">
+            <p className="text-[11px] pt-3 text-stone-500 dark:text-gray-500">
+              Respondo assim que possível. Bons estudos!
             </p>
           </div>
-
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs text-gray-500 max-w-5xl mx-auto w-full">
-        <p>Codelab João • Plataforma educacional voltada para o aprendizado prático</p>
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+        <p>Codelab João • Aprendizado prático de JavaScript</p>
       </footer>
-
     </div>
   )
 }
