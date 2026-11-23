@@ -25,7 +25,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const EM_MANUTENCAO = true;
+  const EM_MANUTENCAO = false;
 
   const headersList = await headers();
   const host = headersList.get("host") || "";
