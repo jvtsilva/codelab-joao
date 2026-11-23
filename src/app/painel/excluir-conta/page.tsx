@@ -115,46 +115,48 @@ export default function ExcluirContaPage() {
   const accentRedClasses = 'text-red-700 dark:text-red-400'
 
   return (
-    <div className="min-h-screen flex flex-col justify-between p-4 selection:bg-red-500 selection:text-white bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
+    <div className="min-h-screen flex flex-col justify-between selection:bg-red-500 selection:text-white bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
       {/* Topo discreto */}
-      <header className="max-w-md w-full mx-auto pt-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="px-2.5 py-1.5 font-bold text-xs rounded-lg border shrink-0 bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
-            JS
-          </span>
-          <span className="font-bold text-sm tracking-wide truncate">
-            Codelab <span className={`${accentGreenClasses} font-normal`}>João</span>
-          </span>
-        </div>
+      <header className="sticky top-0 z-50 w-full border-b border-stone-200/80 dark:border-gray-800/80 bg-stone-50/95 dark:bg-gray-950/95 backdrop-blur px-4 py-3">
+        <div className="max-w-md w-full mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="px-2.5 py-1.5 font-bold text-xs rounded-lg border shrink-0 bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
+              JS
+            </span>
+            <span className="font-bold text-sm tracking-wide truncate">
+              Codelab <span className={`${accentGreenClasses} font-normal`}>João</span>
+            </span>
+          </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={alternarTema}
-            className={`px-2.5 py-2 border text-xs font-semibold rounded-xl cursor-pointer ${btnClasses}`}
-            title="Alternar modo claro e escuro"
-            aria-label="Alternar modo claro e escuro"
-          >
-            <span className="hidden sm:inline">{isDark ? '☀ Claro' : '🌙 Escuro'}</span>
-            <span className="sm:hidden">{isDark ? '☀' : '🌙'}</span>
-          </button>
-
-          {!deleteSuccess && (
-            <Link
-              href="/painel"
-              className={`text-xs font-semibold px-3 py-2 rounded-xl border ${btnClasses} ${
-                deleteLoading ? 'pointer-events-none opacity-50' : ''
-              }`}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={alternarTema}
+              className={`px-2.5 py-2 border text-xs font-semibold rounded-xl cursor-pointer ${btnClasses}`}
+              title="Alternar modo claro e escuro"
+              aria-label="Alternar modo claro e escuro"
             >
-              Painel
-            </Link>
-          )}
+              <span className="hidden sm:inline">{isDark ? '☀ Claro' : '🌙 Escuro'}</span>
+              <span className="sm:hidden">{isDark ? '☀' : '🌙'}</span>
+            </button>
+
+            {!deleteSuccess && (
+              <Link
+                href="/painel"
+                className={`text-xs font-semibold px-3 py-2 rounded-xl border ${btnClasses} ${
+                  deleteLoading ? 'pointer-events-none opacity-50' : ''
+                }`}
+              >
+                Painel
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Card Central */}
-      <main className="flex-1 flex flex-col items-center justify-center my-auto py-4">
-        <div className={`max-w-md w-full border p-6 sm:p-8 rounded-3xl space-y-6 text-center ${cardClasses}`}>
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
+        <div className={`max-w-md w-full border p-5 sm:p-8 rounded-3xl space-y-6 text-center ${cardClasses}`}>
           {deleteSuccess ? (
             <div className="space-y-5 py-4">
               <div className="w-16 h-16 border rounded-full flex items-center justify-center mx-auto text-2xl font-bold bg-emerald-50 border-emerald-600/25 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400">

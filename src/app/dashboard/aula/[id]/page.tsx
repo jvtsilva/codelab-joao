@@ -1,603 +1,1229 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { aulasData } from '@/data/lessonsData'
 import { supabase } from '@/lib/supabase'
 import { Navbar } from '@/components/Navbar'
+import {
+  aulasData,
+  type AcaoSimulador,
+  type AulaItem,
+  type ItemClassificacao,
+  type TopicoTeoria,
+} from '@/data/lessonsData'
+
+interface AulaDetalhePageProps {
+  concluidasIds?: string[]
+  onConcluirAula?: (aulaId: string, xpGanho: number) => Promise<void> | void
+}
+
+type FeedbackStatus = 'idle' | 'ok' | 'erro'
 
 const STORAGE_KEY = 'codelab_tema_aula'
+const XP_POR_AULA = 50
 
-export default function AulaDetalhePage() {
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
+function lerTemaInicial(): boolean {
+  if (typeof window === 'undefined') return true
+  const salvo = window.localStorage.getItem(STORAGE_KEY)
+  return salvo !== 'light'
+}
+
+export default function AulaDetalhePage({
+  concluidasIds = [],
+  onConcluirAula,
+}: AulaDetalhePageProps) {
   const params = useParams<{ id: string }>()
-  const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id
-  const aulaIdParam = rawId ?? '1'
-  const numeroAula = Number(aulaIdParam.replace('lesson-', '')) || 1
+  const router = useRouter()
+  const rawId = typeof params?.id === 'string' ? params.id : undefined
 
-  const aula =
+  const aula: AulaItem | undefined =
     aulasData.find(
-      (item) => item.numero === numeroAula || item.id === aulaIdParam,
-    ) ?? aulasData[0]
+      (item: AulaItem) =>
+        item.id === rawId || String(item.numero) === rawId,
+    ) || aulasData[0]
 
-  const [isDark, setIsDark] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
-  const [userXp, setUserXp] = useState(0)
-  const [code, setCode] = useState(aula.pratica.codigoInicial)
-  const [copied, setCopied] = useState(false)
-  const [praticaFeitaLocal, setPraticaFeitaLocal] = useState(false)
-  const [mostrarExemplo, setMostrarExemplo] = useState(false)
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number | undefined>>({})
-  const [submittedAnswers, setSubmittedAnswers] = useState<Record<number, boolean>>({})
-  const [completed, setCompleted] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState('')
-  const [progressoLeitura, setProgressoLeitura] = useState(0)
+  const [isDark, setIsDark] = useState<boolean>(() => lerTemaInicial())
+  const [etapaAtual, setEtapaAtual] = useState<number>(0)
+  const [saving, setSaving] = useState<boolean>(false)
+  const [concluidaLocal, setConcluidaLocal] = useState<boolean>(false)
+  const [erroSalvar, setErroSalvar] = useState<string | null>(null)
 
-  useLayoutEffect(() => {
-    const savedTheme = localStorage.getItem(STORAGE_KEY)
-    const dark = savedTheme !== 'light'
-    setIsDark(dark)
-    document.documentElement.classList.toggle('dark', dark)
-    document.documentElement.style.backgroundColor = dark ? '#030712' : '#fafaf9'
-  }, [])
+  // Prática 1: Ordenar frases / passos
+  const [itensOrdenados, setItensOrdenados] = useState<string[]>([])
+  const [feedbackOrdem, setFeedbackOrdem] = useState<FeedbackStatus>('idle')
+
+  // Prática 2: Classificação por toque
+  const [selecoesClassificacao, setSelecoesClassificacao] = useState<
+    Record<number, string>
+  >({})
+  const [feedbackClassificacao, setFeedbackClassificacao] =
+    useState<FeedbackStatus>('idle')
+
+  // Prática 3: Montar blocos de código
+  const [blocosSelecionados, setBlocosSelecionados] = useState<string[]>([])
+  const [feedbackBlocos, setFeedbackBlocos] = useState<FeedbackStatus>('idle')
+
+  // Prática 4: Caça ao erro
+  const [indiceErroSelecionado, setIndiceErroSelecionado] = useState<
+    number | null
+  >(null)
+  const [feedbackCacaErro, setFeedbackCacaErro] =
+    useState<FeedbackStatus>('idle')
+
+  // Prática 5: Simulador de estado
+  const [valorSimulador, setValorSimulador] = useState<number>(0)
+  const [feedbackSimulador, setFeedbackSimulador] =
+    useState<FeedbackStatus>('idle')
+
+  // Quiz interativo (uma questão por vez)
+  const [indicePergunta, setIndicePergunta] = useState<number>(0)
+  const [respostaSelecionada, setRespostaSelecionada] = useState<number | null>(
+    null,
+  )
+  const [respostasCorretas, setRespostasCorretas] = useState<boolean[]>([])
+
+  useIsomorphicLayoutEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark)
+    document.documentElement.style.backgroundColor = isDark
+      ? '#030712'
+      : '#fafaf9'
+  }, [isDark])
 
   useEffect(() => {
-    const atualizarLeitura = () => {
-      const scrollTop = window.scrollY
-      const alturaTotal =
-        document.documentElement.scrollHeight - window.innerHeight
-      if (alturaTotal <= 0) {
-        setProgressoLeitura(100)
-        return
-      }
-      const pct = Math.min(100, Math.max(0, Math.round((scrollTop / alturaTotal) * 100)))
-      setProgressoLeitura(pct)
-    }
-
-    atualizarLeitura()
-    window.addEventListener('scroll', atualizarLeitura, { passive: true })
-    window.addEventListener('resize', atualizarLeitura)
-    return () => {
-      window.removeEventListener('scroll', atualizarLeitura)
-      window.removeEventListener('resize', atualizarLeitura)
-    }
-  }, [aula.id])
-
-  useEffect(() => {
+    if (!aula) return
     let active = true
 
-    const localDone =
-      localStorage.getItem(`codelab_visitante_aula_${aula.numero}`) === 'true'
+    async function carregarSessaoEProgresso() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      if (!active) return
 
-    setCode(aula.pratica.codigoInicial)
-    setCopied(false)
-    setPraticaFeitaLocal(localDone)
-    setMostrarExemplo(false)
-    setSelectedAnswers({})
-    setSubmittedAnswers({})
-    setSaveError('')
-    setCompleted(localDone)
+      let jaConcluida = false
 
-    async function loadProgress() {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-
-        if (!active) return
-
-        if (session) {
-          setUserId(session.user.id)
-
-          const { data: xpRows, error: xpError } = await supabase
-            .from('user_challenges')
-            .select('xp_earned')
-            .eq('user_id', session.user.id)
-
-          if (active && !xpError && xpRows) {
-            const totalXp = xpRows.reduce((total, row) => total + (row.xp_earned || 0), 0)
-            setUserXp(totalXp)
-            localStorage.setItem('codelab_user_xp', String(totalXp))
-          }
-        } else {
-          const savedXp = localStorage.getItem('codelab_user_xp')
-          if (savedXp) setUserXp(Number(savedXp))
+      if (typeof window !== 'undefined') {
+        if (
+          window.localStorage.getItem(
+            `codelab_visitante_aula_${aula!.numero}`,
+          ) === 'true'
+        ) {
+          jaConcluida = true
         }
+      }
 
-        if (!session) return
-
+      if (session) {
+        setUserId(session.user.id)
         const { data } = await supabase
           .from('user_progress')
           .select('completed')
           .eq('user_id', session.user.id)
-          .eq('lesson_id', `lesson-${aula.numero}`)
+          .eq('lesson_id', aula!.id)
           .maybeSingle()
 
         if (!active) return
-
         if (data?.completed) {
-          localStorage.setItem(`codelab_visitante_aula_${aula.numero}`, 'true')
-          setCompleted(true)
-          setPraticaFeitaLocal(true)
+          jaConcluida = true
         }
-      } catch (error) {
-        console.error('Não foi possível carregar o progresso:', error)
+      }
+
+      if (active && jaConcluida) {
+        setConcluidaLocal(true)
       }
     }
 
-    loadProgress()
+    carregarSessaoEProgresso()
+
     return () => {
       active = false
     }
-  }, [aula.id, aula.numero, aula.pratica.codigoInicial])
+  }, [aula])
 
   const alternarTema = () => {
-    setIsDark((current) => {
-      const next = !current
-      localStorage.setItem(STORAGE_KEY, next ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', next)
-      document.documentElement.style.backgroundColor = next ? '#030712' : '#fafaf9'
-      return next
+    setIsDark((atual: boolean) => {
+      const proximo = !atual
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
+      }
+      document.documentElement.classList.toggle('dark', proximo)
+      document.documentElement.style.backgroundColor = proximo
+        ? '#030712'
+        : '#fafaf9'
+      return proximo
     })
   }
 
-  const handleCopyCode = async () => {
-    try {
-      await navigator.clipboard?.writeText(code)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      setCopied(false)
+  const completed =
+    concluidaLocal ||
+    (aula
+      ? concluidasIds.includes(aula.id) ||
+        concluidasIds.includes(String(aula.numero))
+      : false)
+
+  useEffect(() => {
+    if (!aula) return
+    setEtapaAtual(0)
+    setConcluidaLocal(false)
+    setErroSalvar(null)
+    setSaving(false)
+
+    setItensOrdenados(aula.pratica.frases ? [...aula.pratica.frases] : [])
+    setFeedbackOrdem('idle')
+
+    setSelecoesClassificacao({})
+    setFeedbackClassificacao('idle')
+
+    setBlocosSelecionados([])
+    setFeedbackBlocos('idle')
+
+    setIndiceErroSelecionado(null)
+    setFeedbackCacaErro('idle')
+
+    setValorSimulador(aula.pratica.simuladorEstado?.valorInicial ?? 0)
+    setFeedbackSimulador('idle')
+
+    setIndicePergunta(0)
+    setRespostaSelecionada(null)
+    setRespostasCorretas([])
+  }, [aula?.id])
+
+  const caixa =
+    'rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-gray-900'
+  const subcaixa =
+    'rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-gray-800 dark:bg-gray-950/70'
+  const destaque = 'text-stone-900 dark:text-white'
+  const texto =
+    'text-xs sm:text-sm leading-relaxed text-stone-600 dark:text-gray-300'
+  const botao =
+    'rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-stone-800 hover:bg-stone-100 disabled:opacity-45 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 cursor-pointer'
+
+  if (!aula) {
+    return (
+      <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
+        <div className="relative">
+          <Navbar
+            activeTab="trilha"
+            subtitle="Aprenda no seu ritmo"
+            userId={userId}
+            isDark={isDark}
+            onToggleTheme={alternarTema}
+          />
+        </div>
+        <main className="flex-1 mx-auto max-w-3xl w-full px-4 py-10">
+          <div className={caixa}>
+            <p className="text-sm font-semibold text-stone-800 dark:text-gray-200">
+              Aula não encontrada.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="mt-4 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-gray-950 cursor-pointer"
+            >
+              Voltar à trilha
+            </button>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  const etapas = ['Introdução', 'Teoria', 'Prática', 'Quiz', 'Conclusão']
+
+  const progressoPercentual = Math.round(
+    ((etapaAtual + 1) / etapas.length) * 100,
+  )
+
+  const temOrdenacao =
+    Array.isArray(aula.pratica.frases) &&
+    Array.isArray(aula.pratica.ordemCorreta) &&
+    aula.pratica.frases.length > 0
+  const temClassificacao = Boolean(aula.pratica.classificacao)
+  const temMontarBlocos = Boolean(aula.pratica.montarBlocos)
+  const temCacaErro = Boolean(aula.pratica.cacaErro)
+  const temSimulador = Boolean(aula.pratica.simuladorEstado)
+
+  const moverItem = (index: number, direcao: -1 | 1) => {
+    const novoIndice = index + direcao
+    if (novoIndice < 0 || novoIndice >= itensOrdenados.length) return
+    const copia = [...itensOrdenados]
+    const temp = copia[index]
+    copia[index] = copia[novoIndice]
+    copia[novoIndice] = temp
+    setItensOrdenados(copia)
+    setFeedbackOrdem('idle')
+  }
+
+  const conferirOrdem = () => {
+    if (!aula.pratica.ordemCorreta) return
+    const acertou = aula.pratica.ordemCorreta.every(
+      (item: string, idx: number) => itensOrdenados[idx] === item,
+    )
+    setFeedbackOrdem(acertou ? 'ok' : 'erro')
+  }
+
+  const selecionarCategoria = (itemIdx: number, categoria: string) => {
+    setSelecoesClassificacao((prev: Record<number, string>) => ({
+      ...prev,
+      [itemIdx]: categoria,
+    }))
+    setFeedbackClassificacao('idle')
+  }
+
+  const conferirClassificacao = () => {
+    const cfg = aula.pratica.classificacao
+    if (!cfg) return
+    const todosRespondidos = cfg.itens.every(
+      (_: ItemClassificacao, idx: number) =>
+        Boolean(selecoesClassificacao[idx]),
+    )
+    if (!todosRespondidos) {
+      setFeedbackClassificacao('erro')
+      return
+    }
+    const acertouTodos = cfg.itens.every(
+      (item: ItemClassificacao, idx: number) =>
+        selecoesClassificacao[idx] === item.categoriaCorreta,
+    )
+    setFeedbackClassificacao(acertouTodos ? 'ok' : 'erro')
+  }
+
+  const conferirBlocos = () => {
+    const cfg = aula.pratica.montarBlocos
+    if (!cfg) return
+    const acertou =
+      blocosSelecionados.length === cfg.respostaCorreta.length &&
+      cfg.respostaCorreta.every(
+        (bloco: string, idx: number) => blocosSelecionados[idx] === bloco,
+      )
+    setFeedbackBlocos(acertou ? 'ok' : 'erro')
+  }
+
+  const conferirCacaErro = () => {
+    const cfg = aula.pratica.cacaErro
+    if (!cfg || indiceErroSelecionado === null) return
+    setFeedbackCacaErro(
+      indiceErroSelecionado === cfg.indiceErro ? 'ok' : 'erro',
+    )
+  }
+
+  const conferirSimulador = () => {
+    const cfg = aula.pratica.simuladorEstado
+    if (!cfg) return
+    const comp = cfg.comparador || '>='
+    let atingiu = false
+    if (comp === '>=') atingiu = valorSimulador >= cfg.alvo
+    else if (comp === '<=') atingiu = valorSimulador <= cfg.alvo
+    else atingiu = valorSimulador === cfg.alvo
+    setFeedbackSimulador(atingiu ? 'ok' : 'erro')
+  }
+
+  const perguntaAtual = aula.quiz[indicePergunta]
+
+  const responderQuiz = (opcaoIdx: number) => {
+    if (respostaSelecionada !== null || !perguntaAtual) return
+    setRespostaSelecionada(opcaoIdx)
+    const acertou = opcaoIdx === perguntaAtual.respostaCorreta
+    setRespostasCorretas((prev: boolean[]) => [...prev, acertou])
+  }
+
+  const avancarQuiz = () => {
+    if (indicePergunta + 1 < aula.quiz.length) {
+      setIndicePergunta((prev: number) => prev + 1)
+      setRespostaSelecionada(null)
+    } else {
+      setEtapaAtual(4)
     }
   }
 
-  const marcarAulaConcluida = async () => {
+  const handleConcluirAula = async () => {
+    if (saving || completed) return
     setSaving(true)
-    setSaveError('')
+    setErroSalvar(null)
 
     try {
-      localStorage.setItem(`codelab_visitante_aula_${aula.numero}`, 'true')
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(
+          `codelab_visitante_aula_${aula.numero}`,
+          'true',
+        )
+      }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      let currentUserId = userId
+      if (!currentUserId) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        currentUserId = session?.user?.id ?? null
+        if (currentUserId) setUserId(currentUserId)
+      }
 
-      if (session) {
+      if (currentUserId) {
         const { error } = await supabase.from('user_progress').upsert(
           {
-            user_id: session.user.id,
-            lesson_id: `lesson-${aula.numero}`,
+            user_id: currentUserId,
+            lesson_id: aula.id,
             completed: true,
+            updated_at: new Date().toISOString(),
           },
           { onConflict: 'user_id,lesson_id' },
         )
-
-        if (error) throw error
+        if (error) {
+          throw error
+        }
       }
 
-      setCompleted(true)
-      setPraticaFeitaLocal(true)
+      if (onConcluirAula) {
+        await onConcluirAula(aula.id, XP_POR_AULA)
+      }
+
+      setConcluidaLocal(true)
     } catch (error) {
-      console.error('Erro ao salvar conclusão:', error)
-      setSaveError(
-        'Não foi possível sincronizar com sua conta. Seu progresso local foi mantido.',
+      console.error('Erro ao salvar conclusão da aula:', error)
+      setErroSalvar(
+        'Não foi possível salvar no banco agora, mas o progresso local foi registrado.',
       )
-      setCompleted(true)
-      setPraticaFeitaLocal(true)
+      setConcluidaLocal(true)
     } finally {
       setSaving(false)
     }
   }
 
-  const quizCompleto =
-    aula.quiz.length > 0 &&
-    aula.quiz.every((_, index) => submittedAnswers[index] === true)
-
-  const quizAcertos = aula.quiz.reduce(
-    (total, pergunta, index) =>
-      total +
-      (selectedAnswers[index] === pergunta.respostaCorreta && submittedAnswers[index]
-        ? 1
-        : 0),
-    0,
-  )
-
-  const proximaAula = aula.conclusao.proximaAulaId
-    ? aulasData.find((item) => item.id === aula.conclusao.proximaAulaId)
-    : aulasData.find((item) => item.numero === aula.numero + 1)
-
-  const caixa =
-    'rounded-2xl border border-stone-200 bg-white p-5 text-stone-900 dark:border-gray-800 dark:bg-gray-900 dark:text-stone-100 sm:p-6'
-  const subcaixa =
-    'rounded-xl border border-stone-200 bg-stone-50 p-4 dark:border-gray-800 dark:bg-gray-950'
-  const texto = 'text-sm leading-relaxed text-stone-700 dark:text-stone-300'
-  const destaque = 'text-emerald-700 dark:text-emerald-400'
-  const botao =
-    'rounded-xl border border-stone-300 bg-stone-100 px-3 py-2 text-xs font-semibold text-stone-800 hover:bg-stone-200 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 cursor-pointer'
+  const totalAcertosQuiz = respostasCorretas.filter(Boolean).length
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-stone-100">
-      <Navbar
-        activeTab="aula"
-        subtitle={`Aula ${aula.numero} • ${aula.titulo}`}
-        userId={userId}
-        userXp={userXp}
-        isDark={isDark}
-        onToggleTheme={alternarTema}
-      />
-
-      <div className="sticky top-[57px] z-40 h-1 w-full bg-stone-200 dark:bg-gray-800">
-        <div
-          className="h-full bg-emerald-500"
-          style={{ width: `${progressoLeitura}%` }}
+    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white selection:bg-emerald-500 selection:text-gray-950">
+      <div className="relative">
+        <Navbar
+          activeTab="trilha"
+          subtitle={`Aula ${aula.numero} • ${aula.titulo}`}
+          userId={userId}
+          isDark={isDark}
+          onToggleTheme={alternarTema}
         />
       </div>
 
-      <main className="mx-auto w-full max-w-4xl flex-1 space-y-6 p-4 pb-20 sm:p-6 md:p-8">
-        <div className="flex items-center justify-between gap-2">
-          <Link
-            href="/dashboard"
-            className="text-xs font-semibold text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400"
-          >
-            ← Voltar para a trilha
-          </Link>
-          {completed && (
-            <span className="rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-xs font-semibold">
-              ✓ Aula concluída
+      <main className="flex-1 mx-auto max-w-3xl w-full px-4 py-6 sm:py-8 space-y-5 pb-12">
+        {/* Cabeçalho e progresso da aula */}
+        <div className={caixa}>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard')}
+              className="rounded-lg border border-stone-300 bg-stone-50 px-2.5 py-1 text-xs font-bold text-stone-700 hover:bg-stone-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+            >
+              ← Voltar à trilha
+            </button>
+            <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Módulo {aula.modulo} • Aula {aula.numero} • +{XP_POR_AULA} XP
             </span>
-          )}
-        </div>
+            <span className="text-xs font-semibold text-stone-500 dark:text-gray-400 tabular-nums">
+              Etapa {etapaAtual + 1} de {etapas.length} ({progressoPercentual}%)
+            </span>
+          </div>
 
-        {/* Topo da Aula */}
-        <section
-          className={`${caixa} border-emerald-600/25 bg-emerald-50/40 dark:border-emerald-500/20 dark:bg-gray-900`}
-        >
-          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            Aula {aula.numero}
-          </span>
-          <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+          <h1 className={`mt-2 text-xl sm:text-2xl font-extrabold leading-snug ${destaque}`}>
             {aula.titulo}
-          </h2>
-          {aula.resumo && <p className={`${texto} mt-2`}>{aula.resumo}</p>}
+          </h1>
+          <p className={`mt-1 ${texto}`}>{aula.resumo}</p>
 
-          {aula.introducao.imagemUrl ? (
-            <img
-              src={aula.introducao.imagemUrl}
-              alt={aula.introducao.imagemAlt || `Objetivo da aula ${aula.numero}`}
-              className="mt-4 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-stone-200 dark:bg-gray-800">
+            <div
+              className="h-full rounded-full bg-emerald-500"
+              style={{ width: `${progressoPercentual}%` }}
             />
-          ) : (
-            (aula.introducao.objetivo || aula.introducao.contexto) && (
-              <div className={`${subcaixa} mt-4 space-y-2`}>
-                {aula.introducao.objetivo && (
-                  <p className={texto}>{aula.introducao.objetivo}</p>
-                )}
-                {aula.introducao.contexto && (
-                  <p className={texto}>{aula.introducao.contexto}</p>
-                )}
-              </div>
-            )
-          )}
-        </section>
+          </div>
 
-        {/* Teoria */}
-        <section className={caixa}>
-          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            Teoria
-          </span>
-          <h2 className="mt-2 text-xl font-black tracking-tight sm:text-2xl">
-            Entenda o conceito
-          </h2>
-
-          <div className="mt-5 space-y-6">
-            {aula.teoria.topicos.map((topico, index) => (
-              <article key={`${index}-${topico.titulo}`} className="space-y-2">
-                <h3 className="font-bold">{topico.titulo}</h3>
-                {topico.explicacao && (
-                  <p className={`${texto} whitespace-pre-line`}>{topico.explicacao}</p>
-                )}
-                {topico.imagemUrl && (
-                  <img
-                    src={topico.imagemUrl}
-                    alt={topico.imagemAlt || topico.titulo}
-                    className="mt-2 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
-                  />
-                )}
-              </article>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {etapas.map((nomeEtapa: string, idx: number) => (
+              <button
+                key={nomeEtapa}
+                type="button"
+                onClick={() => setEtapaAtual(idx)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-bold cursor-pointer ${
+                  etapaAtual === idx
+                    ? 'bg-emerald-500 text-gray-950'
+                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+              >
+                {nomeEtapa}
+              </button>
             ))}
           </div>
+        </div>
 
-          {aula.teoria.exemploCotidiano && (
-            <div className={`${subcaixa} mt-6 space-y-2`}>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-                Exemplo do cotidiano
-              </h3>
-              <p className={`${texto} whitespace-pre-line`}>
-                {aula.teoria.exemploCotidiano}
+        {/* Etapa 0: Introdução */}
+        {etapaAtual === 0 && (
+          <div className={`${caixa} space-y-4`}>
+            <h2 className={`text-lg font-extrabold ${destaque}`}>
+              Objetivo e Contexto
+            </h2>
+
+            <div className={subcaixa}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                Objetivo da aula
+              </span>
+              <p className={`mt-1 font-medium ${destaque}`}>
+                {aula.introducao.objetivo}
               </p>
             </div>
-          )}
 
-          {aula.teoria.exemploCodigo && (
-            <div className={`${subcaixa} mt-4 space-y-2`}>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-                Exemplo em código
-              </h3>
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
-                <code>{aula.teoria.exemploCodigo}</code>
-              </pre>
+            <div className={subcaixa}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                Contexto
+              </span>
+              <p className={`mt-1 ${texto}`}>{aula.introducao.contexto}</p>
             </div>
-          )}
 
-          {aula.teoria.resumo && (
-            <div className="mt-5 border-l-4 border-emerald-500 pl-4">
-              <p className={`${texto} font-medium`}>{aula.teoria.resumo}</p>
-            </div>
-          )}
-        </section>
-
-        {/* Prática */}
-        <section className={caixa}>
-          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            Prática
-          </span>
-          <h2 className="mt-2 text-xl font-black">Agora é sua vez!</h2>
-          <h3 className="mt-3 font-bold">{aula.pratica.titulo}</h3>
-          <p className={`${texto} mt-2 whitespace-pre-line`}>
-            {aula.pratica.enunciado}
-          </p>
-
-          <div className={`${subcaixa} mt-4 space-y-2`}>
-            <label htmlFor="lesson-code" className="text-xs font-bold uppercase tracking-wider">
-              Seu espaço de prática
-            </label>
-            <textarea
-              id="lesson-code"
-              value={code}
-              onChange={(event) => setCode(event.target.value)}
-              rows={7}
-              spellCheck={false}
-              className="w-full rounded-xl border border-gray-800 bg-gray-950 p-4 font-mono text-xs leading-relaxed text-emerald-300 focus:border-emerald-500 focus:outline-none sm:text-sm"
-            />
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setCode(aula.pratica.codigoInicial)}
-                className={botao}
-              >
-                Restaurar modelo
-              </button>
-              <button type="button" onClick={handleCopyCode} className={botao}>
-                {copied ? '✓ Copiado!' : 'Copiar texto'}
-              </button>
-              {aula.pratica.exemploSolucao && (
-                <button
-                  type="button"
-                  onClick={() => setMostrarExemplo((prev) => !prev)}
-                  className={botao}
-                >
-                  {mostrarExemplo ? 'Esconder exemplo de solução' : 'Ver exemplo de solução'}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {mostrarExemplo && aula.pratica.exemploSolucao && (
-            <div className={`${subcaixa} mt-4 space-y-2 border-emerald-600/30 dark:border-emerald-500/30`}>
-              <h3 className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-                Uma referência possível
-              </h3>
-              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300 sm:text-sm">
-                <code>{aula.pratica.exemploSolucao}</code>
-              </pre>
-            </div>
-          )}
-
-          <div className={`${subcaixa} mt-4 space-y-2`}>
-            <p className={texto}>
-              <strong className={destaque}>Resultado esperado:</strong>{' '}
-              {aula.pratica.resultadoEsperado}
-            </p>
-            <p className={texto}>
-              <strong className={destaque}>Dica:</strong> {aula.pratica.dica}
-            </p>
-          </div>
-
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setPraticaFeitaLocal(true)}
-              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs font-extrabold text-gray-950 cursor-pointer"
-            >
-              {praticaFeitaLocal ? '✓ Prática registrada' : 'Registrar prática feita'}
-            </button>
-          </div>
-        </section>
-
-        {/* Quiz */}
-        <section className={caixa}>
-          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            Quiz
-          </span>
-          <h2 className="mt-2 text-xl font-black">Teste seus conhecimentos</h2>
-
-          <div className="mt-5 space-y-5">
-            {aula.quiz.map((pergunta, questionIndex) => {
-              const selected = selectedAnswers[questionIndex]
-              const submitted = submittedAnswers[questionIndex]
-              const acertou = selected === pergunta.respostaCorreta
-
-              return (
-                <div key={questionIndex} className={`${subcaixa} space-y-3`}>
-                  <h3 className="text-sm font-bold">
-                    {questionIndex + 1}. {pergunta.pergunta}
-                  </h3>
-                  <div className="space-y-2">
-                    {pergunta.opcoes.map((opcao, optionIndex) => {
-                      const isSelected = selected === optionIndex
-                      const isCorrect = optionIndex === pergunta.respostaCorreta
-                      let style =
-                        'border-stone-200 bg-white dark:border-gray-800 dark:bg-gray-900'
-
-                      if (submitted && isSelected) {
-                        style = isCorrect
-                          ? 'border-emerald-600 bg-emerald-500/10'
-                          : 'border-red-500 bg-red-500/10'
-                      } else if (!submitted && isSelected) {
-                        style = 'border-emerald-500 bg-emerald-500/10'
-                      }
-
-                      return (
-                        <button
-                          key={optionIndex}
-                          type="button"
-                          disabled={submitted}
-                          onClick={() =>
-                            setSelectedAnswers((current) => ({
-                              ...current,
-                              [questionIndex]: optionIndex,
-                            }))
-                          }
-                          className={`w-full rounded-xl border p-3 text-left text-sm ${style} ${
-                            !submitted ? 'hover:border-emerald-500 cursor-pointer' : ''
-                          }`}
-                        >
-                          {opcao}
-                        </button>
-                      )
-                    })}
-                  </div>
-
-                  {!submitted ? (
-                    <button
-                      type="button"
-                      disabled={selected === undefined}
-                      onClick={() =>
-                        setSubmittedAnswers((current) => ({
-                          ...current,
-                          [questionIndex]: true,
-                        }))
-                      }
-                      className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-3 py-2 text-xs font-bold text-gray-950 disabled:opacity-40 cursor-pointer"
-                    >
-                      Conferir resposta
-                    </button>
-                  ) : (
-                    <div className="space-y-2">
-                      <p
-                        className={`text-sm font-medium ${
-                          acertou
-                            ? destaque
-                            : 'text-amber-700 dark:text-amber-400'
-                        }`}
-                      >
-                        {acertou ? 'Resposta correta! ' : 'Quase! '}
-                        {pergunta.explicacao}
-                      </p>
-                      {!acertou && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSubmittedAnswers((current) => ({
-                              ...current,
-                              [questionIndex]: false,
-                            }))
-                            setSelectedAnswers((current) => ({
-                              ...current,
-                              [questionIndex]: undefined,
-                            }))
-                          }}
-                          className={botao}
-                        >
-                          Tentar novamente
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {quizCompleto && (
-            <div className={`${subcaixa} mt-5`}>
-              <p className="font-bold">
-                Resultado: {quizAcertos} de {aula.quiz.length} acertos
-              </p>
-              <p className={`${texto} mt-1`}>
-                {quizAcertos === aula.quiz.length
-                  ? 'Excelente! Você mandou muito bem.'
-                  : 'Revise as explicações e tente novamente nas próximas aulas.'}
-              </p>
-            </div>
-          )}
-        </section>
-
-        {/* Conclusão */}
-        <section className={caixa}>
-          <span className={`text-xs font-bold uppercase tracking-wider ${destaque}`}>
-            Conclusão
-          </span>
-
-          {aula.conclusao.imagemUrl ? (
-            <img
-              src={aula.conclusao.imagemUrl}
-              alt={aula.conclusao.imagemAlt || `Resumo da aula ${aula.numero}`}
-              className="mt-4 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
-            />
-          ) : (
-            aula.conclusao.aprendizados.length > 0 && (
-              <ul className="mt-4 space-y-2">
-                {aula.conclusao.aprendizados.map((item, index) => (
-                  <li key={index} className="flex gap-3 text-sm leading-relaxed">
-                    <span className={`font-black ${destaque}`}>✓</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            )
-          )}
-
-          {aula.conclusao.reflexao && (
-            <div className={`${subcaixa} mt-4`}>
-              <p className={texto}>{aula.conclusao.reflexao}</p>
-            </div>
-          )}
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={marcarAulaConcluida}
-              disabled={saving || completed}
-              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-3 text-sm font-extrabold text-gray-950 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
-            >
-              {saving
-                ? 'Salvando...'
-                : completed
-                  ? '✓ Aula concluída'
-                  : 'Marcar aula como concluída'}
-            </button>
-
-            {proximaAula ? (
-              <Link
-                href={`/dashboard/aula/${proximaAula.numero}`}
-                className={`text-center ${botao}`}
-              >
-                Próxima aula: {proximaAula.titulo} →
-              </Link>
-            ) : (
-              <Link href="/dashboard" className={botao}>
-                Voltar à trilha
-              </Link>
+            {aula.introducao.imagemUrl && (
+              <img
+                src={aula.introducao.imagemUrl}
+                alt={aula.introducao.imagemAlt || aula.titulo}
+                className="w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+              />
             )}
           </div>
+        )}
 
-          {saveError && (
-            <p className="mt-3 text-xs text-amber-700 dark:text-amber-400">{saveError}</p>
+        {/* Etapa 1: Teoria */}
+        {etapaAtual === 1 && (
+          <div className="space-y-4">
+            <div className={caixa}>
+              <h2 className={`text-lg font-extrabold ${destaque}`}>
+                Conceitos Essenciais
+              </h2>
+
+              <div className="mt-4 space-y-3">
+                {aula.teoria.topicos.map(
+                  (topico: TopicoTeoria, idx: number) => (
+                    <div key={`${topico.titulo}-${idx}`} className={subcaixa}>
+                      <h3
+                        className={`text-sm sm:text-base font-bold ${destaque}`}
+                      >
+                        {topico.titulo}
+                      </h3>
+                      <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
+                        {topico.explicacao}
+                      </p>
+                      {topico.imagemUrl && (
+                        <img
+                          src={topico.imagemUrl}
+                          alt={topico.imagemAlt || topico.titulo}
+                          className="mt-3 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+                        />
+                      )}
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className={`${caixa} space-y-4`}>
+              <div className={subcaixa}>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                  Aplicação prática
+                </span>
+                <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
+                  {aula.teoria.exemploCotidiano}
+                </p>
+              </div>
+
+              {aula.teoria.exemploCodigo && (
+                <div>
+                  <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400 mb-1.5">
+                    Exemplo de código
+                  </span>
+                  <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-emerald-300">
+                    <code>{aula.teoria.exemploCodigo}</code>
+                  </pre>
+                </div>
+              )}
+
+              <div className={subcaixa}>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  Síntese
+                </span>
+                <p className={`mt-1 font-semibold ${destaque}`}>
+                  {aula.teoria.resumo}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Etapa 2: Prática Interativa */}
+        {etapaAtual === 2 && (
+          <div className={`${caixa} space-y-4`}>
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                Prática guiada
+              </span>
+              <h2 className={`mt-1 text-lg font-extrabold ${destaque}`}>
+                {aula.pratica.titulo}
+              </h2>
+              <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
+                {aula.pratica.enunciado}
+              </p>
+            </div>
+
+            {aula.pratica.codigoInicial && (
+              <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-3.5 text-xs leading-relaxed text-emerald-300">
+                <code>{aula.pratica.codigoInicial}</code>
+              </pre>
+            )}
+
+            {aula.pratica.imagemUrl && (
+              <img
+                src={aula.pratica.imagemUrl}
+                alt={aula.pratica.imagemAlt || aula.pratica.titulo}
+                className="w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
+              />
+            )}
+
+            {temOrdenacao ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {itensOrdenados.map((item: string, idx: number) => (
+                    <div
+                      key={`${item}-${idx}`}
+                      className={`${subcaixa} flex items-center justify-between gap-3 py-3`}
+                    >
+                      <span
+                        className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                      >
+                        {item}
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => moverItem(idx, -1)}
+                          disabled={idx === 0}
+                          aria-label="Mover para cima"
+                          className="rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-bold text-stone-700 disabled:opacity-35 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 cursor-pointer"
+                        >
+                          ↑
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moverItem(idx, 1)}
+                          disabled={idx === itensOrdenados.length - 1}
+                          aria-label="Mover para baixo"
+                          className="rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-bold text-stone-700 disabled:opacity-35 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 cursor-pointer"
+                        >
+                          ↓
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={conferirOrdem}
+                    className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                  >
+                    Conferir ordem
+                  </button>
+                </div>
+
+                {feedbackOrdem === 'ok' && (
+                  <div className={subcaixa}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                    >
+                      ✓{' '}
+                      {aula.pratica.acertoMsg ||
+                        'Sequência organizada corretamente.'}
+                    </p>
+                  </div>
+                )}
+
+                {feedbackOrdem === 'erro' && (
+                  <div className={`${subcaixa} space-y-1`}>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
+                      {aula.pratica.erroMsg ||
+                        'A sequência ainda precisa de ajustes. Revise a ordem das etapas.'}
+                    </p>
+                    {aula.pratica.dica && (
+                      <p className={texto}>
+                        <strong className={destaque}>Dica:</strong>{' '}
+                        {aula.pratica.dica}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : temClassificacao ? (
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  {aula.pratica.classificacao!.itens.map(
+                    (item: ItemClassificacao, itemIdx: number) => {
+                      const escolhida = selecoesClassificacao[itemIdx]
+                      return (
+                        <div
+                          key={`${item.texto}-${itemIdx}`}
+                          className={`${subcaixa} space-y-2.5`}
+                        >
+                          <p
+                            className={`font-mono text-xs sm:text-sm font-bold ${destaque}`}
+                          >
+                            {item.texto}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {aula.pratica.classificacao!.categorias.map(
+                              (cat: string) => {
+                                const ativa = escolhida === cat
+                                return (
+                                  <button
+                                    key={cat}
+                                    type="button"
+                                    onClick={() =>
+                                      selecionarCategoria(itemIdx, cat)
+                                    }
+                                    className={`rounded-xl border px-3 py-1.5 text-xs font-bold cursor-pointer ${
+                                      ativa
+                                        ? 'border-emerald-500 bg-emerald-500 text-gray-950'
+                                        : 'border-stone-300 bg-white text-stone-700 hover:border-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200'
+                                    }`}
+                                  >
+                                    {cat}
+                                  </button>
+                                )
+                              },
+                            )}
+                          </div>
+                        </div>
+                      )
+                    },
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={conferirClassificacao}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                >
+                  Conferir classificação
+                </button>
+
+                {feedbackClassificacao === 'ok' && (
+                  <div className={subcaixa}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                    >
+                      ✓{' '}
+                      {aula.pratica.classificacao!.acertoMsg ||
+                        'Classificação concluída corretamente.'}
+                    </p>
+                  </div>
+                )}
+
+                {feedbackClassificacao === 'erro' && (
+                  <div className={`${subcaixa} space-y-1`}>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
+                      {aula.pratica.classificacao!.erroMsg ||
+                        'Há itens pendentes ou classificados de forma incorreta.'}
+                    </p>
+                    {aula.pratica.dica && (
+                      <p className={texto}>
+                        <strong className={destaque}>Dica:</strong>{' '}
+                        {aula.pratica.dica}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : temMontarBlocos ? (
+              <div className="space-y-4">
+                <div className={`${subcaixa} space-y-3`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                      Montagem
+                    </span>
+                    {blocosSelecionados.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFeedbackBlocos('idle')
+                          setBlocosSelecionados((prev: string[]) =>
+                            prev.slice(0, -1),
+                          )
+                        }}
+                        className="text-xs font-bold text-stone-600 hover:text-stone-900 dark:text-gray-400 dark:hover:text-white cursor-pointer"
+                      >
+                        Desfazer último
+                      </button>
+                    )}
+                  </div>
+
+                  {blocosSelecionados.length === 0 ? (
+                    <p className="font-mono text-xs sm:text-sm text-stone-400 dark:text-gray-500">
+                      ...
+                    </p>
+                  ) : (
+                    <>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {blocosSelecionados.map(
+                          (bloco: string, idx: number) => (
+                            <button
+                              key={`${bloco}-${idx}`}
+                              type="button"
+                              onClick={() => {
+                                setFeedbackBlocos('idle')
+                                setBlocosSelecionados((prev: string[]) =>
+                                  prev.filter(
+                                    (_: string, i: number) => i !== idx,
+                                  ),
+                                )
+                              }}
+                              title="Toque para remover"
+                              className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 font-mono text-xs sm:text-sm font-bold text-emerald-900 hover:bg-emerald-500/20 dark:text-emerald-200 cursor-pointer"
+                            >
+                              {bloco}
+                            </button>
+                          ),
+                        )}
+                      </div>
+
+                      <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed text-emerald-300">
+                        <code>{blocosSelecionados.join('')}</code>
+                      </pre>
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {aula.pratica.montarBlocos!.blocosDisponiveis.map(
+                    (bloco: string, idx: number) => (
+                      <button
+                        key={`${bloco}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setFeedbackBlocos('idle')
+                          setBlocosSelecionados((prev: string[]) => [
+                            ...prev,
+                            bloco,
+                          ])
+                        }}
+                        className="rounded-xl border border-stone-300 bg-white px-3 py-2 font-mono text-xs sm:text-sm font-bold text-stone-800 hover:border-emerald-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 cursor-pointer"
+                      >
+                        {bloco}
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={conferirBlocos}
+                    disabled={blocosSelecionados.length === 0}
+                    className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-45 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                  >
+                    Conferir
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBlocosSelecionados([])
+                      setFeedbackBlocos('idle')
+                    }}
+                    disabled={blocosSelecionados.length === 0}
+                    className={botao}
+                  >
+                    Limpar
+                  </button>
+                </div>
+
+                {feedbackBlocos === 'ok' && (
+                  <div className={subcaixa}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                    >
+                      ✓{' '}
+                      {aula.pratica.montarBlocos!.acertoMsg ||
+                        'Estrutura montada corretamente.'}
+                    </p>
+                  </div>
+                )}
+
+                {feedbackBlocos === 'erro' && (
+                  <div className={`${subcaixa} space-y-1`}>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
+                      {aula.pratica.montarBlocos!.erroMsg ||
+                        'Ainda não ficou certo. Tente montar novamente.'}
+                    </p>
+                    {aula.pratica.dica && (
+                      <p className={texto}>
+                        <strong className={destaque}>Dica:</strong>{' '}
+                        {aula.pratica.dica}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : temCacaErro ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {aula.pratica.cacaErro!.etapas.map(
+                    (etapaLinha: string, idx: number) => {
+                      const selecionada = indiceErroSelecionado === idx
+                      return (
+                        <button
+                          key={`${etapaLinha}-${idx}`}
+                          type="button"
+                          onClick={() => {
+                            setIndiceErroSelecionado(idx)
+                            setFeedbackCacaErro('idle')
+                          }}
+                          className={`w-full text-left rounded-xl border p-3 font-mono text-xs sm:text-sm cursor-pointer ${
+                            selecionada
+                              ? 'border-emerald-500 bg-emerald-500/15 font-bold text-emerald-900 dark:text-emerald-200'
+                              : 'border-stone-200 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-800 dark:bg-gray-950/70 dark:text-gray-200'
+                          }`}
+                        >
+                          {etapaLinha}
+                        </button>
+                      )
+                    },
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={conferirCacaErro}
+                  disabled={indiceErroSelecionado === null}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-45 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                >
+                  Conferir linha com erro
+                </button>
+
+                {feedbackCacaErro === 'ok' && (
+                  <div className={subcaixa}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                    >
+                      ✓{' '}
+                      {aula.pratica.cacaErro!.acertoMsg ||
+                        'Você encontrou o ponto problemático corretamente.'}
+                    </p>
+                  </div>
+                )}
+
+                {feedbackCacaErro === 'erro' && (
+                  <div className={`${subcaixa} space-y-1`}>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
+                      {aula.pratica.cacaErro!.erroMsg ||
+                        'Essa linha não é o erro principal. Tente outra.'}
+                    </p>
+                    {aula.pratica.dica && (
+                      <p className={texto}>
+                        <strong className={destaque}>Dica:</strong>{' '}
+                        {aula.pratica.dica}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : temSimulador ? (
+              <div className="space-y-4">
+                <div className={`${subcaixa} space-y-2`}>
+                  <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    {aula.pratica.simuladorEstado!.rotuloEstado}
+                  </span>
+                  <p className={`text-xl font-black tabular-nums ${destaque}`}>
+                    {valorSimulador}
+                  </p>
+                  <p className={texto}>
+                    {aula.pratica.simuladorEstado!.descricaoMeta}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {aula.pratica.simuladorEstado!.acoes.map(
+                    (acao: AcaoSimulador, idx: number) => (
+                      <button
+                        key={`${acao.rotulo}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setValorSimulador((prev: number) => prev + acao.delta)
+                          setFeedbackSimulador('idle')
+                        }}
+                        className={botao}
+                      >
+                        {acao.rotulo}
+                      </button>
+                    ),
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setValorSimulador(
+                        aula.pratica.simuladorEstado!.valorInicial,
+                      )
+                      setFeedbackSimulador('idle')
+                    }}
+                    className={botao}
+                  >
+                    Reiniciar
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={conferirSimulador}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                >
+                  Conferir estado
+                </button>
+
+                {feedbackSimulador === 'ok' && (
+                  <div className={subcaixa}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${destaque}`}
+                    >
+                      ✓{' '}
+                      {aula.pratica.simuladorEstado!.acertoMsg ||
+                        'Meta atingida com sucesso.'}
+                    </p>
+                  </div>
+                )}
+
+                {feedbackSimulador === 'erro' && (
+                  <div className={`${subcaixa} space-y-1`}>
+                    <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
+                      {aula.pratica.simuladorEstado!.erroMsg ||
+                        'Ainda não atingiu a meta esperada.'}
+                    </p>
+                    {aula.pratica.dica && (
+                      <p className={texto}>
+                        <strong className={destaque}>Dica:</strong>{' '}
+                        {aula.pratica.dica}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className={subcaixa}>
+                <p className={texto}>{aula.pratica.resultadoEsperado}</p>
+                {aula.pratica.dica && (
+                  <p className={`mt-2 ${texto}`}>
+                    <strong className={destaque}>Dica:</strong> {aula.pratica.dica}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Etapa 3: Quiz */}
+        {etapaAtual === 3 && perguntaAtual && (
+          <div className={`${caixa} space-y-4`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                Verificação rápida
+              </span>
+              <span className="text-xs font-semibold text-stone-500 dark:text-gray-400 tabular-nums">
+                Pergunta {indicePergunta + 1} de {aula.quiz.length}
+              </span>
+            </div>
+
+            <h2 className={`text-base sm:text-lg font-extrabold ${destaque}`}>
+              {perguntaAtual.pergunta}
+            </h2>
+
+            <div className="space-y-2.5">
+              {perguntaAtual.opcoes.map((opcao: string, idx: number) => {
+                const selecionada = respostaSelecionada === idx
+                const ehCorreta = idx === perguntaAtual.respostaCorreta
+                let estiloOpcao =
+                  'border-stone-200 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-800 dark:bg-gray-950/70 dark:text-gray-200'
+
+                if (respostaSelecionada !== null) {
+                  if (ehCorreta) {
+                    estiloOpcao =
+                      'border-emerald-500 bg-emerald-500/15 font-bold text-emerald-900 dark:text-emerald-200'
+                  } else if (selecionada) {
+                    estiloOpcao =
+                      'border-red-500 bg-red-500/15 text-red-900 dark:text-red-200'
+                  }
+                }
+
+                return (
+                  <button
+                    key={`${opcao}-${idx}`}
+                    type="button"
+                    onClick={() => responderQuiz(idx)}
+                    disabled={respostaSelecionada !== null}
+                    className={`w-full text-left rounded-xl border p-3.5 text-xs sm:text-sm cursor-pointer ${estiloOpcao}`}
+                  >
+                    {opcao}
+                  </button>
+                )
+              })}
+            </div>
+
+            {respostaSelecionada !== null && (
+              <div className={`${subcaixa} space-y-3`}>
+                <p
+                  className={`text-xs sm:text-sm font-semibold ${
+                    respostaSelecionada === perguntaAtual.respostaCorreta
+                      ? 'text-emerald-700 dark:text-emerald-400'
+                      : 'text-amber-700 dark:text-amber-400'
+                  }`}
+                >
+                  {respostaSelecionada === perguntaAtual.respostaCorreta
+                    ? '✓ Resposta correta!'
+                    : 'Atenção à explicação:'}
+                </p>
+                <p className={texto}>{perguntaAtual.explicacao}</p>
+                <button
+                  type="button"
+                  onClick={avancarQuiz}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                >
+                  {indicePergunta + 1 < aula.quiz.length
+                    ? 'Próxima pergunta →'
+                    : 'Ir para a conclusão →'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Etapa 4: Conclusão */}
+        {etapaAtual === 4 && (
+          <div className={`${caixa} space-y-4`}>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <h2 className={`text-lg font-extrabold ${destaque}`}>
+                Resumo e Conclusão
+              </h2>
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
+                Quiz: {totalAcertosQuiz}/{aula.quiz.length}
+              </span>
+            </div>
+
+            <div className={subcaixa}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
+                O que você trabalhou nesta aula
+              </span>
+              <ul className="space-y-1.5 list-disc list-inside">
+                {aula.conclusao.aprendizados.map(
+                  (item: string, idx: number) => (
+                    <li key={`${item}-${idx}`} className={texto}>
+                      {item}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+
+            <div className={subcaixa}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                Para refletir
+              </span>
+              <p className={`mt-1 ${texto}`}>{aula.conclusao.reflexao}</p>
+            </div>
+
+            {erroSalvar && (
+              <div className="rounded-xl border border-amber-500/40 bg-amber-50 p-3 text-xs font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
+                {erroSalvar}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              {completed ? (
+                <span className="rounded-xl border border-emerald-600/30 bg-emerald-50 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
+                  ✓ Aula concluída (+{XP_POR_AULA} XP)
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void handleConcluirAula()}
+                  disabled={saving}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                >
+                  {saving
+                    ? 'Salvando...'
+                    : `Concluir aula e ganhar +${XP_POR_AULA} XP`}
+                </button>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                {aula.conclusao.proximaAulaId ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const prox = aulasData.find(
+                        (item) => item.id === aula.conclusao.proximaAulaId,
+                      )
+                      router.push(
+                        prox
+                          ? `/dashboard/aula/${prox.numero}`
+                          : '/dashboard',
+                      )
+                    }}
+                    className={botao}
+                  >
+                    Próxima aula →
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push('/dashboard')}
+                    className={botao}
+                  >
+                    Voltar à trilha
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Navegação entre etapas */}
+        <div className="flex items-center justify-between gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              setEtapaAtual((prev: number) => Math.max(0, prev - 1))
+            }
+            disabled={etapaAtual === 0}
+            className={botao}
+          >
+            ← Etapa anterior
+          </button>
+
+          {etapaAtual < etapas.length - 1 && (
+            <button
+              type="button"
+              onClick={() =>
+                setEtapaAtual((prev: number) =>
+                  Math.min(etapas.length - 1, prev + 1),
+                )
+              }
+              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+            >
+              Próxima etapa →
+            </button>
           )}
-        </section>
+        </div>
       </main>
+
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-3xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+        <p>Codelab João • Aprendizado prático de JavaScript</p>
+        <Link
+          href="/contato"
+          className="font-medium hover:text-emerald-700 text-stone-600 dark:hover:text-emerald-400 dark:text-gray-400"
+        >
+          💬 Contato e Suporte
+        </Link>
+      </footer>
     </div>
   )
 }

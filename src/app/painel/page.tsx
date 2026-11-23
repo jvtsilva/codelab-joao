@@ -13,7 +13,7 @@ interface RecentActivity {
 }
 
 const STORAGE_KEY = 'codelab_tema_aula'
-const TOTAL_AULAS_MODULO_1 = 18
+const TOTAL_AULAS_TRILHA = 16
 const XP_POR_AULA = 50
 
 export default function PainelPage() {
@@ -245,7 +245,7 @@ export default function PainelPage() {
     }
   }
 
-  const progressPercent = Math.min(100, Math.round((completedCount / TOTAL_AULAS_MODULO_1) * 100))
+  const progressPercent = Math.min(100, Math.round((completedCount / TOTAL_AULAS_TRILHA) * 100))
 
   const cardClasses =
     'bg-white border-stone-200 text-stone-900 shadow-xs dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-lg'
@@ -275,7 +275,7 @@ export default function PainelPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
+    <div className="min-h-screen flex flex-col relative selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
       <Navbar
         activeTab="painel"
         subtitle="Painel Codelab"
@@ -285,7 +285,7 @@ export default function PainelPage() {
         onToggleTheme={alternarTema}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 pb-20">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-8 pb-12">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight">
@@ -305,24 +305,24 @@ export default function PainelPage() {
         </div>
 
         {/* Grid Superior: Progresso Geral na Trilha + Atalho para Medalhas */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="border rounded-2xl p-5 sm:p-6 flex flex-col justify-between gap-4 lg:col-span-2 bg-white border-emerald-600/25 shadow-sm dark:bg-gray-900 dark:border-emerald-500/25 dark:shadow-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="border rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-4 lg:col-span-2 bg-white border-emerald-600/25 shadow-sm dark:bg-gray-900 dark:border-emerald-500/25 dark:shadow-xl">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <span className={`text-[11px] font-bold uppercase tracking-wider ${accentGreenClasses}`}>
-                  Módulo 1 • JavaScript
+                  Trilha Base • 4 Módulos (16 Aulas)
                 </span>
-                <span className={`text-xs font-extrabold ${accentGreenClasses}`}>
+                <span className={`text-xs font-extrabold tabular-nums ${accentGreenClasses}`}>
                   {progressPercent}%
                 </span>
               </div>
               <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-white">
                 Seu Desempenho na Trilha
               </h3>
-              <p className={`text-xs ${textMutedClasses}`}>
+              <p className={`text-xs tabular-nums ${textMutedClasses}`}>
                 Você concluiu{' '}
                 <strong className={accentGreenClasses}>
-                  {completedCount} de {TOTAL_AULAS_MODULO_1}
+                  {completedCount} de {TOTAL_AULAS_TRILHA}
                 </strong>{' '}
                 aulas.
               </p>
@@ -345,7 +345,7 @@ export default function PainelPage() {
 
           <Link
             href="/medalhas"
-            className={`border rounded-2xl p-5 sm:p-6 flex flex-col justify-between gap-4 cursor-pointer group lg:col-span-1 ${cardClasses} hover:border-amber-600/40 dark:hover:border-amber-500/40`}
+            className={`border rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-4 cursor-pointer group lg:col-span-1 ${cardClasses} hover:border-amber-600/40 dark:hover:border-amber-500/40`}
           >
             <div className="space-y-1">
               <div className="w-10 h-10 border rounded-xl flex items-center justify-center text-lg mb-3 bg-amber-50 border-amber-600/25 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400">
@@ -367,7 +367,7 @@ export default function PainelPage() {
 
         {/* Detalhamento de XP: Aulas vs Desafios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div className={`border rounded-2xl p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
+          <div className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
             <div className="space-y-1 min-w-0">
               <span className={`text-[11px] font-bold uppercase tracking-wider block ${accentGreenClasses}`}>
                 Trilha de Estudos
@@ -375,12 +375,12 @@ export default function PainelPage() {
               <h3 className="text-sm sm:text-base font-bold truncate">
                 XP das Aulas
               </h3>
-              <p className={`text-xs ${textMutedClasses}`}>
+              <p className={`text-xs tabular-nums ${textMutedClasses}`}>
                 {XP_POR_AULA} XP por aula concluída ({completedCount} {completedCount === 1 ? 'aula' : 'aulas'}).
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className={`text-lg sm:text-xl font-black ${accentGreenClasses}`}>
+              <span className={`text-lg sm:text-xl font-black tabular-nums ${accentGreenClasses}`}>
                 {lessonsXp.toLocaleString('pt-BR')} XP
               </span>
               <span className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}>
@@ -389,7 +389,7 @@ export default function PainelPage() {
             </div>
           </div>
 
-          <div className={`border rounded-2xl p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
+          <div className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
             <div className="space-y-1 min-w-0">
               <span className={`text-[11px] font-bold uppercase tracking-wider block ${accentAmberClasses}`}>
                 Arena de Desafios
@@ -402,7 +402,7 @@ export default function PainelPage() {
               </p>
             </div>
             <div className="text-right shrink-0">
-              <span className={`text-lg sm:text-xl font-black ${accentAmberClasses}`}>
+              <span className={`text-lg sm:text-xl font-black tabular-nums ${accentAmberClasses}`}>
                 {challengesXp.toLocaleString('pt-BR')} XP
               </span>
               <span className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}>
@@ -413,10 +413,10 @@ export default function PainelPage() {
         </div>
 
         {/* Grid Inferior: Informações, Atividades, Perfil, Segurança e Exclusão */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="space-y-6 lg:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
+          <div className="space-y-5 sm:space-y-6 lg:col-span-1">
             {/* Informações */}
-            <div className={`border rounded-2xl p-5 sm:p-6 space-y-4 ${cardClasses}`}>
+            <div className={`border rounded-2xl p-4 sm:p-6 space-y-4 ${cardClasses}`}>
               <h3 className="text-base sm:text-lg font-bold">Informações</h3>
               <div className="space-y-3 text-xs">
                 <div>
@@ -447,7 +447,7 @@ export default function PainelPage() {
             </div>
 
             {/* Atividades Recentes */}
-            <div className={`border rounded-2xl p-5 sm:p-6 space-y-4 ${cardClasses}`}>
+            <div className={`border rounded-2xl p-4 sm:p-6 space-y-4 ${cardClasses}`}>
               <div>
                 <h3 className="text-base font-bold">Atividades Recentes ⏳</h3>
                 <p className={`text-[11px] mt-0.5 ${textMutedClasses}`}>
@@ -480,9 +480,9 @@ export default function PainelPage() {
             </div>
           </div>
 
-          <div className="space-y-6 lg:col-span-2">
+          <div className="space-y-5 sm:space-y-6 lg:col-span-2">
             {/* Nome de Exibição */}
-            <div className={`border rounded-2xl p-5 sm:p-6 space-y-4 ${cardClasses}`}>
+            <div className={`border rounded-2xl p-4 sm:p-6 space-y-4 ${cardClasses}`}>
               <div>
                 <h3 className="text-base sm:text-lg font-bold">Nome de Exibição</h3>
                 <p className={`text-xs mt-0.5 ${textMutedClasses}`}>
@@ -527,7 +527,7 @@ export default function PainelPage() {
             </div>
 
             {/* Segurança (Senha) */}
-            <div className={`border rounded-2xl p-5 sm:p-6 space-y-4 ${cardClasses}`}>
+            <div className={`border rounded-2xl p-4 sm:p-6 space-y-4 ${cardClasses}`}>
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <h3 className="text-base sm:text-lg font-bold">Segurança</h3>
@@ -637,7 +637,7 @@ export default function PainelPage() {
             </div>
 
             {/* Zona de Perigo */}
-            <div className="border rounded-2xl p-5 sm:p-6 space-y-3 bg-white border-red-600/25 shadow-sm dark:bg-gray-900 dark:border-red-500/20 dark:shadow-lg">
+            <div className="border rounded-2xl p-4 sm:p-6 space-y-3 bg-white border-red-600/25 shadow-sm dark:bg-gray-900 dark:border-red-500/20 dark:shadow-lg">
               <div>
                 <h3 className={`text-base sm:text-lg font-bold ${accentRedClasses}`}>
                   Zona de Perigo
@@ -661,6 +661,16 @@ export default function PainelPage() {
           </div>
         </div>
       </main>
+
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+        <p>Codelab João • Aprendizado prático de JavaScript</p>
+        <Link
+          href="/contato"
+          className="font-medium hover:text-emerald-700 text-stone-600 dark:hover:text-emerald-400 dark:text-gray-400"
+        >
+          💬 Contato e Suporte
+        </Link>
+      </footer>
     </div>
   )
 }

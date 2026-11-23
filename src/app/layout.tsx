@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sans",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   title: "Codelab João",
@@ -24,9 +37,13 @@ export default async function RootLayout({
   const mostrarManutencao = EM_MANUTENCAO && !isLocalhost;
 
   return (
-    <html lang="pt-BR" className="dark" suppressHydrationWarning>
+    <html
+      lang="pt-BR"
+      className={`dark ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <body
-        className="antialiased bg-gray-950 text-white"
+        className="font-sans antialiased bg-gray-950 text-white"
         suppressHydrationWarning
       >
         {mostrarManutencao ? (

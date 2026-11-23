@@ -52,7 +52,7 @@ export function Navbar({
     'bg-stone-50 border-stone-200 text-stone-700 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-300'
 
   return (
-    <header className="border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-3.5 sm:px-6 py-3">
+    <header className="relative border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-3.5 sm:px-6 py-2.5 sm:py-3">
       <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Link
@@ -77,7 +77,7 @@ export function Navbar({
               )}
             </h1>
             {subtitle && (
-              <p className="sm:hidden text-[11px] truncate text-stone-500 dark:text-gray-400">
+              <p className="sm:hidden text-[11px] leading-tight truncate text-stone-500 dark:text-gray-400">
                 {subtitle}
               </p>
             )}
@@ -179,13 +179,13 @@ export function Navbar({
         </div>
 
         {/* Barra Mobile */}
-        <div className="flex md:hidden items-center gap-2 shrink-0">
+        <div className="flex md:hidden items-center gap-1.5 shrink-0">
           {onToggleTheme && (
             <button
               type="button"
               onClick={onToggleTheme}
               suppressHydrationWarning
-              className={`px-2.5 py-1.5 border rounded-xl text-xs font-bold cursor-pointer ${navBtnClasses}`}
+              className={`px-2.5 py-2 border rounded-xl text-xs font-bold cursor-pointer ${navBtnClasses}`}
               title="Alternar modo claro e escuro"
               aria-label="Alternar modo claro e escuro"
             >
@@ -196,7 +196,7 @@ export function Navbar({
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`px-2.5 py-1.5 border rounded-xl font-bold text-xs active:scale-95 cursor-pointer ${navBtnClasses} text-emerald-700 dark:text-emerald-400`}
+            className={`px-3 py-2 border rounded-xl font-bold text-xs cursor-pointer ${navBtnClasses} text-emerald-700 dark:text-emerald-400`}
             aria-label="Abrir Menu"
           >
             {menuOpen ? 'Fechar' : 'Menu'}
@@ -206,7 +206,7 @@ export function Navbar({
 
       {/* Menu Mobile */}
       {menuOpen && (
-        <div className="md:hidden absolute top-14 left-0 right-0 border-b p-4 space-y-2 z-50 shadow-2xl bg-white border-stone-200 dark:bg-gray-900 dark:border-gray-800">
+        <div className="md:hidden absolute top-full left-0 right-0 border-b p-4 space-y-2 z-50 shadow-2xl bg-white border-stone-200 dark:bg-gray-900 dark:border-gray-800">
           <Link
             href="/dashboard"
             onClick={() => setMenuOpen(false)}
