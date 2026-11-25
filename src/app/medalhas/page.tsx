@@ -15,7 +15,7 @@ interface ChallengeProgressRow {
 const STORAGE_KEY = 'codelab_tema_aula'
 const TOTAL_AULAS_MODULO_1 = 3
 const METADE_AULAS_MODULO_1 = Math.ceil(TOTAL_AULAS_MODULO_1 / 2)
-const TOTAL_AULAS_TRILHA = 16
+const TOTAL_AULAS_TRILHA = 24
 const METADE_AULAS_TRILHA = Math.ceil(TOTAL_AULAS_TRILHA / 2)
 const META_AULAS_MODULO_2 = 6
 const META_AULAS_MODULO_4 = 12
@@ -250,7 +250,7 @@ export default function MedalhasPage() {
       id: 'trilha-completa',
       icon: '🏅',
       title: 'Trilha Completa',
-      description: `Concluir todas as ${TOTAL_AULAS_TRILHA} aulas dos 4 módulos.`,
+      description: `Concluir todas as ${TOTAL_AULAS_TRILHA} aulas dos 6 módulos.`,
       unlocked: completedCount >= TOTAL_AULAS_TRILHA,
       statusText:
         completedCount >= TOTAL_AULAS_TRILHA
@@ -299,19 +299,21 @@ export default function MedalhasPage() {
       />
 
       {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-12">
-        <div className="text-center space-y-2 py-3 sm:py-4">
-          <span className="inline-block px-3 py-1 border font-bold text-[11px] rounded-full bg-emerald-50 text-emerald-700 border-emerald-600/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-            CONQUISTAS 🏆 • {unlockedCount}/{medals.length} MEDALHAS
-          </span>
-          <h2 className="text-xl sm:text-3xl font-black tracking-tight">
-            Painel de Medalhas
-          </h2>
-          <p className={`text-[15px] sm:text-base pt-1 leading-relaxed ${textMutedClasses}`}>
-            Bom ver você por aqui,{' '}
-            <strong className="text-stone-900 dark:text-white">{userName}</strong>!
-            Conclua aulas e desafios para acumular XP e desbloquear medalhas.
-          </p>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 dark:border-gray-800 pb-5">
+          <div className="space-y-1.5 w-full">
+            <span className="inline-block px-3 py-1 border font-bold text-[11px] rounded-full bg-emerald-50 text-emerald-700 border-emerald-600/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
+              CONQUISTAS 🏆 • {unlockedCount}/{medals.length} MEDALHAS
+            </span>
+            <h2 className="text-xl sm:text-3xl font-black tracking-tight">
+              Painel de Medalhas
+            </h2>
+            <p className={`text-sm sm:text-base leading-relaxed max-w-none ${textMutedClasses}`}>
+              Bom ver você por aqui,{' '}
+              <strong className="text-stone-900 dark:text-white">{userName}</strong>!
+              Conclua aulas e desafios para acumular XP e desbloquear medalhas.
+            </p>
+          </div>
         </div>
 
         {/* Resumo do Progresso e XP Total */}
@@ -370,7 +372,7 @@ export default function MedalhasPage() {
         </div>
 
         {/* Grid de Medalhas */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {medals.map((medal) => {
             const isEmerald = medal.tone === 'emerald'
             const unlockedBox = isEmerald
@@ -440,7 +442,7 @@ export default function MedalhasPage() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-4xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
         <p>Codelab João • Aprendizado prático de JavaScript</p>
         <Link
           href="/contato"

@@ -109,7 +109,7 @@ export default function RankingPage() {
         onToggleTheme={alternarTema}
       />
 
-      <main className="flex-1 max-w-3xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
         <div className="flex items-center justify-between">
           <Link
             href="/desafios"
@@ -126,13 +126,13 @@ export default function RankingPage() {
           <h2 className="text-lg sm:text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             Ranking de XP
           </h2>
-          <p className={`text-[15px] sm:text-base max-w-lg mx-auto leading-relaxed tabular-nums ${textMutedClasses}`}>
+          <p className={`text-[15px] sm:text-base max-w-2xl mx-auto leading-relaxed tabular-nums ${textMutedClasses}`}>
             Soma das aulas concluídas na trilha ({XP_POR_AULA} XP por aula) e dos desafios resolvidos na plataforma.
           </p>
         </div>
 
         {currentUserEntry && (
-          <div className="border rounded-2xl px-3.5 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-2.5 text-xs sm:text-sm tabular-nums bg-emerald-50 border-emerald-600/25 text-stone-900 dark:bg-gray-900 dark:border-emerald-500/25 dark:text-white">
+          <div className="border rounded-2xl px-3.5 sm:px-5 py-3 sm:py-3.5 flex items-center justify-between gap-2.5 text-xs sm:text-sm tabular-nums bg-emerald-50 border-emerald-600/25 text-stone-900 dark:bg-gray-900 dark:border-emerald-500/25 dark:text-white">
             <div className="min-w-0">
               <span className={`font-bold ${accentGreenClasses}`}>Sua posição:</span>{' '}
               <span className="font-extrabold">#{currentUserIndex + 1}</span>
@@ -225,7 +225,7 @@ export default function RankingPage() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-3xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
         <p>Codelab João • Aprendizado prático de JavaScript</p>
         <Link
           href="/contato"

@@ -13,7 +13,7 @@ interface RecentActivity {
 }
 
 const STORAGE_KEY = 'codelab_tema_aula'
-const TOTAL_AULAS_TRILHA = 16
+const TOTAL_AULAS_TRILHA = 24
 const XP_POR_AULA = 50
 
 export default function PainelPage() {
@@ -310,7 +310,7 @@ export default function PainelPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <span className={`text-[11px] font-bold uppercase tracking-wider ${accentGreenClasses}`}>
-                  Trilha Base • 4 Módulos (16 Aulas)
+                  Trilha Base • 6 Módulos (24 Aulas)
                 </span>
                 <span className={`text-xs font-extrabold tabular-nums ${accentGreenClasses}`}>
                   {progressPercent}%

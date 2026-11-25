@@ -178,7 +178,7 @@ export default function ArenaPage() {
       />
 
       {/* Vitrine dos Desafios */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-5 sm:space-y-6 pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
         {/* Banner */}
         <div className="space-y-3 border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-amber-50/50 border-amber-600/25 dark:bg-gray-900 dark:border-amber-500/20">
           <div className="space-y-1.5">
@@ -188,7 +188,7 @@ export default function ArenaPage() {
             <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
               Pratique sua lógica por módulo
             </h2>
-            <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${textMutedClasses}`}>
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-2xl ${textMutedClasses}`}>
               Abra um módulo, resolva as missões no editor ou no quiz e acumule XP no seu ritmo.
             </p>
           </div>
@@ -213,7 +213,7 @@ export default function ArenaPage() {
               {completedIds.length} de {totalChallenges} concluídos
             </p>
           </div>
-          <div className="w-full sm:w-48 h-3 rounded-full overflow-hidden border p-0.5 bg-stone-100 border-stone-200 dark:bg-gray-950 dark:border-gray-800">
+          <div className="w-full sm:w-64 h-3 rounded-full overflow-hidden border p-0.5 bg-stone-100 border-stone-200 dark:bg-gray-950 dark:border-gray-800">
             <div
               suppressHydrationWarning
               className="bg-amber-500 h-full rounded-full transition-[width] duration-300"
@@ -324,7 +324,7 @@ export default function ArenaPage() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-4xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
         <p>Codelab João • Aprendizado prático de JavaScript</p>
         <Link
           href="/contato"

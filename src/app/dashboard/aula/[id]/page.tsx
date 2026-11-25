@@ -213,7 +213,7 @@ export default function AulaDetalhePage({
             onToggleTheme={alternarTema}
           />
         </div>
-        <main className="flex-1 mx-auto max-w-3xl w-full px-4 py-10">
+        <main className="flex-1 mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-10">
           <div className={caixa}>
             <p className="text-sm font-semibold text-stone-800 dark:text-gray-200">
               Aula não encontrada.
@@ -231,6 +231,17 @@ export default function AulaDetalhePage({
     )
   }
 
+  const indiceAtual = aulasData.findIndex(
+    (item: AulaItem) => item.id === aula.id,
+  )
+  const proximaAula: AulaItem | undefined =
+    aulasData.find(
+      (item: AulaItem) => item.id === aula.conclusao?.proximaAulaId,
+    ) ||
+    (indiceAtual !== -1 && indiceAtual + 1 < aulasData.length
+      ? aulasData[indiceAtual + 1]
+      : undefined)
+
   const etapas = ['Introdução', 'Teoria', 'Prática', 'Quiz', 'Conclusão']
 
   const progressoPercentual = Math.round(
@@ -245,6 +256,9 @@ export default function AulaDetalhePage({
   const temMontarBlocos = Boolean(aula.pratica.montarBlocos)
   const temCacaErro = Boolean(aula.pratica.cacaErro)
   const temSimulador = Boolean(aula.pratica.simuladorEstado)
+  const listaQuiz = Array.isArray(aula.quiz) ? aula.quiz : []
+  const linhasCacaErro =
+    aula.pratica.cacaErro?.linhas ?? aula.pratica.cacaErro?.etapas ?? []
 
   const moverItem = (index: number, direcao: -1 | 1) => {
     const novoIndice = index + direcao
@@ -321,7 +335,7 @@ export default function AulaDetalhePage({
     setFeedbackSimulador(atingiu ? 'ok' : 'erro')
   }
 
-  const perguntaAtual = aula.quiz[indicePergunta]
+  const perguntaAtual = listaQuiz[indicePergunta]
 
   const responderQuiz = (opcaoIdx: number) => {
     if (respostaSelecionada !== null || !perguntaAtual) return
@@ -331,7 +345,7 @@ export default function AulaDetalhePage({
   }
 
   const avancarQuiz = () => {
-    if (indicePergunta + 1 < aula.quiz.length) {
+    if (indicePergunta + 1 < listaQuiz.length) {
       setIndicePergunta((prev: number) => prev + 1)
       setRespostaSelecionada(null)
     } else {
@@ -406,7 +420,7 @@ export default function AulaDetalhePage({
         />
       </div>
 
-      <main className="flex-1 mx-auto max-w-3xl w-full px-4 py-6 sm:py-8 space-y-5 pb-12">
+      <main className="flex-1 mx-auto max-w-6xl w-full px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 pb-12">
         {/* Cabeçalho e progresso da aula */}
         <div className={caixa}>
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -425,7 +439,9 @@ export default function AulaDetalhePage({
             </span>
           </div>
 
-          <h1 className={`mt-2 text-xl sm:text-2xl font-extrabold leading-snug ${destaque}`}>
+          <h1
+            className={`mt-2 text-xl sm:text-2xl font-extrabold leading-snug ${destaque}`}
+          >
             {aula.titulo}
           </h1>
           <p className={`mt-1 ${texto}`}>{aula.resumo}</p>
@@ -467,7 +483,7 @@ export default function AulaDetalhePage({
                 Objetivo da aula
               </span>
               <p className={`mt-1 font-medium ${destaque}`}>
-                {aula.introducao.objetivo}
+                {aula.introducao?.objetivo}
               </p>
             </div>
 
@@ -475,10 +491,10 @@ export default function AulaDetalhePage({
               <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
                 Contexto
               </span>
-              <p className={`mt-1 ${texto}`}>{aula.introducao.contexto}</p>
+              <p className={`mt-1 ${texto}`}>{aula.introducao?.contexto}</p>
             </div>
 
-            {aula.introducao.imagemUrl && (
+            {aula.introducao?.imagemUrl && (
               <img
                 src={aula.introducao.imagemUrl}
                 alt={aula.introducao.imagemAlt || aula.titulo}
@@ -497,7 +513,7 @@ export default function AulaDetalhePage({
               </h2>
 
               <div className="mt-4 space-y-3">
-                {aula.teoria.topicos.map(
+                {(aula.teoria?.topicos ?? []).map(
                   (topico: TopicoTeoria, idx: number) => (
                     <div key={`${topico.titulo}-${idx}`} className={subcaixa}>
                       <h3
@@ -527,11 +543,11 @@ export default function AulaDetalhePage({
                   Aplicação prática
                 </span>
                 <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
-                  {aula.teoria.exemploCotidiano}
+                  {aula.teoria?.exemploCotidiano}
                 </p>
               </div>
 
-              {aula.teoria.exemploCodigo && (
+              {aula.teoria?.exemploCodigo && (
                 <div>
                   <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400 mb-1.5">
                     Exemplo de código
@@ -547,7 +563,7 @@ export default function AulaDetalhePage({
                   Síntese
                 </span>
                 <p className={`mt-1 font-semibold ${destaque}`}>
-                  {aula.teoria.resumo}
+                  {aula.teoria?.resumo}
                 </p>
               </div>
             </div>
@@ -556,26 +572,35 @@ export default function AulaDetalhePage({
 
         {/* Etapa 2: Prática Interativa */}
         {etapaAtual === 2 && (
-          <div className={`${caixa} space-y-4`}>
-            <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Prática guiada
-              </span>
-              <h2 className={`mt-1 text-lg font-extrabold ${destaque}`}>
-                {aula.pratica.titulo}
-              </h2>
-              <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
-                {aula.pratica.enunciado}
-              </p>
+          <div className={`${caixa} space-y-5`}>
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                  Prática guiada
+                </span>
+                <h2 className={`mt-1 text-lg font-extrabold ${destaque}`}>
+                  {aula.pratica?.titulo}
+                </h2>
+                <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
+                  {aula.pratica?.enunciado}
+                </p>
+              </div>
+
+              <Link
+                href="/playground"
+                className="text-xs font-semibold text-emerald-700 hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300 shrink-0"
+              >
+                Ir para o Playground →
+              </Link>
             </div>
 
-            {aula.pratica.codigoInicial && (
+            {aula.pratica?.codigoInicial && (
               <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl bg-gray-950 p-3.5 text-xs leading-relaxed text-emerald-300">
                 <code>{aula.pratica.codigoInicial}</code>
               </pre>
             )}
 
-            {aula.pratica.imagemUrl && (
+            {aula.pratica?.imagemUrl && (
               <img
                 src={aula.pratica.imagemUrl}
                 alt={aula.pratica.imagemAlt || aula.pratica.titulo}
@@ -855,7 +880,7 @@ export default function AulaDetalhePage({
                   <div className={`${subcaixa} space-y-1`}>
                     <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
                       {aula.pratica.montarBlocos!.erroMsg ||
-                        'Ainda não ficou certo. Tente montar novamente.'}
+                        'A montagem ainda não corresponde ao esperado. Tente ajustar os blocos.'}
                     </p>
                     {aula.pratica.dica && (
                       <p className={texto}>
@@ -867,30 +892,31 @@ export default function AulaDetalhePage({
                 )}
               </div>
             ) : temCacaErro ? (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  {aula.pratica.cacaErro!.etapas.map(
-                    (etapaLinha: string, idx: number) => {
-                      const selecionada = indiceErroSelecionado === idx
-                      return (
-                        <button
-                          key={`${etapaLinha}-${idx}`}
-                          type="button"
-                          onClick={() => {
-                            setIndiceErroSelecionado(idx)
-                            setFeedbackCacaErro('idle')
-                          }}
-                          className={`w-full text-left rounded-xl border p-3 font-mono text-xs sm:text-sm cursor-pointer ${
-                            selecionada
-                              ? 'border-emerald-500 bg-emerald-500/15 font-bold text-emerald-900 dark:text-emerald-200'
-                              : 'border-stone-200 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-800 dark:bg-gray-950/70 dark:text-gray-200'
-                          }`}
-                        >
-                          {etapaLinha}
-                        </button>
-                      )
-                    },
-                  )}
+                  {linhasCacaErro.map((linha: string, idx: number) => {
+                    const selecionada = indiceErroSelecionado === idx
+                    return (
+                      <button
+                        key={`${linha}-${idx}`}
+                        type="button"
+                        onClick={() => {
+                          setIndiceErroSelecionado(idx)
+                          setFeedbackCacaErro('idle')
+                        }}
+                        className={`w-full text-left rounded-xl border px-3.5 py-2.5 font-mono text-xs sm:text-sm cursor-pointer ${
+                          selecionada
+                            ? 'border-emerald-500 bg-emerald-500/15 text-emerald-950 font-bold dark:text-emerald-200'
+                            : 'border-stone-300 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-200'
+                        }`}
+                      >
+                        <span className="mr-2 text-stone-400 dark:text-gray-500">
+                          {idx + 1}.
+                        </span>
+                        {linha}
+                      </button>
+                    )
+                  })}
                 </div>
 
                 <button
@@ -909,7 +935,7 @@ export default function AulaDetalhePage({
                     >
                       ✓{' '}
                       {aula.pratica.cacaErro!.acertoMsg ||
-                        'Você encontrou o ponto problemático corretamente.'}
+                        'Erro identificado corretamente.'}
                     </p>
                   </div>
                 )}
@@ -918,7 +944,7 @@ export default function AulaDetalhePage({
                   <div className={`${subcaixa} space-y-1`}>
                     <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
                       {aula.pratica.cacaErro!.erroMsg ||
-                        'Essa linha não é o erro principal. Tente outra.'}
+                        'Essa linha não é a que contém o problema. Observe com calma.'}
                     </p>
                     {aula.pratica.dica && (
                       <p className={texto}>
@@ -931,46 +957,53 @@ export default function AulaDetalhePage({
               </div>
             ) : temSimulador ? (
               <div className="space-y-4">
-                <div className={`${subcaixa} space-y-2`}>
-                  <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                    {aula.pratica.simuladorEstado!.rotuloEstado}
-                  </span>
-                  <p className={`text-xl font-black tabular-nums ${destaque}`}>
-                    {valorSimulador}
-                  </p>
-                  <p className={texto}>
-                    {aula.pratica.simuladorEstado!.descricaoMeta}
-                  </p>
-                </div>
+                <div className={`${subcaixa} space-y-3`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                      {aula.pratica.simuladorEstado!.rotulo ||
+                        aula.pratica.simuladorEstado!.rotuloEstado ||
+                        'Estado atual'}
+                    </span>
+                    <span
+                      className={`font-mono text-base sm:text-lg font-black tabular-nums ${destaque}`}
+                    >
+                      {valorSimulador}
+                    </span>
+                  </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {aula.pratica.simuladorEstado!.acoes.map(
-                    (acao: AcaoSimulador, idx: number) => (
-                      <button
-                        key={`${acao.rotulo}-${idx}`}
-                        type="button"
-                        onClick={() => {
-                          setValorSimulador((prev: number) => prev + acao.delta)
-                          setFeedbackSimulador('idle')
-                        }}
-                        className={botao}
-                      >
-                        {acao.rotulo}
-                      </button>
-                    ),
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setValorSimulador(
-                        aula.pratica.simuladorEstado!.valorInicial,
-                      )
-                      setFeedbackSimulador('idle')
-                    }}
-                    className={botao}
-                  >
-                    Reiniciar
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    {aula.pratica.simuladorEstado!.acoes.map(
+                      (acao: AcaoSimulador, idx: number) => (
+                        <button
+                          key={`${acao.rotulo}-${idx}`}
+                          type="button"
+                          onClick={() => {
+                            setValorSimulador((atual: number) =>
+                              acao.definirPara !== undefined
+                                ? acao.definirPara
+                                : atual + (acao.delta ?? 0),
+                            )
+                            setFeedbackSimulador('idle')
+                          }}
+                          className={botao}
+                        >
+                          {acao.rotulo}
+                        </button>
+                      ),
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setValorSimulador(
+                          aula.pratica.simuladorEstado!.valorInicial ?? 0,
+                        )
+                        setFeedbackSimulador('idle')
+                      }}
+                      className={botao}
+                    >
+                      Resetar valor
+                    </button>
+                  </div>
                 </div>
 
                 <button
@@ -978,7 +1011,7 @@ export default function AulaDetalhePage({
                   onClick={conferirSimulador}
                   className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
                 >
-                  Conferir estado
+                  Verificar meta
                 </button>
 
                 {feedbackSimulador === 'ok' && (
@@ -988,7 +1021,7 @@ export default function AulaDetalhePage({
                     >
                       ✓{' '}
                       {aula.pratica.simuladorEstado!.acertoMsg ||
-                        'Meta atingida com sucesso.'}
+                        'Meta atingida corretamente.'}
                     </p>
                   </div>
                 )}
@@ -997,7 +1030,7 @@ export default function AulaDetalhePage({
                   <div className={`${subcaixa} space-y-1`}>
                     <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-400">
                       {aula.pratica.simuladorEstado!.erroMsg ||
-                        'Ainda não atingiu a meta esperada.'}
+                        'O valor ainda não atingiu o objetivo da prática.'}
                     </p>
                     {aula.pratica.dica && (
                       <p className={texto}>
@@ -1009,87 +1042,111 @@ export default function AulaDetalhePage({
                 )}
               </div>
             ) : (
-              <div className={subcaixa}>
-                <p className={texto}>{aula.pratica.resultadoEsperado}</p>
-                {aula.pratica.dica && (
-                  <p className={`mt-2 ${texto}`}>
-                    <strong className={destaque}>Dica:</strong> {aula.pratica.dica}
-                  </p>
-                )}
+              <div className={`${subcaixa} space-y-3`}>
+                <p className={texto}>
+                  {aula.pratica?.dica ||
+                    'Revise os conceitos da etapa anterior e avance para o quiz.'}
+                </p>
+                <Link
+                  href="/playground"
+                  className="inline-flex items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs sm:text-sm font-extrabold text-gray-950"
+                >
+                  Testar no Playground →
+                </Link>
               </div>
             )}
           </div>
         )}
 
         {/* Etapa 3: Quiz */}
-        {etapaAtual === 3 && perguntaAtual && (
+        {etapaAtual === 3 && (
           <div className={`${caixa} space-y-4`}>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Verificação rápida
-              </span>
-              <span className="text-xs font-semibold text-stone-500 dark:text-gray-400 tabular-nums">
-                Pergunta {indicePergunta + 1} de {aula.quiz.length}
-              </span>
-            </div>
+            {perguntaAtual ? (
+              <>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                    Quiz da aula
+                  </span>
+                  <span className="text-xs font-semibold text-stone-500 dark:text-gray-400 tabular-nums">
+                    Pergunta {indicePergunta + 1} de {listaQuiz.length}
+                  </span>
+                </div>
 
-            <h2 className={`text-base sm:text-lg font-extrabold ${destaque}`}>
-              {perguntaAtual.pergunta}
-            </h2>
+                <h2 className={`text-base sm:text-lg font-extrabold ${destaque}`}>
+                  {perguntaAtual.pergunta}
+                </h2>
 
-            <div className="space-y-2.5">
-              {perguntaAtual.opcoes.map((opcao: string, idx: number) => {
-                const selecionada = respostaSelecionada === idx
-                const ehCorreta = idx === perguntaAtual.respostaCorreta
-                let estiloOpcao =
-                  'border-stone-200 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-800 dark:bg-gray-950/70 dark:text-gray-200'
+                <div className="space-y-2">
+                  {perguntaAtual.opcoes.map((opcao: string, idx: number) => {
+                    const respondida = respostaSelecionada !== null
+                    const escolhida = respostaSelecionada === idx
+                    const correta = perguntaAtual.respostaCorreta === idx
 
-                if (respostaSelecionada !== null) {
-                  if (ehCorreta) {
-                    estiloOpcao =
-                      'border-emerald-500 bg-emerald-500/15 font-bold text-emerald-900 dark:text-emerald-200'
-                  } else if (selecionada) {
-                    estiloOpcao =
-                      'border-red-500 bg-red-500/15 text-red-900 dark:text-red-200'
-                  }
-                }
+                    let estiloOpcao =
+                      'border-stone-300 bg-stone-50 text-stone-800 hover:border-emerald-500 dark:border-gray-700 dark:bg-gray-950/70 dark:text-gray-200'
 
-                return (
-                  <button
-                    key={`${opcao}-${idx}`}
-                    type="button"
-                    onClick={() => responderQuiz(idx)}
-                    disabled={respostaSelecionada !== null}
-                    className={`w-full text-left rounded-xl border p-3.5 text-xs sm:text-sm cursor-pointer ${estiloOpcao}`}
-                  >
-                    {opcao}
-                  </button>
-                )
-              })}
-            </div>
+                    if (respondida) {
+                      if (correta) {
+                        estiloOpcao =
+                          'border-emerald-500 bg-emerald-500/15 text-emerald-950 font-bold dark:text-emerald-200'
+                      } else if (escolhida) {
+                        estiloOpcao =
+                          'border-red-500 bg-red-500/15 text-red-900 font-semibold dark:text-red-300'
+                      }
+                    }
 
-            {respostaSelecionada !== null && (
-              <div className={`${subcaixa} space-y-3`}>
-                <p
-                  className={`text-xs sm:text-sm font-semibold ${
-                    respostaSelecionada === perguntaAtual.respostaCorreta
-                      ? 'text-emerald-700 dark:text-emerald-400'
-                      : 'text-amber-700 dark:text-amber-400'
-                  }`}
-                >
-                  {respostaSelecionada === perguntaAtual.respostaCorreta
-                    ? '✓ Resposta correta!'
-                    : 'Atenção à explicação:'}
+                    return (
+                      <button
+                        key={`${opcao}-${idx}`}
+                        type="button"
+                        disabled={respondida}
+                        onClick={() => responderQuiz(idx)}
+                        className={`w-full text-left rounded-xl border px-4 py-3 text-xs sm:text-sm cursor-pointer disabled:cursor-default ${estiloOpcao}`}
+                      >
+                        {opcao}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {respostaSelecionada !== null && (
+                  <div className={`${subcaixa} space-y-3`}>
+                    <p
+                      className={`text-xs sm:text-sm font-semibold ${
+                        respostaSelecionada === perguntaAtual.respostaCorreta
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-amber-700 dark:text-amber-400'
+                      }`}
+                    >
+                      {respostaSelecionada === perguntaAtual.respostaCorreta
+                        ? '✓ Resposta correta!'
+                        : 'Atenção à explicação:'}
+                    </p>
+                    <p className={texto}>{perguntaAtual.explicacao}</p>
+                    <button
+                      type="button"
+                      onClick={avancarQuiz}
+                      className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                    >
+                      {indicePergunta + 1 < listaQuiz.length
+                        ? 'Próxima pergunta →'
+                        : 'Ir para conclusão →'}
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="space-y-3">
+                <p className={texto}>
+                  Nenhuma pergunta cadastrada nesta aula. Você pode avançar
+                  para a conclusão.
                 </p>
-                <p className={texto}>{perguntaAtual.explicacao}</p>
                 <button
                   type="button"
-                  onClick={avancarQuiz}
+                  onClick={() => setEtapaAtual(4)}
                   className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
                 >
-                  {indicePergunta + 1 < aula.quiz.length
-                    ? 'Próxima pergunta →'
-                    : 'Ir para a conclusão →'}
+                  Ir para conclusão →
                 </button>
               </div>
             )}
@@ -1099,89 +1156,88 @@ export default function AulaDetalhePage({
         {/* Etapa 4: Conclusão */}
         {etapaAtual === 4 && (
           <div className={`${caixa} space-y-4`}>
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <h2 className={`text-lg font-extrabold ${destaque}`}>
-                Resumo e Conclusão
-              </h2>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
-                Quiz: {totalAcertosQuiz}/{aula.quiz.length}
-              </span>
-            </div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              Conclusão da aula
+            </span>
+            <h2 className={`text-lg sm:text-xl font-extrabold ${destaque}`}>
+              {aula.conclusao?.titulo || 'Aula concluída'}
+            </h2>
+            <p className={`whitespace-pre-line ${texto}`}>
+              {aula.conclusao?.mensagem ||
+                (aula.conclusao?.aprendizados ?? []).join('\n')}
+            </p>
 
-            <div className={subcaixa}>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-2">
-                O que você trabalhou nesta aula
-              </span>
-              <ul className="space-y-1.5 list-disc list-inside">
-                {aula.conclusao.aprendizados.map(
-                  (item: string, idx: number) => (
-                    <li key={`${item}-${idx}`} className={texto}>
-                      {item}
-                    </li>
-                  ),
-                )}
-              </ul>
-            </div>
-
-            <div className={subcaixa}>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
-                Para refletir
-              </span>
-              <p className={`mt-1 ${texto}`}>{aula.conclusao.reflexao}</p>
-            </div>
-
-            {erroSalvar && (
-              <div className="rounded-xl border border-amber-500/40 bg-amber-50 p-3 text-xs font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">
-                {erroSalvar}
+            {listaQuiz.length > 0 && respostasCorretas.length > 0 && (
+              <div className={subcaixa}>
+                <p className={`text-xs sm:text-sm font-semibold ${destaque}`}>
+                  Desempenho no quiz: {totalAcertosQuiz} de {listaQuiz.length}{' '}
+                  acertos
+                </p>
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className={subcaixa}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
+                Próximo passo
+              </span>
+              <p className={`mt-1 text-xs sm:text-sm ${destaque}`}>
+                {aula.conclusao?.proximoPasso ||
+                  aula.conclusao?.reflexao ||
+                  'Continue avançando na trilha ou teste suas ideias no Playground.'}
+              </p>
+            </div>
+
+            {erroSalvar && (
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                {erroSalvar}
+              </p>
+            )}
+
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 pt-2">
               {completed ? (
-                <span className="rounded-xl border border-emerald-600/30 bg-emerald-50 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/15 dark:text-emerald-300">
+                <span className="inline-flex items-center justify-center rounded-xl border border-emerald-500/35 bg-emerald-500/10 px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-300">
                   ✓ Aula concluída (+{XP_POR_AULA} XP)
                 </span>
               ) : (
                 <button
                   type="button"
-                  onClick={() => void handleConcluirAula()}
                   disabled={saving}
-                  className="rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
+                  onClick={() => void handleConcluirAula()}
+                  className="inline-flex items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 px-5 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
                 >
                   {saving
                     ? 'Salvando...'
-                    : `Concluir aula e ganhar +${XP_POR_AULA} XP`}
+                    : `Concluir aula (+${XP_POR_AULA} XP)`}
                 </button>
               )}
 
-              <div className="flex flex-wrap gap-2">
-                {aula.conclusao.proximaAulaId ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const prox = aulasData.find(
-                        (item) => item.id === aula.conclusao.proximaAulaId,
-                      )
-                      router.push(
-                        prox
-                          ? `/dashboard/aula/${prox.numero}`
-                          : '/dashboard',
-                      )
-                    }}
-                    className={botao}
-                  >
-                    Próxima aula →
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => router.push('/dashboard')}
-                    className={botao}
-                  >
-                    Voltar à trilha
-                  </button>
-                )}
-              </div>
+              {proximaAula && (
+                <Link
+                  href={`/dashboard/aula/${proximaAula.id}`}
+                  className={`inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-xs sm:text-sm font-extrabold ${
+                    completed
+                      ? 'bg-emerald-500 hover:bg-emerald-400 text-gray-950'
+                      : 'border border-emerald-500/50 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300'
+                  }`}
+                >
+                  Próxima aula ({proximaAula.numero}) →
+                </Link>
+              )}
+
+              <button
+                type="button"
+                onClick={() => router.push('/dashboard')}
+                className={`${botao} inline-flex items-center justify-center`}
+              >
+                Voltar à trilha
+              </button>
+
+              <Link
+                href="/playground"
+                className={`${botao} inline-flex items-center justify-center`}
+              >
+                Ir para o Playground →
+              </Link>
             </div>
           </div>
         )}
@@ -1190,40 +1246,27 @@ export default function AulaDetalhePage({
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() =>
-              setEtapaAtual((prev: number) => Math.max(0, prev - 1))
-            }
             disabled={etapaAtual === 0}
+            onClick={() => setEtapaAtual((prev: number) => Math.max(0, prev - 1))}
             className={botao}
           >
             ← Etapa anterior
           </button>
 
-          {etapaAtual < etapas.length - 1 && (
-            <button
-              type="button"
-              onClick={() =>
-                setEtapaAtual((prev: number) =>
-                  Math.min(etapas.length - 1, prev + 1),
-                )
-              }
-              className="rounded-xl bg-emerald-500 hover:bg-emerald-400 px-4 py-2.5 text-xs sm:text-sm font-extrabold text-gray-950 cursor-pointer"
-            >
-              Próxima etapa →
-            </button>
-          )}
+          <button
+            type="button"
+            disabled={etapaAtual === etapas.length - 1}
+            onClick={() =>
+              setEtapaAtual((prev: number) =>
+                Math.min(etapas.length - 1, prev + 1),
+              )
+            }
+            className={botao}
+          >
+            Próxima etapa →
+          </button>
         </div>
       </main>
-
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-3xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
-        <p>Codelab João • Aprendizado prático de JavaScript</p>
-        <Link
-          href="/contato"
-          className="font-medium hover:text-emerald-700 text-stone-600 dark:hover:text-emerald-400 dark:text-gray-400"
-        >
-          💬 Contato e Suporte
-        </Link>
-      </footer>
     </div>
   )
 }

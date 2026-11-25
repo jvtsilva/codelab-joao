@@ -32,7 +32,8 @@ export interface ConfigMontarBlocos {
 }
 
 export interface ConfigCacaErro {
-  etapas: string[]
+  etapas?: string[]
+  linhas?: string[]
   indiceErro: number
   acertoMsg?: string
   erroMsg?: string
@@ -40,15 +41,17 @@ export interface ConfigCacaErro {
 
 export interface AcaoSimulador {
   rotulo: string
-  delta: number
+  delta?: number
+  definirPara?: number
 }
 
 export interface ConfigSimuladorEstado {
-  rotuloEstado: string
+  rotulo?: string
+  rotuloEstado?: string
   valorInicial: number
   alvo: number
   comparador?: '>=' | '==' | '<='
-  descricaoMeta: string
+  descricaoMeta?: string
   acoes: AcaoSimulador[]
   acertoMsg?: string
   erroMsg?: string
@@ -92,9 +95,12 @@ export interface AulaItem {
   }
   quiz: PerguntaQuiz[]
   conclusao: {
-    aprendizados: string[]
-    reflexao: string
-    proximaAulaId: string | null
+    titulo?: string
+    mensagem?: string
+    proximoPasso?: string
+    aprendizados?: string[]
+    reflexao?: string
+    proximaAulaId?: string | null
     imagemUrl?: string
     imagemAlt?: string
   }
@@ -2107,6 +2113,1006 @@ export const aulasData: AulaItem[] = [
       ],
       reflexao:
         'Agora que você concluiu as 16 aulas da base, qual pequeno projeto ou rotina do dia a dia você gostaria de montar primeiro?',
+      proximaAulaId: 'lesson-17',
+    },
+  },
+  {
+    id: 'lesson-17',
+    numero: 17,
+    modulo: 5,
+    titulo: 'O que é HTML: Estrutura e Tags Essenciais',
+    resumo:
+      'Títulos, parágrafos, botões, inputs e listas com tags básicas da web.',
+
+    introducao: {
+      objetivo:
+        'Entender o papel do HTML como esqueleto da página e reconhecer tags essenciais para textos, campos e botões.',
+      contexto:
+        'Antes de estilizar ou colocar JavaScript para reagir a cliques, o navegador precisa saber o que existe na tela: um título, um texto, um campo de digitação ou um botão.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. HTML define o que cada coisa é na página',
+          explicacao:
+            'HTML (HyperText Markup Language) usa tags entre sinais de menor e maior para marcar conteúdos. Em geral, uma tag tem abertura e fechamento, como <p>Texto aqui</p>, ou representa um campo simples como <input>.',
+        },
+        {
+          titulo: '2. Títulos, parágrafos e listas organizam a leitura',
+          explicacao:
+            'Use <h1> para o título principal, <p> para parágrafos de texto e <ul> com <li> para listas de itens. Isso deixa a estrutura clara tanto para quem lê quanto para o código.',
+        },
+        {
+          titulo: '3. Botões e inputs preparam a interação',
+          explicacao:
+            'Elementos como <input> e <button> criam pontos de contato com quem usa a página — o ponto exato onde o JavaScript vai atuar nos próximos módulos.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — uma ficha de cadastro simples:\nVocê precisa de um título no topo, um campo para digitar o nome e um botão para confirmar.',
+
+      exemploCodigo:
+        '<h1>Minha Lista</h1>\n<p>Digite um item abaixo:</p>\n<input type="text" placeholder="Ex.: Estudar DOM" />\n<button>Adicionar</button>',
+
+      resumo:
+        'O HTML cria a estrutura básica da página por meio de tags como h1, p, ul, li, input e button.',
+    },
+
+    pratica: {
+      titulo: 'Monte a estrutura HTML de um bloco simples',
+      enunciado:
+        'Monte na ordem correta os blocos HTML para criar um título principal, um parágrafo de instrução e um botão de ação:',
+      codigoInicial: '// Organize as tags HTML na ordem correta',
+      resultadoEsperado:
+        'Montar a sequência correta de tags HTML para título, parágrafo e botão.',
+      dica:
+        'Comece pelo título <h1>, depois o parágrafo <p> e por fim o <button>.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          '<h1>Bem-vindo</h1>',
+          '<button>Enviar</button>',
+          '<p>Prática na web</p>',
+        ],
+        respostaCorreta: [
+          '<h1>Bem-vindo</h1>',
+          '<p>Prática na web</p>',
+          '<button>Enviar</button>',
+        ],
+        acertoMsg:
+          'Mandou bem! Você montou uma estrutura HTML limpa do topo até o botão.',
+        erroMsg:
+          'Revise a ordem das tags: título primeiro, texto no meio e botão por último.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'Qual é o papel principal do HTML em uma página web?',
+        opcoes: [
+          'Estruturar e identificar os elementos da página, como títulos, textos e botões',
+          'Substituir completamente a lógica de variáveis e condições do JavaScript',
+          'Conectar diretamente ao banco de dados sem precisar de backend ou API',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'O HTML fornece a estrutura base dos elementos que aparecem na página.',
+      },
+      {
+        pergunta: 'Qual par de tags representa melhor um parágrafo de texto?',
+        opcoes: ['<p> ... </p>', '<btn> ... </btn>', '<list> ... </list>'],
+        respostaCorreta: 0,
+        explicacao:
+          'A tag <p> é a tag padrão do HTML para parágrafos de texto.',
+      },
+      {
+        pergunta:
+          'Por que criar bons elementos HTML ajuda antes de usar JavaScript?',
+        opcoes: [
+          'Porque o JS precisa de elementos claros na página para ler valores ou reagir a eventos',
+          'Porque o HTML executa loops for sozinho sem precisar de código JS',
+          'Porque sem HTML o navegador não abre nenhuma aba',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Uma estrutura HTML bem feita facilita selecionar elementos e conectar ações depois.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Estrutura HTML compreendida',
+      mensagem:
+        'Você viu como tags organizam títulos, textos, listas e controles básicos na página.',
+      proximoPasso:
+        'Avance para a Aula 18 para ver como agrupar blocos com clareza.',
+      aprendizados: [
+        'HTML organiza a estrutura dos elementos de uma página por meio de tags.',
+        'Tags como h1, p, ul/li, input e button cobrem boa parte das interfaces básicas.',
+        'Ter boa estrutura HTML facilita muito a estilização e a interação com JavaScript.',
+      ],
+      reflexao:
+        'Se você fosse montar uma página de tarefas simples, quais três tags HTML seriam indispensáveis?',
+      proximaAulaId: 'lesson-18',
+    },
+  },
+  {
+    id: 'lesson-18',
+    numero: 18,
+    modulo: 5,
+    titulo: 'Organizando Blocos com div, section e Semântica',
+    resumo:
+      'Como agrupar elementos na página com clareza e estrutura.',
+
+    introducao: {
+      objetivo:
+        'Aprender a agrupar partes de uma interface usando containers e tags semânticas para manter a página organizada.',
+      contexto:
+        'Quando uma página cresce, jogar tudo solto vira bagunça. Agrupar elementos relacionados ajuda tanto na leitura do código quanto na hora de aplicar estilos e eventos.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. Agrupar elementos relacionados facilita o trabalho',
+          explicacao:
+            'Um card de produto ou um bloco de formulário tem vários elementos juntos (título, descrição, botão). Agrupar esses itens permite tratar o bloco como uma unidade.',
+        },
+        {
+          titulo: '2. div é um container genérico e tags semânticas dão significado',
+          explicacao:
+            'A tag <div> agrupa blocos de forma neutra. Já tags semânticas como <header>, <main>, <section> e <article> deixam claro qual é o papel daquela parte da página.',
+        },
+        {
+          titulo: '3. Organização evita conflitos quando a página cresce',
+          explicacao:
+            'Separar áreas distintas da tela impede que um ajuste feito em um bloco bagunce outro sem querer.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — pastas no computador:\nEm vez de deixar 40 arquivos soltos na área de trabalho, você separa em pastas como "Projetos", "Estudos" e "Documentos".',
+
+      exemploCodigo:
+        '<main>\n  <section class="card-resumo">\n    <h2>Resumo</h2>\n    <p>Total: R$ 120</p>\n  </section>\n</main>',
+
+      resumo:
+        'Agrupar elementos com <div> ou tags semânticas como <main> e <section> mantém a página legível e organizada.',
+    },
+
+    pratica: {
+      titulo: 'Classifique onde cada bloco pertence na estrutura',
+      enunciado:
+        'Associe cada trecho ou ideia da página ao agrupamento mais adequado:',
+      codigoInicial:
+        '// Pense na função de cada parte da estrutura da página',
+      resultadoEsperado:
+        'Classificar corretamente a função de cada estrutura na organização da página.',
+      dica:
+        'Veja o que é conteúdo principal da página e o que é um agrupamento genérico de apoio.',
+      classificacao: {
+        categorias: ['Área principal / Seção', 'Agrupamento genérico (div)'],
+        itens: [
+          {
+            texto: 'Conteúdo central da página (<main>)',
+            categoriaCorreta: 'Área principal / Seção',
+          },
+          {
+            texto:
+              'Caixa neutra para agrupar elementos sem significado semântico próprio',
+            categoriaCorreta: 'Agrupamento genérico (div)',
+          },
+          {
+            texto: 'Bloco temático de conteúdo (<section>)',
+            categoriaCorreta: 'Área principal / Seção',
+          },
+        ],
+        acertoMsg:
+          'Ótimo! Você diferenciou bem a estrutura semântica do agrupamento genérico.',
+        erroMsg:
+          'Confira qual opção descreve um container genérico e qual descreve seção/área principal.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'Para que serve agrupar elementos dentro de um container?',
+        opcoes: [
+          'Para organizar partes relacionadas da interface e facilitar estilo e manipulação',
+          'Para impedir que o navegador renderize qualquer texto na tela',
+          'Para substituir o uso de variáveis no JavaScript',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Agrupar elementos relacionados torna a estrutura mais clara e fácil de manter.',
+      },
+      {
+        pergunta:
+          'Qual a vantagem de usar tags semânticas como <main> e <section>?',
+        opcoes: [
+          'Elas comunicam melhor o propósito de cada parte da página no código',
+          'Elas fazem o código rodar mais rápido que o processador',
+          'Elas dispensam fechar as tags HTML',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Tags semânticas deixam explícito o papel de cada seção da página.',
+      },
+      {
+        pergunta: 'Quando uma <div> costuma fazer sentido?',
+        opcoes: [
+          'Quando você só precisa de uma caixa neutra para agrupar elementos sem exigir um significado semântico específico',
+          'Sempre que precisar criar um título principal da página',
+          'Apenas quando o código tiver erro de sintaxe',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'A <div> funciona bem como agrupamento neutro quando nenhuma tag semântica se encaixa melhor.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Organização estrutural concluída',
+      mensagem:
+        'Você estruturou a diferença entre containers genéricos e seções semânticas da página.',
+      proximoPasso:
+        'Siga para a Aula 19 para aplicar cores, fontes e espaçamentos com CSS.',
+      aprendizados: [
+        'Agrupar elementos deixa a estrutura da página mais clara e organizada.',
+        'Tags semânticas ajudam a descrever o papel de cada parte do layout.',
+        'Uma estrutura bem dividida facilita o próximo passo: estilizar com CSS.',
+      ],
+      reflexao:
+        'Em uma página com topo, lista de itens e rodapé, como você separaria esses três blocos?',
+      proximaAulaId: 'lesson-19',
+    },
+  },
+  {
+    id: 'lesson-19',
+    numero: 19,
+    modulo: 5,
+    titulo: 'Primeiros Passos no CSS: Cores, Fontes e Espaçamento',
+    resumo:
+      'Trabalhe cores, fundos, margens, preenchimento interno e bordas.',
+
+    introducao: {
+      objetivo:
+        'Compreender como o CSS altera aparência, tipografia e espaçamento dos elementos na tela.',
+      contexto:
+        'HTML puro mostra tudo em preto, branco e estilo padrão do navegador. O CSS entra para dar identidade visual, legibilidade e respiro entre os elementos.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. Cores e tipografia definem leitura e contraste',
+          explicacao:
+            'Propriedades como color (cor do texto), background (fundo) e font-size (tamanho da fonte) mudam a aparência visual. Contraste suficiente entre texto e fundo é essencial para ler sem cansaço.',
+        },
+        {
+          titulo: '2. Padding é respiro por dentro; margin é espaço por fora',
+          explicacao:
+            'Pense numa caixa: padding afasta o conteúdo interno da borda da própria caixa, enquanto margin cria distância entre essa caixa e os elementos ao redor.',
+        },
+        {
+          titulo: '3. Bordas e cantos arredondados delimitam o bloco',
+          explicacao:
+            'Propriedades como border e border-radius ajudam a definir limites visuais de botões e cards de forma limpa.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — um botão confortável de clicar:\nSe o texto encosta na borda do botão, fica apertado. Dar respiro interno ao elemento torna a leitura e o clique bem mais confortáveis.',
+
+      exemploCodigo:
+        '.card {\n  background: #111827;\n  color: #f9fafb;\n  padding: 16px;\n  margin-bottom: 12px;\n  border-radius: 10px;\n}',
+
+      resumo:
+        'CSS controla o visual da página, equilibrando cores, tipografia e espaçamentos internos (padding) e externos (margin).',
+    },
+
+    pratica: {
+      titulo: 'Classifique o papel de cada propriedade CSS',
+      enunciado:
+        'Identifique o que cada propriedade ou conceito CSS faz na aparência do elemento:',
+      codigoInicial:
+        '// Diferencie respiro interno, afastamento externo e visual',
+      resultadoEsperado:
+        'Classificar corretamente padding, margin e border-radius.',
+      dica:
+        'Lembre: padding fica por dentro da borda, margin afasta elementos vizinhos e border-radius arredonda cantos.',
+      classificacao: {
+        categorias: ['Espaço interno / Cantos', 'Afastamento externo (margin)'],
+        itens: [
+          {
+            texto: 'padding: 16px — cria respiro entre o conteúdo e a borda do próprio bloco',
+            categoriaCorreta: 'Espaço interno / Cantos',
+          },
+          {
+            texto: 'margin-bottom: 12px — cria distância fora do bloco em relação ao próximo elemento',
+            categoriaCorreta: 'Afastamento externo (margin)',
+          },
+          {
+            texto: 'border-radius: 10px — arredonda os cantos da caixa na tela',
+            categoriaCorreta: 'Espaço interno / Cantos',
+          },
+        ],
+        acertoMsg:
+          'Mandou bem! Você separou com clareza o que atua por dentro e o que afasta por fora.',
+        erroMsg:
+          'Revise o que age dentro do bloco/cantos e o que cria distância entre elementos vizinhos.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'Qual é a diferença prática entre padding e margin?',
+        opcoes: [
+          'padding cria espaço interno entre o conteúdo e a borda; margin cria espaço externo ao redor do elemento',
+          'padding muda a cor da fonte e margin muda a cor do fundo',
+          'Não há diferença nenhuma entre os dois',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Padding atua por dentro do elemento; margin atua por fora, afastando vizinhos.',
+      },
+      {
+        pergunta: 'O que a propriedade border-radius costuma fazer?',
+        opcoes: [
+          'Arredonda os cantos da borda ou da caixa do elemento',
+          'Cria um loop que repete o elemento na tela',
+          'Apaga o texto dentro de um parágrafo',
+        ],
+        respostaCorreta: 0,
+        explicacao: 'border-radius arredonda os cantos visuais do elemento.',
+      },
+      {
+        pergunta: 'Por que o contraste entre cor do texto e fundo importa?',
+        opcoes: [
+          'Porque garante boa leitura e evita esforço visual excessivo',
+          'Porque impede o código HTML de carregar',
+          'Porque transforma números em strings automaticamente',
+        ],
+        respostaCorreta: 0,
+        explicacao: 'Bom contraste facilita a leitura em qualquer tela.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Fundamentos de CSS concluídos',
+      mensagem:
+        'Você trabalhou espaçamento, contraste e acabamento visual com propriedades essenciais do CSS.',
+      proximoPasso:
+        'Vá para a Aula 20 para alinhar elementos e cards com Flexbox.',
+      aprendizados: [
+        'CSS define cores, tipografia e espaçamentos da interface.',
+        'Padding dá espaço interno e margin separa elementos entre si.',
+        'Pequenos ajustes visuais deixam a interface muito mais clara.',
+      ],
+      reflexao:
+        'Quando você olha para um site difícil de ler, o problema costuma ser mais de contraste, espaçamento ou excesso de informação?',
+      proximaAulaId: 'lesson-20',
+    },
+  },
+  {
+    id: 'lesson-20',
+    numero: 20,
+    modulo: 5,
+    titulo: 'Alinhando Elementos com Flexbox',
+    resumo:
+      'Centralize, organize itens lado a lado e monte cards limpos.',
+
+    introducao: {
+      objetivo:
+        'Entender como o Flexbox organiza elementos em linha ou coluna e alinha itens com clareza.',
+      contexto:
+        'Colocar itens lado a lado, centralizar um bloco ou distribuir botões sem depender de truques antigos fica muito mais direto com Flexbox.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. Container flexível controla os filhos diretos',
+          explicacao:
+            'Quando você define display: flex em um container, os elementos filhos diretos passam a se organizar de acordo com as regras daquele container.',
+        },
+        {
+          titulo: '2. Direção, alinhamento e espaçamento entre itens',
+          explicacao:
+            'Com flex-direction você define linha ou coluna; com justify-content e align-items você alinha os itens; com gap você cria espaço uniforme entre eles sem gambiarra.',
+        },
+        {
+          titulo: '3. Responsividade começa com flexibilidade',
+          explicacao:
+            'Permitir que itens quebrem linha (flex-wrap: wrap) ajuda a evitar que elementos fiquem espremidos em telas estreitas.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — barra de navegação ou linha de botões:\nVocê quer vários botões alinhados na mesma linha com espaçamento igual entre eles, sem ficar medindo margem na mão em cada um.',
+
+      exemploCodigo:
+        '.barra {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n}',
+
+      resumo:
+        'Flexbox facilita alinhar, distribuir e espaçar elementos em containers de forma previsível.',
+    },
+
+    pratica: {
+      titulo: 'Monte uma regra de alinhamento com Flexbox',
+      enunciado:
+        'Coloque os blocos na ordem para ativar o Flexbox, espaçar os itens e alinhá-los ao centro:',
+      codigoInicial: '// Monte as declarações CSS do container',
+      resultadoEsperado:
+        'Organizar display: flex, gap e align-items na sequência correta.',
+      dica:
+        'Comece ligando display: flex, depois o espaçamento gap e por fim align-items: center.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          'display: flex;',
+          'align-items: center;',
+          'gap: 12px;',
+        ],
+        respostaCorreta: [
+          'display: flex;',
+          'gap: 12px;',
+          'align-items: center;',
+        ],
+        acertoMsg:
+          'Mandou bem! Essa combinação é o pão com manteiga de layouts modernos.',
+        erroMsg: 'Ajuste a ordem dos blocos para formar a regra completa.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta:
+          'O que acontece quando aplicamos display: flex em um elemento pai?',
+        opcoes: [
+          'Os filhos diretos passam a ser organizados pelo modelo flexível do container',
+          'O elemento pai desaparece da página',
+          'O JavaScript passa a ignorar eventos de clique',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'display: flex transforma o elemento em um container flexível para seus filhos diretos.',
+      },
+      {
+        pergunta:
+          'Qual propriedade cria espaço uniforme entre os itens de um flex container?',
+        opcoes: ['gap', 'z-index', 'cursor'],
+        respostaCorreta: 0,
+        explicacao:
+          'gap define o espaçamento entre os itens sem precisar adicionar margens extras em cada um.',
+      },
+      {
+        pergunta: 'Por que flex-wrap ajuda em telas menores?',
+        opcoes: [
+          'Porque permite que os itens quebrem linha em vez de espremer tudo numa faixa apertada',
+          'Porque apaga os itens que não cabem na tela',
+          'Porque muda a cor do texto automaticamente',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'flex-wrap permite que os elementos se acomodem em novas linhas quando o espaço aperta.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Flexbox em prática concluído',
+      mensagem:
+        'Você estruturou regras essenciais para alinhar e espaçar elementos em layouts flexíveis.',
+      proximoPasso:
+        'Siga para a Aula 21 para conectar o JavaScript à página por meio do DOM.',
+      aprendizados: [
+        'Flexbox organiza elementos de forma previsível em linha ou coluna.',
+        'gap e propriedades de alinhamento reduzem ajustes manuais repetitivos.',
+        'Com HTML e CSS prontos, o próximo passo é fazer o JavaScript interagir com a tela.',
+      ],
+      reflexao:
+        'Onde você já notou elementos desalinhados ou apertados em páginas que você acessa?',
+      proximaAulaId: 'lesson-21',
+    },
+  },
+  {
+    id: 'lesson-21',
+    numero: 21,
+    modulo: 6,
+    titulo: 'O que é o DOM e Como Selecionar Elementos',
+    resumo:
+      'Entenda a árvore da página e selecione elementos com querySelector.',
+
+    introducao: {
+      objetivo:
+        'Entender o que é o DOM e como o JavaScript encontra elementos da página para trabalhar com eles.',
+      contexto:
+        'Até agora você escreveu lógica em JavaScript e montou estrutura e estilo. O DOM é a ponte que deixa o JavaScript enxergar e alterar o que está na tela.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. O que é o DOM',
+          explicacao:
+            'DOM (Document Object Model) é a representação da página HTML que o navegador cria como uma árvore de objetos. Por meio do objeto document, o JavaScript consegue acessar elementos da tela.',
+        },
+        {
+          titulo: '2. Selecionando elementos com querySelector',
+          explicacao:
+            'Com document.querySelector(), você busca o primeiro elemento que combina com um seletor CSS — como uma tag ("button"), uma classe (".botao-salvar") ou um id ("#titulo").',
+        },
+        {
+          titulo: '3. Guardar a referência em uma variável',
+          explicacao:
+            'Costuma-se guardar o elemento selecionado em uma const (ex.: const botao = document.querySelector("#btn")) para reutilizar sem repetir a busca várias vezes.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — encontrar um livro numa estante:\nAntes de abrir a página ou marcar algo, você primeiro localiza qual livro quer pegar.',
+
+      exemploCodigo:
+        'const titulo = document.querySelector("#titulo-pagina")\nconst botao = document.querySelector(".btn-acao")',
+
+      resumo:
+        'O DOM permite ao JavaScript acessar a página, e querySelector encontra elementos usando seletores.',
+    },
+
+    pratica: {
+      titulo: 'Encontre o passo fora de ordem ao selecionar um elemento',
+      enunciado:
+        'Veja a sequência abaixo e toque na linha que causa problema ao tentar usar um elemento do DOM:',
+      codigoInicial: '// Analise cada etapa da interação com o DOM',
+      resultadoEsperado:
+        'Identificar qual etapa está incorreta na sequência.',
+      dica:
+        'Você consegue usar uma variável de elemento antes mesmo de selecioná-la?',
+      cacaErro: {
+        etapas: [
+          '1. Tentar alterar botao.textContent antes de selecionar o botão',
+          '2. Buscar o botão na página com querySelector',
+          '3. Guardar a referência em uma constante',
+          '4. Atualizar o texto após confirmar que o elemento existe',
+        ],
+        linhas: [
+          '1. Tentar alterar botao.textContent antes de selecionar o botão',
+          '2. Buscar o botão na página com querySelector',
+          '3. Guardar a referência em uma constante',
+          '4. Atualizar o texto após confirmar que o elemento existe',
+        ],
+        indiceErro: 0,
+        acertoMsg:
+          'Isso aí! Não faz sentido mexer no elemento antes de selecioná-lo.',
+        erroMsg:
+          'Olhe de novo para a primeira etapa: ela tenta agir antes de buscar o elemento.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'O que representa o DOM no navegador?',
+        opcoes: [
+          'A estrutura da página acessível pelo JavaScript para ler e alterar elementos',
+          'Um banco de dados externo na nuvem',
+          'Um programa que precisa ser instalado separadamente do navegador',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'O DOM expõe os elementos da página para que o JavaScript possa interagir com eles.',
+      },
+      {
+        pergunta: 'O que document.querySelector(".card") faz?',
+        opcoes: [
+          'Seleciona o primeiro elemento que corresponde ao seletor .card',
+          'Apaga todos os arquivos CSS do projeto',
+          'Cria um novo servidor na internet',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'querySelector retorna o primeiro elemento encontrado para o seletor informado.',
+      },
+      {
+        pergunta:
+          'Por que guardar um elemento selecionado em uma const costuma ser boa prática?',
+        opcoes: [
+          'Porque evita repetir a mesma busca várias vezes e deixa o código mais legível',
+          'Porque transforma o elemento em um número inteiro',
+          'Porque dispensa o uso de funções',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Guardar em uma variável deixa o código mais claro e evita buscas repetidas.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Base do DOM concluída',
+      mensagem:
+        'Você entendeu como o DOM representa a página e como selecionar elementos com querySelector.',
+      proximoPasso:
+        'Avance para a Aula 22 para reagir a cliques e digitação com eventos.',
+      aprendizados: [
+        'O DOM é a ponte entre o JavaScript e os elementos da página.',
+        'querySelector permite localizar elementos por seletor.',
+        'Selecionar o elemento é o primeiro passo antes de reagir a eventos ou mudar a tela.',
+      ],
+      reflexao:
+        'Quando você seleciona um elemento que não existe na página, o que costuma acontecer se você tentar acessar algo dele direto?',
+      proximaAulaId: 'lesson-22',
+    },
+  },
+  {
+    id: 'lesson-22',
+    numero: 22,
+    modulo: 6,
+    titulo: 'Reagindo ao Usuário com Eventos',
+    resumo:
+      'Cliques e digitação disparando funções que você já sabe criar.',
+
+    introducao: {
+      objetivo:
+        'Entender como eventos (como cliques e digitação) conectam a ação do usuário às suas funções JavaScript.',
+      contexto:
+        'Uma página interativa espera o usuário agir — clicar num botão, digitar num campo ou enviar algo — e então executa uma função.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. O que é um evento na página',
+          explicacao:
+            'Um evento é algo que acontece na interface: um clique ("click"), digitar em um campo ("input"), enviar um formulário ("submit").',
+        },
+        {
+          titulo: '2. Escutando eventos com addEventListener',
+          explicacao:
+            'Com addEventListener("click", funcao), você diz ao elemento: "quando acontecer um clique aqui, execute essa função".',
+        },
+        {
+          titulo: '3. Reaproveitando a lógica que você já aprendeu',
+          explicacao:
+            'A função disparada pelo evento pode usar variáveis, condições (if/else), arrays, objetos e cálculos exatamente como você já praticou nos módulos anteriores.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — campainha ou botão de elevador:\nO botão fica esperando alguém apertar. Quando alguém aperta, a ação programada acontece.',
+
+      exemploCodigo:
+        'const botao = document.querySelector("#btn-somar")\n\nbotao.addEventListener("click", () => {\n  console.log("Botão clicado!")\n})',
+
+      resumo:
+        'Eventos ligam ações do usuário (como click e input) a funções que executam a lógica da aplicação.',
+    },
+
+    pratica: {
+      titulo: 'Monte a escuta de evento no elemento',
+      enunciado:
+        'Organize os blocos na ordem para selecionar o botão e registrar um evento de clique nele:',
+      codigoInicial: '// Monte a ligação entre o botão e o evento',
+      resultadoEsperado:
+        'Selecionar o botão e associar addEventListener("click", ...).',
+      dica:
+        'Primeiro seleciona o elemento, depois chama addEventListener no botão com o tipo do evento e a função.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          'const btn = document.querySelector("#btn");',
+          'btn.addEventListener("click", () => {',
+          '  atualizarContagem();',
+          '});',
+        ],
+        respostaCorreta: [
+          'const btn = document.querySelector("#btn");',
+          'btn.addEventListener("click", () => {',
+          '  atualizarContagem();',
+          '});',
+        ],
+        acertoMsg:
+          'Mandou bem! Você ligou a seleção do elemento à função disparada pelo evento.',
+        erroMsg:
+          'Confira a ordem: selecione o botão antes e abra/feche o addEventListener corretamente.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'O que addEventListener("click", fn) faz?',
+        opcoes: [
+          'Executa a função fn quando o elemento recebe um clique',
+          'Remove o elemento do HTML após 1 segundo',
+          'Bloqueia o teclado do usuário na página inteira',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'addEventListener registra um ouvinte que dispara a função quando o evento ocorre.',
+      },
+      {
+        pergunta:
+          'Qual evento é comum para acompanhar o que o usuário digita em um campo?',
+        opcoes: ['input', 'resize', 'error'],
+        respostaCorreta: 0,
+        explicacao:
+          'O evento input dispara conforme o valor do campo é alterado.',
+      },
+      {
+        pergunta: 'O que pode acontecer dentro da função de um evento?',
+        opcoes: [
+          'Usar variáveis, condições, cálculos e atualizar elementos na tela',
+          'Apenas exibir alertas sem acessar nenhuma variável',
+          'Somente alterar o título da aba do navegador',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Funções de evento podem executar qualquer lógica JavaScript e atualizar a interface.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Eventos na prática concluídos',
+      mensagem:
+        'Você conectou ações do usuário à atualização de estado e lógica em JavaScript.',
+      proximoPasso:
+        'Avance para a Aula 23 para alterar textos, classes e estilos dinamicamente na tela.',
+      aprendizados: [
+        'Eventos conectam ações do usuário às funções da aplicação.',
+        'addEventListener permite reagir a interações como click e input.',
+        'A lógica de estado e decisão continua sendo a base por trás da interface.',
+      ],
+      reflexao:
+        'Que botão ou campo interativo você gostaria de montar primeiro no Playground?',
+      proximaAulaId: 'lesson-23',
+    },
+  },
+  {
+    id: 'lesson-23',
+    numero: 23,
+    modulo: 6,
+    titulo: 'Mudando Texto, Classes e Estilos na Tela',
+    resumo:
+      'Atualize conteúdos, alterne classes CSS e reaja ao estado da página.',
+
+    introducao: {
+      objetivo:
+        'Aprender a atualizar textos com textContent e alternar classes CSS com classList para refletir o estado da aplicação.',
+      contexto:
+        'Não basta ouvir o clique: a interface precisa responder visualmente — trocando um status, marcando um item como concluído ou destacando um estado ativo.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. Atualizando textos com textContent',
+          explicacao:
+            'Alterar elemento.textContent = "Novo valor" atualiza o texto exibido sem misturar marcação HTML inesperada.',
+        },
+        {
+          titulo: '2. Alternando classes com classList',
+          explicacao:
+            'Em vez de sair escrevendo dezenas de estilos soltos no JS, o mais limpo é deixar as regras visuais no CSS (ex.: .ativo, .concluido) e usar classList.toggle() ou classList.add().',
+        },
+        {
+          titulo: '3. Estado manda na interface',
+          explicacao:
+            'Quando o estado muda (por exemplo, de pendente para concluído), texto e classe acompanham esse estado de forma previsível.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — marcar uma tarefa como feita:\nO texto muda de "Pendente" para "Concluída" e o card recebe a classe que aplica o visual de concluído.',
+
+      exemploCodigo:
+        'statusEl.textContent = "Concluída"\ncardEl.classList.toggle("concluida")',
+
+      resumo:
+        'Use textContent para atualizar textos e classList para alternar estados visuais definidos no CSS.',
+    },
+
+    pratica: {
+      titulo: 'Monte a sequência para alternar o estado visual de um item',
+      enunciado:
+        'Organize os passos na ordem lógica para atualizar o texto e alternar a classe no elemento:',
+      codigoInicial: '// Ordene as ações ao alternar o estado do item',
+      resultadoEsperado:
+        'Colocar na ordem: atualizar texto, alternar classe e exibir estado atualizado.',
+      dica:
+        'Primeiro atualize o texto, depois alterne a classe e por fim reflita o estado na tela.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          'item.classList.toggle("ativo");',
+          'status.textContent = "Concluído";',
+          'renderizarEstado(item);',
+        ],
+        respostaCorreta: [
+          'status.textContent = "Concluído";',
+          'item.classList.toggle("ativo");',
+          'renderizarEstado(item);',
+        ],
+        acertoMsg:
+          'Mandou bem! Texto, classe e estado ficam alinhados do começo ao fim.',
+        erroMsg:
+          'Revise a ordem das linhas para refletir a atualização de forma clara.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta: 'Para que serve classList.toggle("ativo") em um elemento?',
+        opcoes: [
+          'Adiciona a classe "ativo" se ela não estiver lá e remove se já estiver',
+          'Apaga o elemento inteiro da árvore HTML',
+          'Troca o idioma do navegador',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'toggle alterna a presença da classe conforme o estado atual do elemento.',
+      },
+      {
+        pergunta:
+          'Por que alternar classes CSS costuma ser melhor que mexer em vários estilos isolados no JS?',
+        opcoes: [
+          'Porque mantém o visual organizado no CSS e deixa o JS focado na lógica e no estado',
+          'Porque o CSS não aceita cores em arquivos externos',
+          'Porque classList impede erros de digitação em variáveis',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Separar o visual em classes CSS deixa o código mais limpo e fácil de manter.',
+      },
+      {
+        pergunta:
+          'Qual propriedade altera o texto visível de um elemento de forma direta?',
+        opcoes: ['textContent', 'innerHTML', 'dataset'],
+        respostaCorreta: 0,
+        explicacao:
+          'textContent atualiza diretamente o conteúdo de texto do elemento.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Atualização visual concluída',
+      mensagem:
+        'Você aprendeu a combinar textContent e classList para fazer a tela reagir às mudanças de estado.',
+      proximoPasso:
+        'Siga para a Aula 24 e junte tudo em uma mini-interface funcional.',
+      aprendizados: [
+        'textContent atualiza o texto da interface com clareza.',
+        'classList permite aplicar e alternar estados visuais definidos no CSS.',
+        'Manter o estado sincronizado com a tela evita telas inconsistentes.',
+      ],
+      reflexao:
+        'Quais estados visuais você usaria em um botão de favorito ou curtir?',
+      proximaAulaId: 'lesson-24',
+    },
+  },
+  {
+    id: 'lesson-24',
+    numero: 24,
+    modulo: 6,
+    titulo: 'Projeto Web Integrado: Lista ou Card Interativo',
+    resumo:
+      'Junte HTML, CSS, arrays, objetos e eventos em uma mini-interface funcional.',
+
+    introducao: {
+      objetivo:
+        'Integrar estrutura HTML, estilo CSS, dados em arrays/objetos e eventos do DOM para montar uma mini-interface completa.',
+      contexto:
+        'Na prática real, uma aplicação junta tudo: os dados ficam organizados em arrays e objetos, a interface mostra o estado atual e os eventos respondem ao usuário.',
+    },
+
+    teoria: {
+      topicos: [
+        {
+          titulo: '1. Dados organizados em arrays e objetos',
+          explicacao:
+            'Cada item de uma lista ou card pode ser um objeto (ex.: { id, titulo, concluido }) dentro de um array. Assim fica fácil adicionar, filtrar ou atualizar itens.',
+        },
+        {
+          titulo: '2. Fluxo completo: evento -> estado -> tela',
+          explicacao:
+            'O usuário clica ou digita -> o evento roda uma função -> o array/estado é atualizado -> a tela é atualizada para refletir o novo estado.',
+        },
+        {
+          titulo: '3. Use o Playground para experimentar livremente',
+          explicacao:
+            'No Playground você pode montar sua lista, card ou contador testando HTML, CSS e JavaScript juntos sem amarras.',
+        },
+      ],
+
+      exemploCotidiano:
+        'Situação real — mini painel de tarefas ou cards:\nVocê mantém a lista de itens em um array, reage ao clique do botão e atualiza o que aparece na tela.',
+
+      exemploCodigo:
+        'const itens = [{ titulo: "Estudar DOM", feito: false }]\n\nfunction contarFeitos(lista) {\n  return lista.filter((item) => item.feito).length\n}',
+
+      resumo:
+        'Uma mini-interface funcional combina estrutura HTML, estilo CSS, dados em arrays/objetos e eventos.',
+    },
+
+    pratica: {
+      titulo: 'Classifique o papel de cada peça no projeto integrado',
+      enunciado:
+        'Relacione cada parte do projeto à responsabilidade que ela cumpre na aplicação:',
+      codigoInicial:
+        '// Conecte estrutura, visual, dados e interação',
+      resultadoEsperado:
+        'Classificar corretamente onde entra cada responsabilidade do projeto web.',
+      dica:
+        'Separe o que guarda dados, o que define aparência e o que reage às ações do usuário.',
+      classificacao: {
+        categorias: ['Dados e Lógica (JS)', 'Estrutura e Visual (HTML/CSS)'],
+        itens: [
+          {
+            texto: 'Array de objetos com os itens e função que atualiza o estado',
+            categoriaCorreta: 'Dados e Lógica (JS)',
+          },
+          {
+            texto:
+              'Tags, containers, cores, espaçamentos e alinhamento com Flexbox',
+            categoriaCorreta: 'Estrutura e Visual (HTML/CSS)',
+          },
+          {
+            texto: 'Ouvinte de clique que responde à ação do usuário na tela',
+            categoriaCorreta: 'Dados e Lógica (JS)',
+          },
+        ],
+        acertoMsg:
+          'Fechou com chave de ouro! Você conectou todas as camadas da mini-interface.',
+        erroMsg:
+          'Revise o que é dado/lógica em JavaScript e o que é estrutura/estilo na tela.',
+      },
+    },
+
+    quiz: [
+      {
+        pergunta:
+          'Como costuma ficar mais organizado guardar vários itens de uma lista dinâmica?',
+        opcoes: [
+          'Em um array de objetos representando cada item e seu estado',
+          'Em dezenas de variáveis soltas sem relação entre si',
+          'Apenas dentro de uma regra de borda no CSS',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Um array de objetos permite manipular cada item de forma estruturada e previsível.',
+      },
+      {
+        pergunta: 'Qual fluxo resume bem uma interação completa na página?',
+        opcoes: [
+          'Evento do usuário -> atualização de dados/estado -> atualização da tela',
+          'Estilo CSS -> reinício do servidor -> apagar o HTML',
+          'Apenas criar uma variável sem ligar a nenhum evento ou renderização',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'Eventos disparam mudanças de estado que se refletem na interface.',
+      },
+      {
+        pergunta:
+          'Onde vale testar livremente uma mini-interface com HTML, CSS e JS?',
+        opcoes: [
+          'No Playground da plataforma, combinando estrutura, estilo e comportamento à vontade',
+          'Apenas editando o rodapé da página',
+          'Sem nunca testar o código no navegador',
+        ],
+        respostaCorreta: 0,
+        explicacao:
+          'O Playground foi feito exatamente para experimentar HTML, CSS e JavaScript sem restrições de uma lição específica.',
+      },
+    ],
+
+    conclusao: {
+      titulo: 'Módulo 6 concluído!',
+      mensagem:
+        'Você percorreu do HTML e CSS até o DOM, eventos e integração em uma mini-interface.',
+      proximoPasso:
+        'Abra o Playground para criar sua própria lista, card ou componente interativo.',
+      aprendizados: [
+        'HTML e CSS organizam a estrutura e o visual da página.',
+        'O DOM e os eventos conectam as ações do usuário à lógica JavaScript.',
+        'Arrays, objetos e funções dão base para interfaces dinâmicas.',
+      ],
+      reflexao:
+        'Qual mini-projeto você quer construir primeiro no Playground para colocar tudo isso em prática?',
       proximaAulaId: null,
     },
   },

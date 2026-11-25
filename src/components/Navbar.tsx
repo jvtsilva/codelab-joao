@@ -6,7 +6,16 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 interface NavbarProps {
-  activeTab?: 'trilha' | 'desafios' | 'conta' | 'aula' | 'ranking' | 'medalhas' | 'contato' | 'painel'
+  activeTab?:
+    | 'trilha'
+    | 'desafios'
+    | 'playground'
+    | 'conta'
+    | 'aula'
+    | 'ranking'
+    | 'medalhas'
+    | 'contato'
+    | 'painel'
   subtitle?: string
   lessonTitle?: string
   userId?: string | null
@@ -52,8 +61,8 @@ export function Navbar({
     'bg-stone-50 border-stone-200 text-stone-700 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-300'
 
   return (
-    <header className="relative border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 px-3.5 sm:px-6 py-2.5 sm:py-3">
-      <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
+    <header className="relative border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 py-2.5 sm:py-3">
+      <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Link
             href="/dashboard"
@@ -101,6 +110,14 @@ export function Navbar({
             }`}
           >
             Desafios
+          </Link>
+          <Link
+            href="/playground"
+            className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
+              activeTab === 'playground' ? activeNavBtnClasses : navBtnClasses
+            }`}
+          >
+            Playground
           </Link>
           <Link
             href="/ranking"
@@ -224,6 +241,15 @@ export function Navbar({
             }`}
           >
             Desafios Práticos
+          </Link>
+          <Link
+            href="/playground"
+            onClick={() => setMenuOpen(false)}
+            className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
+              activeTab === 'playground' ? activeNavBtnClasses : mobileItemClasses
+            }`}
+          >
+            Playground
           </Link>
           <Link
             href="/ranking"

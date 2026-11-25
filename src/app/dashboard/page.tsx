@@ -130,6 +130,66 @@ const MODULES_BASE = [
       },
     ],
   },
+  {
+    id: 5,
+    titulo: 'Módulo 5: Construindo a Tela (HTML e CSS)',
+    aulas: [
+      {
+        id: 'lesson-17',
+        number: 17,
+        title: 'O que é HTML: Estrutura e Tags Essenciais',
+        desc: 'Títulos, parágrafos, botões, inputs e listas com tags básicas da web.',
+      },
+      {
+        id: 'lesson-18',
+        number: 18,
+        title: 'Organizando Blocos com div, section e Semântica',
+        desc: 'Como agrupar elementos na página com clareza e estrutura.',
+      },
+      {
+        id: 'lesson-19',
+        number: 19,
+        title: 'Primeiros Passos no CSS: Cores, Fontes e Espaçamento',
+        desc: 'Trabalhe cores, fundos, margens, preenchimento interno e bordas.',
+      },
+      {
+        id: 'lesson-20',
+        number: 20,
+        title: 'Alinhando Elementos com Flexbox',
+        desc: 'Centralize, organize itens lado a lado e monte cards limpos.',
+      },
+    ],
+  },
+  {
+    id: 6,
+    titulo: 'Módulo 6: Dando Vida à Página (DOM e Eventos com JS)',
+    aulas: [
+      {
+        id: 'lesson-21',
+        number: 21,
+        title: 'O que é o DOM e Como Selecionar Elementos',
+        desc: 'Entenda a árvore da página e selecione elementos com querySelector.',
+      },
+      {
+        id: 'lesson-22',
+        number: 22,
+        title: 'Reagindo ao Usuário com Eventos',
+        desc: 'Cliques e digitação disparando funções que você já sabe criar.',
+      },
+      {
+        id: 'lesson-23',
+        number: 23,
+        title: 'Mudando Texto, Classes e Estilos na Tela',
+        desc: 'Atualize conteúdos, alterne classes CSS e reaja ao estado da página.',
+      },
+      {
+        id: 'lesson-24',
+        number: 24,
+        title: 'Projeto Web Integrado: Lista ou Card Interativo',
+        desc: 'Junte HTML, CSS, arrays, objetos e eventos em uma mini-interface funcional.',
+      },
+    ],
+  },
 ]
 
 const AVAILABLE_NUMBERS = new Set(aulasData.map((item) => Number(item.numero)))
@@ -156,6 +216,8 @@ export default function DashboardPage() {
     2: false,
     3: false,
     4: false,
+    5: false,
+    6: false,
   })
 
   const totalLessonsCount = ALL_LESSONS.length
@@ -253,7 +315,7 @@ export default function DashboardPage() {
         onToggleTheme={alternarTema}
       />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-3.5 sm:p-6 space-y-6 pb-10">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 pb-10">
         <section className={`space-y-3.5 border p-4 sm:p-6 rounded-2xl ${cardClasses}`}>
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-2">
@@ -451,7 +513,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
         <p>Codelab João • Aprendizado prático de JavaScript</p>
         <Link
           href="/contato"

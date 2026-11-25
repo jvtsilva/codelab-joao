@@ -34,13 +34,26 @@ export default function DesafioIndividualPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [showHint, setShowHint] = useState(false)
 
-  useLayoutEffect(() => {
-    const salvo = localStorage.getItem(STORAGE_KEY)
-    const escuro = salvo !== 'light'
+  const aplicarTema = useCallback((escuro: boolean) => {
     setIsDark(escuro)
     document.documentElement.classList.toggle('dark', escuro)
     document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
   }, [])
+
+  useLayoutEffect(() => {
+    const salvo = localStorage.getItem(STORAGE_KEY)
+    aplicarTema(salvo !== 'light')
+  }, [aplicarTema])
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY) {
+        aplicarTema(event.newValue !== 'light')
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [aplicarTema])
 
   useEffect(() => {
     setSelectedOption(null)
@@ -109,13 +122,9 @@ export default function DesafioIndividualPage() {
   }, [challenge])
 
   const alternarTema = () => {
-    setIsDark((atual) => {
-      const proximo = !atual
-      localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', proximo)
-      document.documentElement.style.backgroundColor = proximo ? '#030712' : '#fafaf9'
-      return proximo
-    })
+    const proximo = !isDark
+    localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
+    aplicarTema(proximo)
   }
 
   const btnClasses =
@@ -249,7 +258,7 @@ export default function DesafioIndividualPage() {
       />
 
       {/* Área de Conteúdo do Desafio */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-5 sm:p-6 md:p-8 space-y-5 pb-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 pb-12">
         <section className={`p-4 sm:p-6 border rounded-2xl space-y-5 ${cardClasses}`}>
           {/* Cabeçalho do desafio */}
           <div className="flex items-center justify-between flex-wrap gap-2">
@@ -276,7 +285,7 @@ export default function DesafioIndividualPage() {
             <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
               {challenge.title}
             </h2>
-            <p className={`whitespace-pre-line ${textBodyClasses}`}>
+            <p className={`whitespace-pre-line max-w-4xl ${textBodyClasses}`}>
               {challenge.prompt}
             </p>
           </div>
@@ -348,7 +357,7 @@ export default function DesafioIndividualPage() {
               </div>
               <textarea
                 id="arena-code-editor"
-                rows={6}
+                rows={8}
                 spellCheck={false}
                 autoCapitalize="off"
                 autoCorrect="off"
@@ -407,17 +416,24 @@ export default function DesafioIndividualPage() {
         </section>
 
         {/* Navegação inferior */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-3">
           <Link
             href="/desafios"
             className={`px-4 py-2.5 border font-semibold text-xs rounded-xl ${btnClasses}`}
           >
             ← Todos os Desafios
           </Link>
+
+          <Link
+            href="/playground"
+            className={`px-4 py-2.5 border font-semibold text-xs rounded-xl ${btnClasses}`}
+          >
+            Testar no Playground →
+          </Link>
         </div>
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-3xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
+      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
         <p>Codelab João • Aprendizado prático de JavaScript</p>
         <Link
           href="/contato"
