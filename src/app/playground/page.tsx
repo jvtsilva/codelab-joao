@@ -241,12 +241,20 @@ export default function PlaygroundPage() {
             </p>
           </div>
 
-          <Link
-            href="/dashboard"
-            className="text-xs sm:text-sm font-semibold text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400 shrink-0"
-          >
-            ← Voltar para a Trilha
-          </Link>
+          <div className="flex items-center gap-4 shrink-0">
+            <Link
+              href="/playground/js"
+              className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 hover:underline"
+            >
+              Modo só JavaScript →
+            </Link>
+            <Link
+              href="/dashboard"
+              className="text-xs sm:text-sm font-semibold text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400"
+            >
+              ← Voltar para a Trilha
+            </Link>
+          </div>
         </div>
 
         <div className={workspaceClasse}>

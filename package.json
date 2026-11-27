@@ -9,10 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/view": "^6.44.2",
     "@marsidev/react-turnstile": "^1.6.3",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.0",
+    "@uiw/react-codemirror": "^4.25.13",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
