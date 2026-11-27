@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useLayoutEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
@@ -34,8 +35,10 @@ function sanitizeXp(rawXp: number | string | null | undefined): number {
 }
 
 export default function RankingPage() {
+  const router = useRouter()
   const [ranking, setRanking] = useState<LeaderboardUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [authVerified, setAuthVerified] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
   const [isDark, setIsDark] = useState(true)
 
@@ -50,25 +53,20 @@ export default function RankingPage() {
   useEffect(() => {
     let active = true
 
-    async function fetchLeaderboard() {
+    async function loadProtectedLeaderboard(sessionUserId: string) {
+      setLoading(true)
       try {
-        const [{ data: xpRows, error: rpcError }, { data: sessionData, error: sessionError }] =
-          await Promise.all([
-            supabase.rpc('get_ranking_xp', { limit_count: 50 }),
-            supabase.auth.getSession(),
-          ])
+        const { data: xpRows, error: rpcError } = await supabase.rpc('get_ranking_xp', {
+          limit_count: 50,
+        })
 
         if (!active) return
 
         if (rpcError) {
           console.error('Erro ao buscar XP do ranking:', rpcError.message)
+          setRanking([])
+          return
         }
-        if (sessionError) {
-          console.error('Erro ao obter sessão no ranking:', sessionError.message)
-        }
-
-        const currentUserId = sessionData?.session?.user?.id ?? null
-        setUserId(currentUserId)
 
         const formattedRanking: LeaderboardUser[] = ((xpRows as RankingRpcRow[] | null) || [])
           .filter((row) => typeof row?.user_id === 'string' && row.user_id.trim().length > 0)
@@ -85,27 +83,74 @@ export default function RankingPage() {
           )
 
         setRanking(formattedRanking)
+        setUserId(sessionUserId)
       } catch (err) {
         console.error('Erro ao carregar ranking:', err)
+        if (active) setRanking([])
       } finally {
         if (active) setLoading(false)
       }
     }
 
-    void fetchLeaderboard()
+    async function initAuthAndRanking() {
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+        if (!active) return
+
+        if (sessionError) {
+          console.error('Erro ao obter sessão no ranking:', sessionError.message)
+        }
+
+        const currentUserId = sessionData?.session?.user?.id ?? null
+        if (!currentUserId) {
+          setAuthVerified(false)
+          setUserId(null)
+          setRanking([])
+          setLoading(false)
+          router.replace('/login')
+          return
+        }
+
+        setAuthVerified(true)
+        setUserId(currentUserId)
+        await loadProtectedLeaderboard(currentUserId)
+      } catch (err) {
+        console.error('Erro ao validar sessão no ranking:', err)
+        if (active) {
+          setAuthVerified(false)
+          setLoading(false)
+          router.replace('/login')
+        }
+      }
+    }
+
+    void initAuthAndRanking()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return
-      setUserId(session?.user?.id ?? null)
+
+      const nextUserId = session?.user?.id ?? null
+      if (!nextUserId) {
+        setAuthVerified(false)
+        setUserId(null)
+        setRanking([])
+        setLoading(false)
+        router.replace('/login')
+        return
+      }
+
+      setAuthVerified(true)
+      setUserId(nextUserId)
+      void loadProtectedLeaderboard(nextUserId)
     })
 
     return () => {
       active = false
       subscription.unsubscribe()
     }
-  }, [])
+  }, [router])
 
   const alternarTema = () => {
     setIsDark((atual) => {
@@ -126,6 +171,17 @@ export default function RankingPage() {
   const textSubtleClasses = 'text-stone-500 dark:text-gray-500'
   const accentAmberClasses = 'text-amber-700 dark:text-amber-400'
   const accentGreenClasses = 'text-emerald-700 dark:text-emerald-400'
+
+  if (!authVerified) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
+        <div className={`flex items-center gap-2.5 text-xs sm:text-sm ${textMutedClasses}`}>
+          <span className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin border-amber-700 dark:border-amber-400" />
+          <span>Verificando sessão para acessar o ranking...</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex flex-col relative selection:bg-amber-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
