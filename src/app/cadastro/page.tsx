@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 const STORAGE_KEY = 'codelab_tema_aula'
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAGB6hl7FfTuEMZ36'
 
 export default function CadastroPage() {
   const [name, setName] = useState('')
@@ -59,6 +61,7 @@ export default function CadastroPage() {
   }
 
   const handleGoogleLogin = async () => {
+    if (loading || successMessage) return
     setErrorMessage('')
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -69,21 +72,27 @@ export default function CadastroPage() {
       })
 
       if (error) throw error
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Erro ao continuar com o Google.'
-      setErrorMessage(msg)
+    } catch {
+      setErrorMessage('Não foi possível iniciar o cadastro com o Google.')
     }
   }
 
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading || successMessage) return
+
     setErrorMessage('')
 
     const cleanName = name.trim()
-    const cleanEmail = email.trim()
+    const cleanEmail = email.trim().toLowerCase()
 
     if (!cleanName) {
       setErrorMessage('Informe seu nome de usuário.')
+      return
+    }
+
+    if (cleanName.length > 80) {
+      setErrorMessage('O nome de usuário deve ter no máximo 80 caracteres.')
       return
     }
 
@@ -115,16 +124,19 @@ export default function CadastroPage() {
         }),
       })
 
-      const apiResult = await apiResponse.json()
-
       if (!apiResponse.ok) {
-        throw new Error(apiResult.error || 'Erro na verificação de segurança.')
+        const apiData = await apiResponse.json().catch(() => null)
+        if (apiResponse.status === 429 && typeof apiData?.error === 'string') {
+          throw new Error(apiData.error)
+        }
+        throw new Error('Falha na verificação do cadastro.')
       }
 
       const { error: signUpError } = await supabase.auth.signUp({
         email: cleanEmail,
         password,
         options: {
+          captchaToken: turnstileToken,
           data: {
             full_name: cleanName,
           },
@@ -138,9 +150,13 @@ export default function CadastroPage() {
       redirectTimeoutRef.current = setTimeout(() => {
         router.replace('/bem-vindo')
       }, 1500)
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Erro ao criar conta. Tente novamente.'
-      setErrorMessage(msg)
+    } catch (err: unknown) {
+      const rateLimitMsg =
+        err instanceof Error && err.message.includes('Muitas tentativas a partir deste IP')
+          ? err.message
+          : 'Não foi possível concluir o cadastro. Verifique os dados e tente novamente.'
+
+      setErrorMessage(rateLimitMsg)
       setTurnstileToken(null)
       turnstileRef.current?.reset()
       setLoading(false)
@@ -190,6 +206,7 @@ export default function CadastroPage() {
       <main className="flex-1 flex items-center justify-center my-auto py-4">
         <form
           onSubmit={handleCadastro}
+          noValidate
           className="max-w-md w-full border px-6 pb-6 pt-4 sm:px-8 sm:pb-8 sm:pt-5 rounded-3xl space-y-4 bg-white border-stone-200 text-stone-900 shadow-xl dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-2xl"
         >
           <div className="text-center">
@@ -261,6 +278,8 @@ export default function CadastroPage() {
             </label>
             <input
               type="text"
+              autoComplete="name"
+              maxLength={80}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -276,6 +295,7 @@ export default function CadastroPage() {
             </label>
             <input
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -300,6 +320,7 @@ export default function CadastroPage() {
             </div>
             <input
               type={showPassword ? 'text' : 'password'}
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -350,9 +371,10 @@ export default function CadastroPage() {
           <div className="flex justify-center my-3" suppressHydrationWarning>
             <Turnstile
               ref={turnstileRef}
-              siteKey="0x4AAAAAAGB6hl7FfTuEMZ36"
+              siteKey={TURNSTILE_SITE_KEY}
               onSuccess={(token) => setTurnstileToken(token)}
               onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
               options={{ theme: isDark ? 'dark' : 'light' }}
             />
           </div>

@@ -92,6 +92,14 @@ btnMudar?.addEventListener('click', () => {
   }
 })`
 
+function escapeClosingStyle(cssCode: string): string {
+  return cssCode.replace(/<\/style/gi, '<\\/style')
+}
+
+function escapeClosingScript(jsCode: string): string {
+  return jsCode.replace(/<\/script/gi, '<\\/script')
+}
+
 export default function PlaygroundPage() {
   const [html, setHtml] = useState(HTML_INICIAL)
   const [css, setCss] = useState(CSS_INICIAL)
@@ -113,13 +121,26 @@ export default function PlaygroundPage() {
   useEffect(() => {
     let active = true
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!active) return
+        setUserId(data.session?.user?.id ?? null)
+      })
+      .catch((err) => {
+        console.error('Erro ao obter sessão no playground:', err)
+      })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return
-      setUserId(data.session?.user?.id ?? null)
+      setUserId(session?.user?.id ?? null)
     })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -140,8 +161,10 @@ export default function PlaygroundPage() {
   }
 
   const srcDoc = useMemo(() => {
-    const scriptTag = `<script>\n${js}\n</script>`
-    const styleTag = `<style>\n${css}\n</style>`
+    const safeCss = escapeClosingStyle(css)
+    const safeJs = escapeClosingScript(js)
+    const scriptTag = `<script>\n${safeJs}\n</script>`
+    const styleTag = `<style>\n${safeCss}\n</style>`
 
     const trimmed = html.trimStart().toLowerCase()
     const temDocumentoCompleto =
@@ -227,29 +250,28 @@ export default function PlaygroundPage() {
         </div>
 
         <div className={workspaceClasse}>
-          {/* Barra superior */}
           <div
-            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-200 dark:border-gray-800 ${
+            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-stone-200 dark:border-gray-800 ${
               expandido
                 ? 'sticky top-0 z-10 -mx-3.5 sm:-mx-6 bg-stone-50/95 px-3.5 py-2.5 sm:px-6 backdrop-blur dark:bg-gray-950/95'
                 : 'pb-3'
             }`}
           >
-            <div className="flex items-center gap-1.5 overflow-x-auto md:hidden">
+            <div className="grid grid-cols-5 gap-1.5 w-full md:hidden">
               {(
                 [
                   { id: 'tudo', rotulo: 'Tudo' },
                   { id: 'html', rotulo: 'HTML' },
                   { id: 'css', rotulo: 'CSS' },
                   { id: 'js', rotulo: 'JS' },
-                  { id: 'resultado', rotulo: 'Resultado' },
+                  { id: 'resultado', rotulo: 'Tela' },
                 ] as const
               ).map((aba) => (
                 <button
                   key={aba.id}
                   type="button"
                   onClick={() => setAbaMobile(aba.id)}
-                  className={`rounded-lg px-2.5 py-1.5 text-[11px] font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`h-9 w-full inline-flex items-center justify-center rounded-lg px-1.5 text-[11px] font-bold whitespace-nowrap cursor-pointer ${
                     abaMobile === aba.id
                       ? 'bg-emerald-500 text-gray-950'
                       : 'bg-stone-100 text-stone-700 border border-stone-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
@@ -264,11 +286,11 @@ export default function PlaygroundPage() {
               Ambiente ao Vivo • HTML + CSS + JavaScript
             </span>
 
-            <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center">
+            <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center shrink-0">
               <button
                 type="button"
                 onClick={resetarTudo}
-                className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                className="h-9 w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-stone-300 bg-white px-3.5 text-xs font-bold whitespace-nowrap text-stone-700 hover:bg-stone-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
               >
                 Resetar
               </button>
@@ -276,9 +298,9 @@ export default function PlaygroundPage() {
               <button
                 type="button"
                 onClick={() => setExpandido((prev) => !prev)}
-                className="rounded-lg bg-emerald-500 hover:bg-emerald-400 px-3 py-1.5 text-xs font-extrabold text-gray-950 cursor-pointer"
+                className="h-9 w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-400 px-3.5 text-xs font-extrabold whitespace-nowrap text-gray-950 cursor-pointer"
               >
-                {expandido ? 'Fechar tela cheia' : 'Expandir tela'}
+                {expandido ? 'Fechar tela' : 'Expandir tela'}
               </button>
             </div>
           </div>
@@ -293,7 +315,6 @@ export default function PlaygroundPage() {
             </p>
           )}
 
-          {/* Editores + Resultado */}
           <div
             className={`grid gap-4 pt-1 grid-cols-1 lg:grid-cols-12 ${
               expandido ? 'flex-1 min-h-[500px]' : ''
@@ -305,10 +326,14 @@ export default function PlaygroundPage() {
               }`}
             >
               <div className={`${mostrarHtml ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
-                <label className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400">
+                <label
+                  htmlFor="playground-html"
+                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                >
                   HTML
                 </label>
                 <textarea
+                  id="playground-html"
                   value={html}
                   onChange={(e) => setHtml(e.target.value)}
                   spellCheck={false}
@@ -317,10 +342,14 @@ export default function PlaygroundPage() {
               </div>
 
               <div className={`${mostrarCss ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
-                <label className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400">
+                <label
+                  htmlFor="playground-css"
+                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                >
                   CSS
                 </label>
                 <textarea
+                  id="playground-css"
                   value={css}
                   onChange={(e) => setCss(e.target.value)}
                   spellCheck={false}
@@ -329,10 +358,14 @@ export default function PlaygroundPage() {
               </div>
 
               <div className={`${mostrarJs ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
-                <label className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400">
+                <label
+                  htmlFor="playground-js"
+                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                >
                   JavaScript
                 </label>
                 <textarea
+                  id="playground-js"
                   value={js}
                   onChange={(e) => setJs(e.target.value)}
                   spellCheck={false}

@@ -9,7 +9,7 @@ import { Navbar } from '@/components/Navbar'
 interface ChallengeProgressRow {
   challenge_id: string
   completed: boolean | null
-  xp_earned: number | null
+  xp_earned: number | string | null
 }
 
 const STORAGE_KEY = 'codelab_tema_aula'
@@ -23,6 +23,23 @@ const XP_POR_AULA = 50
 const META_XP_MESTRE = 1500
 const META_DESAFIOS_INICIANTE = 3
 const META_DESAFIOS_MESTRE = 10
+
+function normalizeLessonKey(rawId: unknown): string | null {
+  if (typeof rawId === 'number' && Number.isFinite(rawId) && rawId > 0) {
+    return `lesson-${Math.floor(rawId)}`
+  }
+  if (typeof rawId === 'string') {
+    const trimmed = rawId.trim()
+    if (/^lesson-\d+$/.test(trimmed)) return trimmed
+    if (/^\d+$/.test(trimmed)) return `lesson-${Number(trimmed)}`
+  }
+  return null
+}
+
+function sanitizeXp(rawXp: unknown): number {
+  const parsed = Number(rawXp)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+}
 
 export default function MedalhasPage() {
   const [completedCount, setCompletedCount] = useState<number>(0)
@@ -49,8 +66,13 @@ export default function MedalhasPage() {
       try {
         const {
           data: { session },
+          error: sessionError,
         } = await supabase.auth.getSession()
         if (!active) return
+
+        if (sessionError) {
+          console.error('Erro ao obter sessão nas medalhas:', sessionError.message)
+        }
 
         if (!session) {
           router.push('/login')
@@ -60,23 +82,29 @@ export default function MedalhasPage() {
         const currentUserId = session.user.id
         setUserId(currentUserId)
         const metadata = session.user.user_metadata
-        setUserName(metadata?.full_name || metadata?.name || 'Aluno')
+        const nomeLimpo = String(metadata?.full_name || metadata?.name || 'Aluno').trim() || 'Aluno'
+        setUserName(nomeLimpo)
 
         const completedSet = new Set<string>()
         let calculatedXp = 0
 
         // 1. Progresso de aulas concluídas no Supabase (50 XP por aula)
-        const { data: progressData } = await supabase
+        const { data: progressData, error: progressError } = await supabase
           .from('user_progress')
           .select('lesson_id, completed')
           .eq('user_id', currentUserId)
 
         if (!active) return
 
-        if (progressData) {
+        if (progressError) {
+          console.error('Erro ao buscar user_progress nas medalhas:', progressError.message)
+        } else if (Array.isArray(progressData)) {
           progressData.forEach((item) => {
-            if (item.completed && item.lesson_id) {
-              completedSet.add(item.lesson_id)
+            if (item?.completed) {
+              const normalized = normalizeLessonKey(item.lesson_id)
+              if (normalized) {
+                completedSet.add(normalized)
+              }
             }
           })
         }
@@ -95,7 +123,7 @@ export default function MedalhasPage() {
         calculatedXp += count * XP_POR_AULA
 
         // 2. Desafios concluídos e XP ganho na Arena de Desafios
-        const { data: challengesData } = await supabase
+        const { data: challengesData, error: challengesError } = await supabase
           .from('user_challenges')
           .select('challenge_id, completed, xp_earned')
           .eq('user_id', currentUserId)
@@ -103,11 +131,14 @@ export default function MedalhasPage() {
         if (!active) return
 
         let doneChallenges = 0
-        if (challengesData) {
+        if (challengesError) {
+          console.error('Erro ao buscar user_challenges nas medalhas:', challengesError.message)
+        } else if (Array.isArray(challengesData)) {
           const rows = challengesData as ChallengeProgressRow[]
           rows.forEach((item) => {
-            calculatedXp += item.xp_earned || 0
-            if (item.completed || (item.xp_earned && item.xp_earned > 0)) {
+            const earned = sanitizeXp(item?.xp_earned)
+            calculatedXp += earned
+            if (Boolean(item?.completed) || earned > 0) {
               doneChallenges += 1
             }
           })
@@ -124,8 +155,20 @@ export default function MedalhasPage() {
 
     getProgress()
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
+      if (!session) {
+        router.push('/login')
+      } else {
+        setUserId(session.user.id)
+      }
+    })
+
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [router])
 
@@ -298,7 +341,6 @@ export default function MedalhasPage() {
         onToggleTheme={alternarTema}
       />
 
-      {/* Conteúdo Principal */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-stone-200 dark:border-gray-800 pb-5">
           <div className="space-y-1.5 w-full">
@@ -316,7 +358,6 @@ export default function MedalhasPage() {
           </div>
         </div>
 
-        {/* Resumo do Progresso e XP Total */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className={`border rounded-2xl p-4 sm:p-5 space-y-3 ${cardClasses}`}>
             <div className="flex items-center justify-between gap-4">
@@ -371,7 +412,6 @@ export default function MedalhasPage() {
           </div>
         </div>
 
-        {/* Grid de Medalhas */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {medals.map((medal) => {
             const isEmerald = medal.tone === 'emerald'
@@ -425,7 +465,6 @@ export default function MedalhasPage() {
           })}
         </div>
 
-        {/* Atalho para continuar */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
           <Link
             href="/dashboard"

@@ -30,27 +30,45 @@ export default function ExcluirContaPage() {
     let active = true
 
     async function checkUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!active) return
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession()
+        if (!active) return
 
-      if (!session) {
-        router.push('/login')
-        return
+        if (error || !session) {
+          router.push('/login')
+          return
+        }
+
+        setUserId(session.user.id)
+        const meta = session.user.user_metadata
+        setUserName(meta?.full_name || meta?.name || 'Aluno')
+      } catch (err) {
+        console.error('Erro ao verificar sessão na exclusão de conta:', err)
+        if (active) router.push('/login')
       }
-
-      setUserId(session.user.id)
-      const meta = session.user.user_metadata
-      setUserName(meta?.full_name || meta?.name || 'Aluno')
     }
 
     checkUser()
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active || deleteSuccess) return
+      if (!session) {
+        router.push('/login')
+      } else {
+        setUserId(session.user.id)
+      }
+    })
+
     return () => {
       active = false
+      subscription.unsubscribe()
     }
-  }, [router])
+  }, [router, deleteSuccess])
 
   const alternarTema = () => {
     setIsDark((atual) => {
@@ -63,7 +81,7 @@ export default function ExcluirContaPage() {
   }
 
   const handleDeleteAccount = async () => {
-    if (!userId || !confirmChecked) return
+    if (!userId || !confirmChecked || deleteLoading) return
     setDeleteLoading(true)
     setDeleteError('')
 
@@ -72,33 +90,39 @@ export default function ExcluirContaPage() {
         data: { session },
       } = await supabase.auth.getSession()
 
-      const response = await fetch('/api/delete-user', {
+      if (!session?.access_token) {
+        throw new Error('Sessão expirada. Faça login novamente para excluir sua conta.')
+      }
+
+      const response = await fetch('/api/deletar-usuario', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({ userId }),
       })
 
-      const data = await response.json()
+      const data = await response.json().catch(() => ({}))
 
-      if (!response.ok) throw new Error(data.error || 'Erro ao excluir conta.')
+      if (!response.ok) {
+        throw new Error(data?.error || 'Erro ao excluir conta.')
+      }
 
       if (typeof window !== 'undefined') {
         Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith('codelab_')) {
+          if (key.startsWith('codelab_') && key !== STORAGE_KEY) {
             localStorage.removeItem(key)
           }
         })
       }
 
-      await supabase.auth.signOut()
-      setDeleteLoading(false)
+      await supabase.auth.signOut().catch(() => {})
       setDeleteSuccess(true)
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : 'Não foi possível excluir a conta.'
       setDeleteError(msg)
+    } finally {
       setDeleteLoading(false)
     }
   }
@@ -116,7 +140,6 @@ export default function ExcluirContaPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between selection:bg-red-500 selection:text-white bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
-      {/* Topo discreto */}
       <header className="sticky top-0 z-50 w-full border-b border-stone-200/80 dark:border-gray-800/80 bg-stone-50/95 dark:bg-gray-950/95 backdrop-blur px-4 py-3">
         <div className="max-w-md w-full mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -154,7 +177,6 @@ export default function ExcluirContaPage() {
         </div>
       </header>
 
-      {/* Card Central */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
         <div className={`max-w-md w-full border p-5 sm:p-8 rounded-3xl space-y-6 text-center ${cardClasses}`}>
           {deleteSuccess ? (

@@ -24,6 +24,15 @@ interface NavbarProps {
   onToggleTheme?: () => void
 }
 
+function clearLocalSessionData() {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem('codelab_user_xp')
+  } catch {
+    // Ignora bloqueio de storage pelo navegador
+  }
+}
+
 export function Navbar({
   activeTab = 'trilha',
   subtitle = 'Aprenda no seu ritmo',
@@ -34,11 +43,20 @@ export function Navbar({
 }: NavbarProps) {
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
 
   const handleLogout = async () => {
+    if (signingOut) return
+    setSigningOut(true)
     setMenuOpen(false)
-    await supabase.auth.signOut()
-    window.location.href = '/'
+    try {
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.error('Erro ao encerrar sessão:', err)
+    } finally {
+      clearLocalSessionData()
+      window.location.href = '/'
+    }
   }
 
   const handleProtectedNav = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -121,7 +139,6 @@ export function Navbar({
           </Link>
           <Link
             href="/ranking"
-            onClick={handleProtectedNav}
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
               activeTab === 'ranking' ? activeNavBtnClasses : navBtnClasses
             }`}
@@ -171,10 +188,11 @@ export function Navbar({
             <div className="flex items-center gap-2 pl-2 border-l border-stone-200 dark:border-gray-800">
               <button
                 type="button"
-                onClick={handleLogout}
-                className="px-3.5 py-2 border rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap bg-red-50 text-red-700 border-red-600/30 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30"
+                disabled={signingOut}
+                onClick={() => void handleLogout()}
+                className="px-3.5 py-2 border rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap disabled:opacity-60 bg-red-50 text-red-700 border-red-600/30 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30"
               >
-                Sair
+                {signingOut ? 'Saindo...' : 'Sair'}
               </button>
             </div>
           ) : (
@@ -212,9 +230,10 @@ export function Navbar({
 
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? 'Fechar Menu' : 'Abrir Menu'}
             className={`px-3 py-2 border rounded-xl font-bold text-xs cursor-pointer ${navBtnClasses} text-emerald-700 dark:text-emerald-400`}
-            aria-label="Abrir Menu"
           >
             {menuOpen ? 'Fechar' : 'Menu'}
           </button>
@@ -253,7 +272,7 @@ export function Navbar({
           </Link>
           <Link
             href="/ranking"
-            onClick={handleProtectedNav}
+            onClick={() => setMenuOpen(false)}
             className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
               activeTab === 'ranking' ? activeNavBtnClasses : mobileItemClasses
             }`}
@@ -290,10 +309,11 @@ export function Navbar({
           {userId ? (
             <button
               type="button"
-              onClick={handleLogout}
-              className="w-full text-left px-4 py-3 border rounded-xl text-xs font-medium cursor-pointer bg-red-50 border-red-600/25 text-red-700 dark:bg-red-500/10 dark:border-red-500/25 dark:text-red-400"
+              disabled={signingOut}
+              onClick={() => void handleLogout()}
+              className="w-full text-left px-4 py-3 border rounded-xl text-xs font-medium cursor-pointer disabled:opacity-60 bg-red-50 border-red-600/25 text-red-700 dark:bg-red-500/10 dark:border-red-500/25 dark:text-red-400"
             >
-              Sair da Conta
+              {signingOut ? 'Saindo...' : 'Sair da Conta'}
             </button>
           ) : (
             <div className="grid grid-cols-2 gap-2 pt-1">

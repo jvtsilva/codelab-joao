@@ -9,6 +9,11 @@ import { Navbar } from '@/components/Navbar'
 
 const STORAGE_KEY = 'codelab_tema_aula'
 
+function sanitizeXp(rawXp: unknown): number {
+  const parsed = Number(rawXp)
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0
+}
+
 export default function DesafioIndividualPage() {
   const params = useParams<{ slug?: string; id?: string }>()
   const rawSlug = params?.slug || params?.id || ''
@@ -69,44 +74,48 @@ export default function DesafioIndividualPage() {
     if (!challenge) return
     let active = true
 
-    async function loadChallengeProgress() {
+    async function loadChallengeProgress(sessionUserId: string | null) {
       const currentChallenge = challenge!
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        if (!active) return
+        if (sessionUserId) {
+          setUserId(sessionUserId)
 
-        if (session) {
-          const currentUserId = session.user.id
-          setUserId(currentUserId)
-
-          const { data: challenges } = await supabase
+          const { data: challenges, error } = await supabase
             .from('user_challenges')
             .select('challenge_id, completed, xp_earned')
-            .eq('user_id', currentUserId)
+            .eq('user_id', sessionUserId)
 
           if (!active) return
 
-          if (challenges) {
+          if (error) {
+            console.error('Erro ao buscar desafios no Supabase:', error.message)
+            return
+          }
+
+          if (Array.isArray(challenges)) {
             const totalXp = challenges.reduce(
-              (acc, curr) => acc + (curr.xp_earned || 0),
-              0,
+              (acc, curr) => acc + sanitizeXp(curr?.xp_earned),
+              0
             )
             setUserXp(totalXp)
-            localStorage.setItem('codelab_user_xp', String(totalXp))
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('codelab_user_xp', String(totalXp))
+            }
 
             const current = challenges.find(
-              (c) => c.challenge_id === currentChallenge.id,
+              (c) => c.challenge_id === currentChallenge.id
             )
-            if (current?.completed) setIsCompleted(true)
+            if (current?.completed === true) setIsCompleted(true)
           }
-        } else if (typeof window !== 'undefined') {
-          const savedXp = Number(localStorage.getItem('codelab_user_xp') || '0')
-          setUserXp(Number.isNaN(savedXp) ? 0 : savedXp)
+        } else {
+          setUserId(null)
+          if (typeof window !== 'undefined') {
+            const savedXp = sanitizeXp(localStorage.getItem('codelab_user_xp'))
+            setUserXp(savedXp)
 
-          if (localStorage.getItem(`codelab_visitante_${currentChallenge.id}`)) {
-            setIsCompleted(true)
+            if (localStorage.getItem(`codelab_visitante_${currentChallenge.id}`) === 'true') {
+              setIsCompleted(true)
+            }
           }
         }
       } catch (error) {
@@ -114,10 +123,29 @@ export default function DesafioIndividualPage() {
       }
     }
 
-    loadChallengeProgress()
+    supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          console.error('Erro ao obter sessão no desafio:', error.message)
+        }
+        void loadChallengeProgress(data.session?.user?.id ?? null)
+      })
+      .catch((err) => {
+        console.error('Erro inesperado na sessão do desafio:', err)
+      })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
+      void loadChallengeProgress(session?.user?.id ?? null)
+    })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [challenge])
 
@@ -142,32 +170,48 @@ export default function DesafioIndividualPage() {
   const registerVictory = useCallback(async () => {
     if (!challenge) return
 
+    const earnedXp = sanitizeXp(challenge.xp)
     setIsSuccess(true)
     setFeedback(challenge.successMessage)
 
+    if (userId) {
+      const { data: rpcResult, error } = await supabase.rpc('complete_challenge', {
+        p_challenge_id: challenge.id,
+        p_xp_reward: earnedXp,
+      })
+
+      if (error) {
+        console.error('Erro ao salvar conclusão do desafio via RPC:', error.message)
+        return
+      }
+
+      setIsCompleted(true)
+
+      const awardedFromDb =
+        rpcResult && typeof rpcResult === 'object' && 'xp_awarded' in rpcResult
+          ? sanitizeXp((rpcResult as { xp_awarded?: unknown }).xp_awarded)
+          : !isCompleted
+          ? earnedXp
+          : 0
+
+      if (awardedFromDb > 0) {
+        const updatedXp = userXp + awardedFromDb
+        setUserXp(updatedXp)
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('codelab_user_xp', String(updatedXp))
+        }
+      }
+      return
+    }
+
     if (!isCompleted) {
       setIsCompleted(true)
-      const newXp = userXp + challenge.xp
+      const newXp = userXp + earnedXp
       setUserXp(newXp)
 
       if (typeof window !== 'undefined') {
         localStorage.setItem('codelab_user_xp', String(newXp))
-        if (!userId) {
-          localStorage.setItem(`codelab_visitante_${challenge.id}`, 'true')
-        }
-      }
-
-      if (userId) {
-        await supabase.from('user_challenges').upsert(
-          {
-            user_id: userId,
-            challenge_id: challenge.id,
-            completed: true,
-            xp_earned: challenge.xp,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,challenge_id' },
-        )
+        localStorage.setItem(`codelab_visitante_${challenge.id}`, 'true')
       }
     }
   }, [challenge, isCompleted, userId, userXp])
@@ -257,17 +301,15 @@ export default function DesafioIndividualPage() {
         onToggleTheme={alternarTema}
       />
 
-      {/* Área de Conteúdo do Desafio */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 pb-12">
         <section className={`p-4 sm:p-6 border rounded-2xl space-y-5 ${cardClasses}`}>
-          {/* Cabeçalho do desafio */}
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-1 bg-amber-500 text-gray-950 font-extrabold text-[11px] rounded-md">
                 {challenge.difficulty.toUpperCase()}
               </span>
               <span className={`text-xs font-bold tabular-nums ${accentAmberClasses}`}>
-                +{challenge.xp} XP
+                +{sanitizeXp(challenge.xp)} XP
               </span>
             </div>
 
@@ -280,7 +322,6 @@ export default function DesafioIndividualPage() {
             )}
           </div>
 
-          {/* Enunciado direto */}
           <div className="space-y-2">
             <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
               {challenge.title}
@@ -290,7 +331,6 @@ export default function DesafioIndividualPage() {
             </p>
           </div>
 
-          {/* Dica opcional para não travar quem está começando */}
           {hintText && !isSuccess && (
             <div className="space-y-2">
               <button
@@ -310,7 +350,6 @@ export default function DesafioIndividualPage() {
             </div>
           )}
 
-          {/* Área de resposta: Quiz */}
           {challenge.type === 'quiz' && challenge.options && (
             <div className="space-y-2.5 pt-1">
               {challenge.options.map((opt) => {
@@ -341,7 +380,6 @@ export default function DesafioIndividualPage() {
             </div>
           )}
 
-          {/* Área de resposta: Código */}
           {challenge.type === 'code' && (
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between gap-2">
@@ -375,7 +413,6 @@ export default function DesafioIndividualPage() {
             </div>
           )}
 
-          {/* Ações */}
           <div className="pt-1 flex flex-col sm:flex-row gap-3">
             <button
               type="button"
@@ -396,7 +433,6 @@ export default function DesafioIndividualPage() {
             )}
           </div>
 
-          {/* Feedback */}
           {feedback && (
             <div
               className={`p-4 rounded-xl border font-mono text-[13px] sm:text-sm space-y-1 ${
@@ -415,7 +451,6 @@ export default function DesafioIndividualPage() {
           )}
         </section>
 
-        {/* Navegação inferior */}
         <div className="flex flex-wrap justify-between items-center gap-3">
           <Link
             href="/desafios"

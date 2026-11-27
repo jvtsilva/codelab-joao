@@ -1,67 +1,100 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+const supabaseServer = supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+  : null
+
+const MAX_CADASTROS_POR_HORA = 3
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+function getClientIp(request: Request): string {
+  const realIp = request.headers.get('x-real-ip')?.trim()
+  if (realIp) return realIp
+
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (forwardedFor) {
+    const parts = forwardedFor
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean)
+    if (parts.length > 0) return parts[parts.length - 1]
+  }
+
+  return '127.0.0.1'
+}
 
 export async function POST(request: Request) {
   try {
-    const { email, password, token } = await request.json()
-
-    // Pega o IP real do usuário na Vercel
-    const forwardedFor = request.headers.get('x-forwarded-for')
-    const ip = forwardedFor ? forwardedFor.split(',')[0].trim() : '127.0.0.1'
-
-    // 1. Valida o Turnstile na Cloudflare
-    const turnstileData = new URLSearchParams()
-    turnstileData.append('secret', process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY || '')
-    turnstileData.append('response', token)
-
-    const turnstileResponse = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST',
-      body: turnstileData,
-    })
-
-    const turnstileResult = await turnstileResponse.json()
-
-    if (!turnstileResult.success) {
-      return NextResponse.json({ error: 'Falha na verificação de segurança (Turnstile). Tente novamente.' }, { status: 400 })
+    if (!supabaseUrl || !supabaseServer) {
+      console.error('Variáveis do Supabase (URL ou SERVICE_ROLE_KEY) ausentes no servidor.')
+      return NextResponse.json(
+        { error: 'Erro interno na configuração do servidor.' },
+        { status: 500 }
+      )
     }
 
-    // 2. Trava de IP para Produção: Verifica cadastros na última 1 hora
+    const body = await request.json().catch(() => null)
+    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
+    const password = typeof body?.password === 'string' ? body.password : ''
+    const token = typeof body?.token === 'string' ? body.token.trim() : ''
+
+    if (!EMAIL_REGEX.test(email) || password.length < 8 || !token) {
+      return NextResponse.json(
+        { error: 'Dados inválidos ou verificação de segurança pendente.' },
+        { status: 400 }
+      )
+    }
+
+    const ip = getClientIp(request)
     const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-    
-    const { data: existingIps, error: selectError } = await supabaseAdmin
+
+    // 1. Consulta tentativas do IP na última 1 hora
+    const { count, error: selectError } = await supabaseServer
       .from('ip_rate_limit')
-      .select('*')
+      .select('*', { count: 'exact', head: true })
       .eq('ip', ip)
       .gte('created_at', umaHoraAtras)
 
     if (selectError) {
-      console.error('Erro ao consultar rate limit:', selectError)
+      console.error('Erro ao consultar ip_rate_limit:', selectError.message)
+      return NextResponse.json(
+        { error: 'Erro interno no servidor.' },
+        { status: 500 }
+      )
     }
 
-    // Se já fez 3 ou mais cadastros na última 1 hora, bloqueia!
-    if (existingIps && existingIps.length >= 3) {
+    if ((count ?? 0) >= MAX_CADASTROS_POR_HORA) {
       return NextResponse.json(
-        { error: 'Muitos cadastros realizados a partir deste IP. Tente novamente mais tarde.' },
+        { error: 'Muitas tentativas a partir deste IP. Tente novamente mais tarde.' },
         { status: 429 }
       )
     }
 
-    // 3. Registra o IP atual na tabela para contar nos próximos
-    const { error: insertError } = await supabaseAdmin
+    // 2. Registra tentativa do IP na tabela ip_rate_limit
+    const { error: insertError } = await supabaseServer
       .from('ip_rate_limit')
       .insert([{ ip }])
 
     if (insertError) {
-      console.error('Erro ao inserir IP no rate limit:', insertError)
+      console.error('Erro ao registrar IP em ip_rate_limit:', insertError.message)
+      return NextResponse.json(
+        { error: 'Erro interno no servidor.' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ success: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Erro interno no servidor.' }, { status: 500 })
+  } catch (err: unknown) {
+    console.error('Erro inesperado em POST /api/cadastro:', err)
+    return NextResponse.json(
+      { error: 'Erro interno no servidor.' },
+      { status: 500 }
+    )
   }
 }

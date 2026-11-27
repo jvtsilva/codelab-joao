@@ -2,49 +2,57 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const errorParam = requestUrl.searchParams.get('error')
 
-  if (code) {
-    // 1. Aguarda a Promise dos cookies (essencial nas versões atuais do Next.js)[cite: 1]
+  if (errorParam) {
+    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
+  }
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Variáveis públicas do Supabase ausentes na rota /auth/callback.')
+    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
+  }
+
+  if (!code) {
+    return NextResponse.redirect(new URL('/login', requestUrl.origin))
+  }
+
+  try {
     const cookieStore = await cookies()
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value
-          },
-          set(name: string, value: string, options: any) {
-            try {
-              cookieStore.set({ name, value, ...options })
-            } catch (error) {
-              // Tratamento para evitar erros de escrita de cookies em Server Components estritos
-            }
-          },
-          remove(name: string, options: any) {
-            try {
-              cookieStore.set({ name, value: '', ...options })
-            } catch (error) {
-              // Tratamento para evitar erros de remoção de cookies
-            }
-          },
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
         },
-      }
-    )
-    
-    // 2. Troca o código temporário pela sessão definitiva do usuário[cite: 1]
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options)
+            })
+          } catch {
+            // Ignora falhas de escrita fora de contexto mutável de cookies
+          }
+        },
+      },
+    })
+
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
+
     if (error) {
       console.error('Erro ao trocar código por sessão:', error.message)
       return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
     }
-  }
 
-  // 3. Redireciona o usuário para o dashboard após confirmar com sucesso[cite: 1]
-  return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+    return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+  } catch (err) {
+    console.error('Erro inesperado na rota /auth/callback:', err)
+    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
+  }
 }

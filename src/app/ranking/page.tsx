@@ -13,13 +13,25 @@ interface LeaderboardUser {
 
 interface RankingRpcRow {
   user_id: string
-  name: string | null
+  full_name?: string | null
+  name?: string | null
   total_xp: number | string | null
 }
 
 const STORAGE_KEY = 'codelab_tema_aula'
 const INSTRUTOR_ID = 'a7ee38e0-6a2a-4b76-88b3-9a7eae68c2d9'
 const XP_POR_AULA = 50
+const MAX_NOME_EXIBICAO = 60
+
+function sanitizeDisplayName(rawName: string | null | undefined): string {
+  const cleaned = String(rawName || '').trim().slice(0, MAX_NOME_EXIBICAO)
+  return cleaned || 'Estudante Codelab'
+}
+
+function sanitizeXp(rawXp: number | string | null | undefined): number {
+  const parsed = Number(rawXp)
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0
+}
 
 export default function RankingPage() {
   const [ranking, setRanking] = useState<LeaderboardUser[]>([])
@@ -40,28 +52,37 @@ export default function RankingPage() {
 
     async function fetchLeaderboard() {
       try {
-        const [{ data: xpRows, error: rpcError }, { data: sessionData }] = await Promise.all([
-          supabase.rpc('get_ranking_xp'),
-          supabase.auth.getSession(),
-        ])
+        const [{ data: xpRows, error: rpcError }, { data: sessionData, error: sessionError }] =
+          await Promise.all([
+            supabase.rpc('get_ranking_xp', { limit_count: 50 }),
+            supabase.auth.getSession(),
+          ])
 
         if (!active) return
 
         if (rpcError) {
-          console.error('Erro ao buscar XP do ranking:', rpcError)
+          console.error('Erro ao buscar XP do ranking:', rpcError.message)
+        }
+        if (sessionError) {
+          console.error('Erro ao obter sessão no ranking:', sessionError.message)
         }
 
         const currentUserId = sessionData?.session?.user?.id ?? null
         setUserId(currentUserId)
 
         const formattedRanking: LeaderboardUser[] = ((xpRows as RankingRpcRow[] | null) || [])
-          .filter((row) => Boolean(row.user_id))
+          .filter((row) => typeof row?.user_id === 'string' && row.user_id.trim().length > 0)
           .map((row) => ({
-            user_id: row.user_id,
-            name: (row.name || '').trim() || 'Estudante Codelab',
-            total_xp: Number(row.total_xp || 0),
+            user_id: row.user_id.trim(),
+            name: sanitizeDisplayName(row.full_name ?? row.name),
+            total_xp: sanitizeXp(row.total_xp),
           }))
-          .sort((a, b) => b.total_xp - a.total_xp)
+          .sort(
+            (a, b) =>
+              b.total_xp - a.total_xp ||
+              a.name.localeCompare(b.name, 'pt-BR') ||
+              a.user_id.localeCompare(b.user_id)
+          )
 
         setRanking(formattedRanking)
       } catch (err) {
@@ -71,10 +92,18 @@ export default function RankingPage() {
       }
     }
 
-    fetchLeaderboard()
+    void fetchLeaderboard()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!active) return
+      setUserId(session?.user?.id ?? null)
+    })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -120,14 +149,19 @@ export default function RankingPage() {
         </div>
 
         <div className="space-y-2 border p-4 sm:p-6 rounded-2xl text-center bg-white border-amber-600/25 shadow-sm dark:bg-gray-900 dark:border-amber-500/25 dark:shadow-xl">
-          <span className={`text-xs font-bold uppercase tracking-wider block ${accentAmberClasses}`}>
+          <span
+            className={`text-xs font-bold uppercase tracking-wider block ${accentAmberClasses}`}
+          >
             Placar Geral 🏆
           </span>
           <h2 className="text-lg sm:text-2xl font-black tracking-tight text-stone-900 dark:text-white">
             Ranking de XP
           </h2>
-          <p className={`text-[15px] sm:text-base max-w-2xl mx-auto leading-relaxed tabular-nums ${textMutedClasses}`}>
-            Soma das aulas concluídas na trilha ({XP_POR_AULA} XP por aula) e dos desafios resolvidos na plataforma.
+          <p
+            className={`text-[15px] sm:text-base max-w-2xl mx-auto leading-relaxed tabular-nums ${textMutedClasses}`}
+          >
+            Soma das aulas concluídas na trilha ({XP_POR_AULA} XP por aula) e dos desafios resolvidos
+            na plataforma.
           </p>
         </div>
 
@@ -153,7 +187,9 @@ export default function RankingPage() {
           </div>
 
           {loading ? (
-            <div className={`p-8 flex items-center justify-center gap-2 text-xs sm:text-sm ${textMutedClasses}`}>
+            <div
+              className={`p-8 flex items-center justify-center gap-2 text-xs sm:text-sm ${textMutedClasses}`}
+            >
               <span className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin border-amber-700 dark:border-amber-400" />
               <span>Carregando ranking...</span>
             </div>
@@ -178,9 +214,12 @@ export default function RankingPage() {
 
                 let badgeColor =
                   'bg-stone-100 text-stone-700 border-stone-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                if (position === 1) badgeColor = 'bg-amber-500 text-gray-950 border-amber-400 font-black'
-                if (position === 2) badgeColor = 'bg-gray-300 text-gray-950 border-gray-200 font-bold'
-                if (position === 3) badgeColor = 'bg-amber-700 text-white border-amber-600 font-bold'
+                if (position === 1)
+                  badgeColor = 'bg-amber-500 text-gray-950 border-amber-400 font-black'
+                if (position === 2)
+                  badgeColor = 'bg-gray-300 text-gray-950 border-gray-200 font-bold'
+                if (position === 3)
+                  badgeColor = 'bg-amber-700 text-white border-amber-600 font-bold'
 
                 return (
                   <div
@@ -195,7 +234,13 @@ export default function RankingPage() {
                       <div
                         className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs tabular-nums shrink-0 border ${badgeColor}`}
                       >
-                        {position === 1 ? '🥇' : position === 2 ? '🥈' : position === 3 ? '🥉' : `#${position}`}
+                        {position === 1
+                          ? '🥇'
+                          : position === 2
+                          ? '🥈'
+                          : position === 3
+                          ? '🥉'
+                          : `#${position}`}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">

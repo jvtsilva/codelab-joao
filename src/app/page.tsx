@@ -7,6 +7,11 @@ import Link from 'next/link'
 
 const STORAGE_KEY = 'codelab_tema_aula'
 
+function sanitizeXp(rawXp: unknown): number {
+  const parsed = Number(rawXp)
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0
+}
+
 export default function HomePage() {
   const [session, setSession] = useState<Session | null>(null)
   const [userXp, setUserXp] = useState<number>(0)
@@ -23,16 +28,60 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
-    async function loadData() {
-      const { data: { session: currentSession } } = await supabase.auth.getSession()
+    let active = true
+
+    function applySessionState(currentSession: Session | null) {
       setSession(currentSession)
 
-      const savedXp = localStorage.getItem('codelab_user_xp')
-      if (savedXp) setUserXp(Number(savedXp))
+      if (typeof window === 'undefined') {
+        setUserXp(0)
+        return
+      }
 
-      setLoading(false)
+      if (!currentSession) {
+        localStorage.removeItem('codelab_user_xp')
+        setUserXp(0)
+        return
+      }
+
+      const savedXp = sanitizeXp(localStorage.getItem('codelab_user_xp'))
+      setUserXp(savedXp)
     }
-    loadData()
+
+    async function loadData() {
+      try {
+        const {
+          data: { session: currentSession },
+          error,
+        } = await supabase.auth.getSession()
+
+        if (!active) return
+
+        if (error) {
+          console.error('Erro ao obter sessão na HomePage:', error.message)
+        }
+
+        applySessionState(currentSession ?? null)
+      } catch (err) {
+        console.error('Erro inesperado na HomePage:', err)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+
+    void loadData()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      if (!active) return
+      applySessionState(nextSession ?? null)
+    })
+
+    return () => {
+      active = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const alternarTema = () => {
@@ -77,8 +126,8 @@ export default function HomePage() {
             {isDark ? '☀ Claro' : '🌙 Escuro'}
           </button>
 
-          {!loading && (
-            session ? (
+          {!loading &&
+            (session ? (
               <Link
                 href="/dashboard"
                 className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold text-xs rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 cursor-pointer"
@@ -100,8 +149,7 @@ export default function HomePage() {
                   Criar Conta
                 </Link>
               </div>
-            )
-          )}
+            ))}
         </div>
 
         {/* Botões Mobile */}
@@ -119,7 +167,8 @@ export default function HomePage() {
 
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-expanded={menuOpen}
             className="p-2.5 border font-bold rounded-xl cursor-pointer active:scale-95 bg-stone-100 hover:bg-stone-200 border-stone-300 text-emerald-700 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-800 dark:text-emerald-400"
             aria-label="Menu"
           >
@@ -139,8 +188,8 @@ export default function HomePage() {
             <span>💬</span> Contato
           </Link>
 
-          {!loading && (
-            session ? (
+          {!loading &&
+            (session ? (
               <Link
                 href="/dashboard"
                 onClick={() => setMenuOpen(false)}
@@ -165,8 +214,7 @@ export default function HomePage() {
                   Criar Conta
                 </Link>
               </div>
-            )
-          )}
+            ))}
         </div>
       )}
 
@@ -177,7 +225,9 @@ export default function HomePage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold bg-emerald-50 border-emerald-600/25 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400"
         >
           <span>✨</span>
-          {userXp > 0 ? `Seu XP atual: ${userXp} XP ⚡` : 'Acesso livre • Aulas + Desafios'}
+          {userXp > 0
+            ? `Seu XP atual: ${userXp.toLocaleString('pt-BR')} XP ⚡`
+            : 'Acesso livre • Aulas + Desafios'}
         </div>
 
         <div className="space-y-3 sm:space-y-4 max-w-3xl">
@@ -230,7 +280,7 @@ export default function HomePage() {
                 suppressHydrationWarning
                 className="text-[10px] font-bold border px-2 py-0.5 rounded-md text-amber-700 bg-amber-50 border-amber-600/30 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/30"
               >
-                {userXp > 0 ? `${userXp} XP` : 'Prática XP'}
+                {userXp > 0 ? `${userXp.toLocaleString('pt-BR')} XP` : 'Prática XP'}
               </span>
             </div>
             <h3 className="font-bold text-sm">Desafios e XP</h3>

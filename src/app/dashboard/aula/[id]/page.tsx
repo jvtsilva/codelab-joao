@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
@@ -32,6 +32,12 @@ function lerTemaInicial(): boolean {
   return salvo !== 'light'
 }
 
+function isSafeImageSrc(url?: string): boolean {
+  if (!url) return false
+  const trimmed = url.trim()
+  return trimmed.startsWith('/') || trimmed.startsWith('https://')
+}
+
 export default function AulaDetalhePage({
   concluidasIds = [],
   onConcluirAula,
@@ -45,6 +51,9 @@ export default function AulaDetalhePage({
       (item: AulaItem) =>
         item.id === rawId || String(item.numero) === rawId,
     ) || aulasData[0]
+
+  const aulaId = aula?.id
+  const aulaNumero = aula?.numero
 
   const [userId, setUserId] = useState<string | null>(null)
   const [isDark, setIsDark] = useState<boolean>(() => lerTemaInicial())
@@ -87,6 +96,9 @@ export default function AulaDetalhePage({
   )
   const [respostasCorretas, setRespostasCorretas] = useState<boolean[]>([])
 
+  const aulaRef = useRef<AulaItem | undefined>(aula)
+  aulaRef.current = aula
+
   useIsomorphicLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', isDark)
     document.documentElement.style.backgroundColor = isDark
@@ -95,53 +107,78 @@ export default function AulaDetalhePage({
   }, [isDark])
 
   useEffect(() => {
-    if (!aula) return
+    if (!aulaId || aulaNumero === undefined) return
     let active = true
 
     async function carregarSessaoEProgresso() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!active) return
-
-      let jaConcluida = false
-
-      if (typeof window !== 'undefined') {
-        if (
-          window.localStorage.getItem(
-            `codelab_visitante_aula_${aula!.numero}`,
-          ) === 'true'
-        ) {
-          jaConcluida = true
-        }
-      }
-
-      if (session) {
-        setUserId(session.user.id)
-        const { data } = await supabase
-          .from('user_progress')
-          .select('completed')
-          .eq('user_id', session.user.id)
-          .eq('lesson_id', aula!.id)
-          .maybeSingle()
-
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
         if (!active) return
-        if (data?.completed) {
-          jaConcluida = true
-        }
-      }
 
-      if (active && jaConcluida) {
-        setConcluidaLocal(true)
+        if (sessionError) {
+          console.error('Erro ao obter sessão na aula:', sessionError.message)
+        }
+
+        let jaConcluida = false
+
+        if (typeof window !== 'undefined') {
+          if (
+            window.localStorage.getItem(
+              `codelab_visitante_aula_${aulaNumero}`,
+            ) === 'true'
+          ) {
+            jaConcluida = true
+          }
+        }
+
+        const currentUserId = session?.user?.id ?? null
+        setUserId(currentUserId)
+
+        if (currentUserId) {
+          const { data, error: progressError } = await supabase
+            .from('user_progress')
+            .select('completed')
+            .eq('user_id', currentUserId)
+            .eq('lesson_id', aulaId!)
+            .maybeSingle()
+
+          if (!active) return
+          if (progressError) {
+            console.error('Erro ao consultar user_progress:', progressError.message)
+          } else if (data?.completed) {
+            jaConcluida = true
+          }
+        }
+
+        if (active && jaConcluida) {
+          setConcluidaLocal(true)
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao carregar progresso da aula:', err)
       }
     }
 
-    carregarSessaoEProgresso()
+    void carregarSessaoEProgresso()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return
+      const nextUserId = session?.user?.id ?? null
+      setUserId(nextUserId)
+      if (event === 'SIGNED_OUT') {
+        setConcluidaLocal(false)
+      }
+    })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
-  }, [aula])
+  }, [aulaId, aulaNumero])
 
   const alternarTema = () => {
     setIsDark((atual: boolean) => {
@@ -165,13 +202,16 @@ export default function AulaDetalhePage({
       : false)
 
   useEffect(() => {
-    if (!aula) return
+    const atualAula = aulaRef.current
+    if (!atualAula) return
     setEtapaAtual(0)
     setConcluidaLocal(false)
     setErroSalvar(null)
     setSaving(false)
 
-    setItensOrdenados(aula.pratica.frases ? [...aula.pratica.frases] : [])
+    setItensOrdenados(
+      atualAula.pratica.frases ? [...atualAula.pratica.frases] : [],
+    )
     setFeedbackOrdem('idle')
 
     setSelecoesClassificacao({})
@@ -183,13 +223,13 @@ export default function AulaDetalhePage({
     setIndiceErroSelecionado(null)
     setFeedbackCacaErro('idle')
 
-    setValorSimulador(aula.pratica.simuladorEstado?.valorInicial ?? 0)
+    setValorSimulador(atualAula.pratica.simuladorEstado?.valorInicial ?? 0)
     setFeedbackSimulador('idle')
 
     setIndicePergunta(0)
     setRespostaSelecionada(null)
     setRespostasCorretas([])
-  }, [aula?.id])
+  }, [aulaId])
 
   const caixa =
     'rounded-2xl border border-stone-200 bg-white p-5 sm:p-6 dark:border-gray-800 dark:bg-gray-900'
@@ -376,15 +416,9 @@ export default function AulaDetalhePage({
       }
 
       if (currentUserId) {
-        const { error } = await supabase.from('user_progress').upsert(
-          {
-            user_id: currentUserId,
-            lesson_id: aula.id,
-            completed: true,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id,lesson_id' },
-        )
+        const { error } = await supabase.rpc('complete_lesson', {
+          p_lesson_id: aula.id,
+        })
         if (error) {
           throw error
         }
@@ -494,10 +528,10 @@ export default function AulaDetalhePage({
               <p className={`mt-1 ${texto}`}>{aula.introducao?.contexto}</p>
             </div>
 
-            {aula.introducao?.imagemUrl && (
+            {isSafeImageSrc(aula.introducao?.imagemUrl) && (
               <img
-                src={aula.introducao.imagemUrl}
-                alt={aula.introducao.imagemAlt || aula.titulo}
+                src={aula.introducao!.imagemUrl!}
+                alt={aula.introducao?.imagemAlt || aula.titulo}
                 className="w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
               />
             )}
@@ -524,9 +558,9 @@ export default function AulaDetalhePage({
                       <p className={`mt-1.5 whitespace-pre-line ${texto}`}>
                         {topico.explicacao}
                       </p>
-                      {topico.imagemUrl && (
+                      {isSafeImageSrc(topico.imagemUrl) && (
                         <img
-                          src={topico.imagemUrl}
+                          src={topico.imagemUrl!}
                           alt={topico.imagemAlt || topico.titulo}
                           className="mt-3 w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
                         />
@@ -600,10 +634,10 @@ export default function AulaDetalhePage({
               </pre>
             )}
 
-            {aula.pratica?.imagemUrl && (
+            {isSafeImageSrc(aula.pratica?.imagemUrl) && (
               <img
-                src={aula.pratica.imagemUrl}
-                alt={aula.pratica.imagemAlt || aula.pratica.titulo}
+                src={aula.pratica!.imagemUrl!}
+                alt={aula.pratica?.imagemAlt || aula.pratica?.titulo || aula.titulo}
                 className="w-full rounded-xl border border-stone-200 dark:border-gray-800 object-cover"
               />
             )}

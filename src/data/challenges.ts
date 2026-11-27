@@ -8,6 +8,7 @@ export interface ArenaChallenge {
   xp: number
   type: 'quiz' | 'code'
   prompt: string
+  hint?: string
   options?: { id: string; text: string }[]
   correctOptionId?: string
   placeholder?: string
@@ -74,8 +75,9 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Você quer conferir se o código está rodando direitinho. Use `console.log()` para mostrar `"Tudo certo por aqui"` no console.',
+    hint: 'Escreva console.log("Tudo certo por aqui") exatamente com esse texto.',
     placeholder: 'console.log("Tudo certo por aqui")',
-    validationPattern: /console\.log\s*\(\s*['"`]Tudo certo por aqui['"`]\s*\)\s*;?/i,
+    validationPattern: /console\.log\s*\(\s*["'`]Tudo certo por aqui["'`]\s*\)\s*;?/i,
     requiredKeyword: 'console.log',
     successMessage: '🎉 Boa! O console é o seu espelho rápido para ver o que o código está fazendo.',
     errorMessage: '❌ Confira a chamada: use `console.log("Tudo certo por aqui")` com aspas.',
@@ -93,6 +95,7 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Crie uma variável chamada `pontos` usando `let` e atribua o valor `0` a ela.',
+    hint: 'Use a palavra-chave let, o nome pontos e = 0.',
     placeholder: 'let pontos = 0',
     validationPattern: /\blet\s+pontos\s*=\s*0\s*;?/i,
     requiredKeyword: 'pontos',
@@ -134,6 +137,7 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Escreva uma comparação estrita (`===`) verificando se `idade` é igual a `18`.',
+    hint: 'Use três sinais de igual (===) entre idade e 18.',
     placeholder: 'idade === 18',
     validationPattern: /idade\s*===\s*18/i,
     requiredKeyword: '===',
@@ -153,6 +157,7 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Escreva uma expressão usando `&&` que verifique se `temIngresso` E `idadeMaiorQue16` são verdadeiros.',
+    hint: 'Escreva temIngresso && idadeMaiorQue16.',
     placeholder: 'temIngresso && idadeMaiorQue16',
     validationPattern: /temIngresso\s*&&\s*idadeMaiorQue16/i,
     requiredKeyword: '&&',
@@ -194,9 +199,11 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Escreva um bloco `if` verificando se `saldo > 0` e mostrando `"Saldo positivo"` com `console.log`.',
+    hint: 'Estrutura: if (saldo > 0) { console.log("Saldo positivo") }',
     placeholder: 'if (saldo > 0) { console.log("Saldo positivo") }',
-    validationPattern: /if\s*\(\s*saldo\s*>\s*0\s*\)\s*\{[\s\S]*console\.log\s*\(\s*['"`]Saldo positivo['"`]\s*\)\s*;?[\s\S]*\}/i,
-    requiredKeyword: 'if',
+    validationPattern:
+      /if\s*\(\s*saldo\s*>\s*0\s*\)\s*\{[\s\S]*console\.log\s*\(\s*["'`]Saldo positivo["'`]\s*\)\s*;?[\s\S]*\}/i,
+    requiredKeyword: 'saldo > 0',
     successMessage: '🎉 Show! O `if` direciona o fluxo apenas quando a condição passa.',
     errorMessage: '❌ Confira a estrutura: `if (saldo > 0) { console.log("Saldo positivo") }`.',
   },
@@ -235,6 +242,7 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Dado um array `tarefas`, acesse e exiba o primeiro item usando `console.log(tarefas[0])`.',
+    hint: 'Use tarefas[0] dentro de console.log(...).',
     placeholder: 'console.log(tarefas[0])',
     validationPattern: /console\.log\s*\(\s*tarefas\s*\[\s*0\s*\]\s*\)\s*;?/i,
     requiredKeyword: 'tarefas[0]',
@@ -254,8 +262,10 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Escreva o início de um `for` que percorra `notas` do índice `0` até `notas.length` incrementando `i++`.',
+    hint: 'Use for (let i = 0; i < notas.length; i++)',
     placeholder: 'for (let i = 0; i < notas.length; i++) {}',
-    validationPattern: /for\s*\(\s*let\s+i\s*=\s*0\s*;\s*i\s*<\s*notas\.length\s*;\s*i\+\+\s*\)/i,
+    validationPattern:
+      /for\s*\(\s*(?:let|var)\s+i\s*=\s*0\s*;\s*i\s*<\s*notas\.length\s*;\s*i\+\+\s*\)/i,
     requiredKeyword: 'notas.length',
     successMessage: '🎉 Mandou bem! `i < notas.length` percorre todos os itens sem estourar o limite.',
     errorMessage: '❌ Confira o laço: `for (let i = 0; i < notas.length; i++)`.',
@@ -273,9 +283,11 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Crie uma função chamada `somar` que receba `(a, b)` e retorne `a + b` com `return`.',
+    hint: 'Use function somar(a, b) e dentro dela return a + b.',
     placeholder: 'function somar(a, b) { return a + b }',
-    validationPattern: /function\s+somar\s*\(\s*a\s*,\s*b\s*\)\s*\{[\s\S]*return\s+a\s*\+\s*b\s*;?[\s\S]*\}/i,
-    requiredKeyword: 'return',
+    validationPattern:
+      /function\s+somar\s*\(\s*a\s*,\s*b\s*\)\s*\{[\s\S]*return\s+a\s*\+\s*b\s*;?[\s\S]*\}/i,
+    requiredKeyword: 'somar',
     successMessage: '🎉 Boa! `return` devolve o resultado da função para quem chamou.',
     errorMessage: '❌ Inclua `function somar(a, b)` e `return a + b` dentro das chaves.',
   },
@@ -292,9 +304,11 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Crie uma constante `aluno` com a propriedade `nome` valendo `"Ana"`.',
+    hint: 'Use const aluno = { nome: "Ana" }.',
     placeholder: 'const aluno = { nome: "Ana" }',
-    validationPattern: /\bconst\s+aluno\s*=\s*\{\s*nome\s*:\s*['"`]Ana['"`]\s*,?\s*\}\s*;?/i,
-    requiredKeyword: 'aluno',
+    validationPattern:
+      /\bconst\s+aluno\s*=\s*\{\s*nome\s*:\s*["'`]Ana["'`]\s*,?\s*\}\s*;?/i,
+    requiredKeyword: 'nome',
     successMessage: '🎉 Perfeito! Objetos agrupam dados relacionados usando pares de chave e valor.',
     errorMessage: '❌ Confira a estrutura do objeto: `const aluno = { nome: "Ana" }`.',
   },
@@ -333,8 +347,10 @@ export const ARENA_CHALLENGES: ArenaChallenge[] = [
     type: 'code',
     prompt:
       'Crie uma função chamada `resumirPedido` que receba `pedidos` e retorne `pedidos.length` usando `return`.',
+    hint: 'Use function resumirPedido(pedidos) e retorne pedidos.length.',
     placeholder: 'function resumirPedido(pedidos) { return pedidos.length }',
-    validationPattern: /function\s+resumirPedido\s*\(\s*pedidos\s*\)\s*\{[\s\S]*return\s+pedidos\.length\s*;?[\s\S]*\}/i,
+    validationPattern:
+      /function\s+resumirPedido\s*\(\s*pedidos\s*\)\s*\{[\s\S]*return\s+pedidos\.length\s*;?[\s\S]*\}/i,
     requiredKeyword: 'resumirPedido',
     successMessage: '🏆 Mandou muito! Você fechou a trilha integrando função, array e retorno de resultado.',
     errorMessage: '❌ Confira a assinatura e o retorno: `function resumirPedido(pedidos) { return pedidos.length }`.',

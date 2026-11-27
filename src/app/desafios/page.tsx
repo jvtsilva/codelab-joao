@@ -2,7 +2,6 @@
 
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ARENA_CHALLENGES, ArenaChallenge } from '@/data/challenges'
 import { Navbar } from '@/components/Navbar'
@@ -18,7 +17,8 @@ const MODULE_GROUPS: {
   {
     id: 1,
     titulo: 'Módulo 1: Lógica e Decomposição',
-    descricao: 'Ordem das instruções, condições do dia a dia e decomposição em etapas (Aulas 1 a 3)',
+    descricao:
+      'Ordem das instruções, condições do dia a dia e decomposição em etapas (Aulas 1 a 3)',
     match: (ch) =>
       ch.subtitle.includes('Aula 1') ||
       ch.subtitle.includes('Aula 2') ||
@@ -27,7 +27,8 @@ const MODULE_GROUPS: {
   {
     id: 2,
     titulo: 'Módulo 2: Dados, Tipos e Lógica',
-    descricao: 'Variáveis, tipos, comparações, operadores lógicos e regras combinadas (Aulas 4 a 8)',
+    descricao:
+      'Variáveis, tipos, comparações, operadores lógicos e regras combinadas (Aulas 4 a 8)',
     match: (ch) =>
       ['Aula 4', 'Aula 5', 'Aula 6', 'Aula 7', 'Aula 8'].some((a) =>
         ch.subtitle.includes(a)
@@ -36,7 +37,8 @@ const MODULE_GROUPS: {
   {
     id: 3,
     titulo: 'Módulo 3: Fluxo, Loops e Arrays',
-    descricao: 'Decisões com if/else, loops for/while, arrays por índice e percurso de listas (Aulas 9 a 12)',
+    descricao:
+      'Decisões com if/else, loops for/while, arrays por índice e percurso de listas (Aulas 9 a 12)',
     match: (ch) =>
       ['Aula 9', 'Aula 10', 'Aula 11', 'Aula 12'].some((a) =>
         ch.subtitle.includes(a)
@@ -45,7 +47,8 @@ const MODULE_GROUPS: {
   {
     id: 4,
     titulo: 'Módulo 4: Funções, Objetos e Projeto',
-    descricao: 'Funções com parâmetros e return, objetos, listas de objetos e resumo de pedidos (Aulas 13 a 16)',
+    descricao:
+      'Funções com parâmetros e return, objetos, listas de objetos e resumo de pedidos (Aulas 13 a 16)',
     match: (ch) =>
       ['Aula 13', 'Aula 14', 'Aula 15', 'Aula 16'].some((a) =>
         ch.subtitle.includes(a)
@@ -53,8 +56,24 @@ const MODULE_GROUPS: {
   },
 ]
 
+function sanitizeXp(rawXp: unknown): number {
+  const parsed = Number(rawXp)
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0
+}
+
+function clearGuestArenaStorage() {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem('codelab_user_xp')
+    ARENA_CHALLENGES.forEach((ch) => {
+      localStorage.removeItem(`codelab_visitante_${ch.id}`)
+    })
+  } catch {
+    // Ignora falha de acesso ao storage
+  }
+}
+
 export default function ArenaPage() {
-  const router = useRouter()
   const [userId, setUserId] = useState<string | null>(null)
   const [userXp, setUserXp] = useState<number>(0)
   const [completedIds, setCompletedIds] = useState<string[]>([])
@@ -77,50 +96,91 @@ export default function ArenaPage() {
   useEffect(() => {
     let active = true
 
-    async function loadUserArena() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!active) return
+    async function loadArenaForSession(sessionUserId: string | null) {
+      try {
+        if (sessionUserId) {
+          setUserId(sessionUserId)
 
-      if (session) {
-        const currentUserId = session.user.id
-        setUserId(currentUserId)
+          const { data: challenges, error } = await supabase
+            .from('user_challenges')
+            .select('challenge_id, completed, xp_earned')
+            .eq('user_id', sessionUserId)
 
-        const { data: challenges, error } = await supabase
-          .from('user_challenges')
-          .select('challenge_id, completed, xp_earned')
-          .eq('user_id', currentUserId)
+          if (!active) return
 
-        if (!active) return
+          if (error) {
+            console.error('Erro ao buscar desafios do usuário:', error.message)
+            return
+          }
 
-        if (!error && challenges) {
-          const totalXpFromDb = challenges.reduce((acc, curr) => acc + (curr.xp_earned || 0), 0)
-          setUserXp(totalXpFromDb)
-          setCompletedIds(challenges.filter((c) => c.completed).map((c) => c.challenge_id))
+          if (Array.isArray(challenges)) {
+            const totalXpFromDb = challenges.reduce(
+              (acc, curr) => acc + sanitizeXp(curr?.xp_earned),
+              0
+            )
+            const doneIds = challenges
+              .filter(
+                (c) => c?.completed === true && typeof c?.challenge_id === 'string'
+              )
+              .map((c) => c.challenge_id)
+
+            setUserXp(totalXpFromDb)
+            setCompletedIds(doneIds)
+
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('codelab_user_xp', String(totalXpFromDb))
+            }
+          }
+        } else {
+          setUserId(null)
 
           if (typeof window !== 'undefined') {
-            localStorage.setItem('codelab_user_xp', String(totalXpFromDb))
+            const savedXp = sanitizeXp(localStorage.getItem('codelab_user_xp'))
+            setUserXp(savedXp)
+
+            const localDone: string[] = []
+            ARENA_CHALLENGES.forEach((ch) => {
+              if (localStorage.getItem(`codelab_visitante_${ch.id}`) === 'true') {
+                localDone.push(ch.id)
+              }
+            })
+            setCompletedIds(localDone)
+          } else {
+            setUserXp(0)
+            setCompletedIds([])
           }
         }
-      } else if (typeof window !== 'undefined') {
-        const savedXp = localStorage.getItem('codelab_user_xp')
-        if (savedXp) setUserXp(Number(savedXp))
-
-        const localDone: string[] = []
-        ARENA_CHALLENGES.forEach((ch) => {
-          if (localStorage.getItem(`codelab_visitante_${ch.id}`)) {
-            localDone.push(ch.id)
-          }
-        })
-        setCompletedIds(localDone)
+      } catch (err) {
+        console.error('Erro ao carregar arena:', err)
       }
     }
 
-    loadUserArena()
+    supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          console.error('Erro ao obter sessão na arena:', error.message)
+        }
+        void loadArenaForSession(data.session?.user?.id ?? null)
+      })
+      .catch((err) => {
+        console.error('Erro inesperado na sessão da arena:', err)
+      })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return
+      if (event === 'SIGNED_OUT') {
+        clearGuestArenaStorage()
+      }
+      void loadArenaForSession(session?.user?.id ?? null)
+    })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [])
 
@@ -141,15 +201,6 @@ export default function ArenaPage() {
     }))
   }
 
-  const handleProtectedNav = (e: React.MouseEvent<HTMLAnchorElement>, targetHref: string) => {
-    if (!userId) {
-      e.preventDefault()
-      router.push('/login')
-      return
-    }
-    router.push(targetHref)
-  }
-
   const groupedModules = MODULE_GROUPS.map((group) => ({
     ...group,
     challenges: ARENA_CHALLENGES.filter(group.match),
@@ -157,7 +208,9 @@ export default function ArenaPage() {
 
   const totalChallenges = ARENA_CHALLENGES.length
   const progressPercent =
-    totalChallenges > 0 ? Math.min(100, Math.round((completedIds.length / totalChallenges) * 100)) : 0
+    totalChallenges > 0
+      ? Math.min(100, Math.round((completedIds.length / totalChallenges) * 100))
+      : 0
 
   const cardClasses =
     'bg-white border-stone-200 text-stone-900 shadow-xs dark:bg-gray-900/90 dark:border-gray-800 dark:text-white dark:shadow-none'
@@ -177,12 +230,12 @@ export default function ArenaPage() {
         onToggleTheme={alternarTema}
       />
 
-      {/* Vitrine dos Desafios */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
-        {/* Banner */}
         <div className="space-y-3 border p-4 sm:p-6 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-amber-50/50 border-amber-600/25 dark:bg-gray-900 dark:border-amber-500/20">
           <div className="space-y-1.5">
-            <span className={`text-xs font-bold uppercase tracking-wider block ${accentAmberClasses}`}>
+            <span
+              className={`text-xs font-bold uppercase tracking-wider block ${accentAmberClasses}`}
+            >
               Desafios de Código • Prática XP
             </span>
             <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-snug">
@@ -194,14 +247,12 @@ export default function ArenaPage() {
           </div>
           <Link
             href="/ranking"
-            onClick={(e) => handleProtectedNav(e, '/ranking')}
             className="w-full sm:w-auto justify-center px-4 py-3 border font-extrabold text-xs rounded-xl flex items-center gap-2 shrink-0 cursor-pointer bg-amber-100 hover:bg-amber-200/80 border-amber-600/35 text-amber-900 dark:bg-amber-500/20 dark:hover:bg-amber-500/30 dark:border-amber-500/40 dark:text-amber-300"
           >
             🏆 Ranking Geral
           </Link>
         </div>
 
-        {/* Barra de Progresso */}
         <div
           className={`border p-4 sm:p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${cardClasses}`}
         >
@@ -222,7 +273,6 @@ export default function ArenaPage() {
           </div>
         </div>
 
-        {/* Desafios agrupados por módulo */}
         <div className="space-y-4">
           {groupedModules.map((modulo) => {
             const modDoneCount = modulo.challenges.filter((ch) =>
@@ -233,9 +283,13 @@ export default function ArenaPage() {
             const isOpen = Boolean(modulosAbertos[modulo.id])
 
             return (
-              <div key={modulo.id} className={`border rounded-2xl overflow-hidden ${cardClasses}`}>
+              <div
+                key={modulo.id}
+                className={`border rounded-2xl overflow-hidden ${cardClasses}`}
+              >
                 <button
                   type="button"
+                  aria-expanded={isOpen}
                   onClick={() => toggleModulo(modulo.id)}
                   className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 text-left cursor-pointer hover:bg-stone-50 dark:hover:bg-gray-800/60"
                 >
@@ -254,7 +308,9 @@ export default function ArenaPage() {
                       <h3 className="font-bold text-sm sm:text-base leading-snug break-words">
                         {modulo.titulo}
                       </h3>
-                      <p className={`text-xs leading-relaxed break-words mt-0.5 ${textMutedClasses}`}>
+                      <p
+                        className={`text-xs leading-relaxed break-words mt-0.5 ${textMutedClasses}`}
+                      >
                         {modulo.descricao}
                       </p>
                       <p
@@ -300,7 +356,9 @@ export default function ArenaPage() {
                                   {challenge.difficulty}
                                 </span>
                               </div>
-                              <p className={`text-xs mt-0.5 leading-relaxed break-words ${textMutedClasses}`}>
+                              <p
+                                className={`text-xs mt-0.5 leading-relaxed break-words ${textMutedClasses}`}
+                              >
                                 <strong className={accentAmberClasses}>+{challenge.xp} XP</strong> •{' '}
                                 {challenge.subtitle}
                               </p>

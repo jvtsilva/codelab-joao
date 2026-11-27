@@ -15,6 +15,12 @@ interface RecentActivity {
 const STORAGE_KEY = 'codelab_tema_aula'
 const TOTAL_AULAS_TRILHA = 24
 const XP_POR_AULA = 50
+const MAX_NOME_CHARS = 60
+
+function formatActivityDate(rawDate: string): string {
+  const parsed = new Date(rawDate)
+  return Number.isNaN(parsed.getTime()) ? 'Recente' : parsed.toLocaleDateString('pt-BR')
+}
 
 export default function PainelPage() {
   const [userName, setUserName] = useState<string>('Aluno')
@@ -72,98 +78,135 @@ export default function PainelPage() {
     let active = true
 
     async function getUserAndProgress() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!active) return
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
+        if (!active) return
 
-      if (!session) {
-        router.push('/login')
-        return
+        if (sessionError) {
+          console.error('Erro ao obter sessão no painel:', sessionError.message)
+        }
+
+        if (!session) {
+          router.replace('/login')
+          return
+        }
+
+        const currentUserId = session.user.id
+        setUserId(currentUserId)
+
+        const metadata = session.user.user_metadata
+        const nameFromMeta =
+          String(metadata?.full_name || metadata?.name || 'Aluno').trim() || 'Aluno'
+
+        setUserName(nameFromMeta)
+        setEditableName(nameFromMeta)
+        setUserEmail(session.user.email ?? 'E-mail não informado')
+
+        if (session.user.last_sign_in_at) {
+          const date = new Date(session.user.last_sign_in_at)
+          setLastSignIn(
+            Number.isNaN(date.getTime()) ? 'Sessão ativa recente' : date.toLocaleString('pt-BR')
+          )
+        } else {
+          setLastSignIn('Sessão ativa recente')
+        }
+
+        let xpAulas = 0
+        let xpDesafios = 0
+
+        const { data: progressData, error: progressError } = await supabase
+          .from('user_progress')
+          .select('lesson_id, completed, updated_at')
+          .eq('user_id', currentUserId)
+
+        if (!active) return
+
+        if (progressError) {
+          console.error('Erro ao buscar user_progress no painel:', progressError.message)
+        } else if (Array.isArray(progressData)) {
+          const completedRows = progressData.filter((item) => Boolean(item?.completed))
+          const count = completedRows.length
+          setCompletedCount(count)
+          xpAulas = count * XP_POR_AULA
+
+          const sortedActivities = [...completedRows]
+            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            .slice(0, 3)
+
+          setRecentActivities(sortedActivities)
+        }
+
+        const { data: challengesData, error: challengesError } = await supabase
+          .from('user_challenges')
+          .select('xp_earned')
+          .eq('user_id', currentUserId)
+
+        if (!active) return
+
+        if (challengesError) {
+          console.error('Erro ao buscar user_challenges no painel:', challengesError.message)
+        } else if (Array.isArray(challengesData)) {
+          challengesData.forEach((item) => {
+            const earned = Number(item?.xp_earned)
+            if (Number.isFinite(earned) && earned > 0) {
+              xpDesafios += earned
+            }
+          })
+        }
+
+        setLessonsXp(xpAulas)
+        setChallengesXp(xpDesafios)
+        setTotalXP(xpAulas + xpDesafios)
+
+        const ua = navigator.userAgent
+        let browser = 'Navegador desconhecido'
+        let os = 'Dispositivo desconhecido'
+
+        if (ua.includes('Win')) os = 'Windows'
+        else if (ua.includes('Mac')) os = 'macOS'
+        else if (ua.includes('Linux')) os = 'Linux'
+        else if (ua.includes('Android')) os = 'Android'
+        else if (ua.includes('like Mac') || ua.includes('iPhone') || ua.includes('iPad')) {
+          os = 'iOS'
+        }
+
+        if (ua.includes('Firefox')) browser = 'Firefox'
+        else if (ua.includes('SamsungBrowser')) browser = 'Samsung Internet'
+        else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera'
+        else if (ua.includes('Edg')) browser = 'Microsoft Edge'
+        else if (ua.includes('Chrome')) browser = 'Google Chrome'
+        else if (ua.includes('Safari')) browser = 'Safari'
+
+        setDeviceInfo(`${browser} (${os})`)
+      } catch (err) {
+        console.error('Erro inesperado ao carregar painel:', err)
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
       }
-
-      const currentUserId = session.user.id
-      setUserId(currentUserId)
-
-      const metadata = session.user.user_metadata
-      const nameFromMeta = metadata?.full_name || metadata?.name || 'Aluno'
-
-      setUserName(nameFromMeta)
-      setEditableName(nameFromMeta)
-      setUserEmail(session.user.email ?? 'E-mail não informado')
-
-      if (session.user.last_sign_in_at) {
-        const date = new Date(session.user.last_sign_in_at)
-        setLastSignIn(date.toLocaleString('pt-BR'))
-      } else {
-        setLastSignIn('Sessão ativa recente')
-      }
-
-      let xpAulas = 0
-      let xpDesafios = 0
-
-      const { data: progressData } = await supabase
-        .from('user_progress')
-        .select('lesson_id, completed, updated_at')
-        .eq('user_id', currentUserId)
-
-      if (!active) return
-
-      if (progressData) {
-        const count = progressData.filter((item) => item.completed).length
-        setCompletedCount(count)
-        xpAulas = count * XP_POR_AULA
-
-        const sortedActivities = progressData
-          .filter((item) => item.completed)
-          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-          .slice(0, 3)
-
-        setRecentActivities(sortedActivities)
-      }
-
-      const { data: challengesData } = await supabase
-        .from('user_challenges')
-        .select('xp_earned')
-        .eq('user_id', currentUserId)
-
-      if (!active) return
-
-      if (challengesData) {
-        challengesData.forEach((item) => {
-          xpDesafios += item.xp_earned || 0
-        })
-      }
-
-      setLessonsXp(xpAulas)
-      setChallengesXp(xpDesafios)
-      setTotalXP(xpAulas + xpDesafios)
-
-      const ua = navigator.userAgent
-      let browser = 'Navegador desconhecido'
-      let os = 'Dispositivo desconhecido'
-
-      if (ua.includes('Win')) os = 'Windows'
-      else if (ua.includes('Mac')) os = 'macOS'
-      else if (ua.includes('Linux')) os = 'Linux'
-      else if (ua.includes('Android')) os = 'Android'
-      else if (ua.includes('like Mac') || ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS'
-
-      if (ua.includes('Firefox')) browser = 'Firefox'
-      else if (ua.includes('SamsungBrowser')) browser = 'Samsung Internet'
-      else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera'
-      else if (ua.includes('Edg')) browser = 'Microsoft Edge'
-      else if (ua.includes('Chrome')) browser = 'Google Chrome'
-      else if (ua.includes('Safari')) browser = 'Safari'
-
-      setDeviceInfo(`${browser} (${os})`)
-      setLoading(false)
     }
 
-    getUserAndProgress()
+    void getUserAndProgress()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return
+      if (event === 'SIGNED_OUT' || !session) {
+        setUserId(null)
+        router.replace('/login')
+      } else {
+        setUserId(session.user.id)
+      }
+    })
 
     return () => {
       active = false
+      subscription.unsubscribe()
     }
   }, [router])
 
@@ -187,6 +230,14 @@ export default function PainelPage() {
       return
     }
 
+    if (cleanName.length > MAX_NOME_CHARS) {
+      setNameMessage({
+        text: `O nome deve ter no máximo ${MAX_NOME_CHARS} caracteres.`,
+        type: 'error',
+      })
+      return
+    }
+
     setNameLoading(true)
 
     try {
@@ -195,6 +246,22 @@ export default function PainelPage() {
       })
 
       if (error) throw error
+
+      if (userId) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert(
+            {
+              id: userId,
+              full_name: cleanName,
+            },
+            { onConflict: 'id' }
+          )
+
+        if (profileError) {
+          console.error('Erro ao sincronizar full_name em profiles:', profileError.message)
+        }
+      }
 
       setUserName(cleanName)
       setEditableName(cleanName)
@@ -309,7 +376,9 @@ export default function PainelPage() {
           <div className="border rounded-2xl p-4 sm:p-6 flex flex-col justify-between gap-4 lg:col-span-2 bg-white border-emerald-600/25 shadow-sm dark:bg-gray-900 dark:border-emerald-500/25 dark:shadow-xl">
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <span className={`text-[11px] font-bold uppercase tracking-wider ${accentGreenClasses}`}>
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-wider ${accentGreenClasses}`}
+                >
                   Trilha Base • 6 Módulos (24 Aulas)
                 </span>
                 <span className={`text-xs font-extrabold tabular-nums ${accentGreenClasses}`}>
@@ -367,36 +436,43 @@ export default function PainelPage() {
 
         {/* Detalhamento de XP: Aulas vs Desafios */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <div className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
+          <div
+            className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}
+          >
             <div className="space-y-1 min-w-0">
-              <span className={`text-[11px] font-bold uppercase tracking-wider block ${accentGreenClasses}`}>
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider block ${accentGreenClasses}`}
+              >
                 Trilha de Estudos
               </span>
-              <h3 className="text-sm sm:text-base font-bold truncate">
-                XP das Aulas
-              </h3>
+              <h3 className="text-sm sm:text-base font-bold truncate">XP das Aulas</h3>
               <p className={`text-xs tabular-nums ${textMutedClasses}`}>
-                {XP_POR_AULA} XP por aula concluída ({completedCount} {completedCount === 1 ? 'aula' : 'aulas'}).
+                {XP_POR_AULA} XP por aula concluída ({completedCount}{' '}
+                {completedCount === 1 ? 'aula' : 'aulas'}).
               </p>
             </div>
             <div className="text-right shrink-0">
               <span className={`text-lg sm:text-xl font-black tabular-nums ${accentGreenClasses}`}>
                 {lessonsXp.toLocaleString('pt-BR')} XP
               </span>
-              <span className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}>
+              <span
+                className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}
+              >
                 Aulas
               </span>
             </div>
           </div>
 
-          <div className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}>
+          <div
+            className={`border rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4 ${cardClasses}`}
+          >
             <div className="space-y-1 min-w-0">
-              <span className={`text-[11px] font-bold uppercase tracking-wider block ${accentAmberClasses}`}>
+              <span
+                className={`text-[11px] font-bold uppercase tracking-wider block ${accentAmberClasses}`}
+              >
                 Arena de Desafios
               </span>
-              <h3 className="text-sm sm:text-base font-bold truncate">
-                XP dos Desafios
-              </h3>
+              <h3 className="text-sm sm:text-base font-bold truncate">XP dos Desafios</h3>
               <p className={`text-xs ${textMutedClasses}`}>
                 Pontos conquistados resolvendo desafios práticos.
               </p>
@@ -405,7 +481,9 @@ export default function PainelPage() {
               <span className={`text-lg sm:text-xl font-black tabular-nums ${accentAmberClasses}`}>
                 {challengesXp.toLocaleString('pt-BR')} XP
               </span>
-              <span className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}>
+              <span
+                className={`block text-[10px] uppercase tracking-wider ${textSubtleClasses}`}
+              >
                 Desafios
               </span>
             </div>
@@ -421,25 +499,35 @@ export default function PainelPage() {
               <div className="space-y-3 text-xs">
                 <div>
                   <span className={`block mb-1 ${textSubtleClasses}`}>Nome cadastrado</span>
-                  <span className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses}`}>
+                  <span
+                    className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses}`}
+                  >
                     {userName}
                   </span>
                 </div>
                 <div>
                   <span className={`block mb-1 ${textSubtleClasses}`}>E-mail</span>
-                  <span className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses}`}>
+                  <span
+                    className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses}`}
+                  >
                     {userEmail}
                   </span>
                 </div>
                 <div>
-                  <span className={`block mb-1 ${textSubtleClasses}`}>Dispositivo / Navegador</span>
-                  <span className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses} ${accentBlueClasses}`}>
+                  <span className={`block mb-1 ${textSubtleClasses}`}>
+                    Dispositivo / Navegador
+                  </span>
+                  <span
+                    className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses} ${accentBlueClasses}`}
+                  >
                     {deviceInfo}
                   </span>
                 </div>
                 <div>
                   <span className={`block mb-1 ${textSubtleClasses}`}>Último acesso</span>
-                  <span className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses} ${accentGreenClasses}`}>
+                  <span
+                    className={`font-medium px-3 py-2 rounded-lg block border truncate ${fieldBoxClasses} ${accentGreenClasses}`}
+                  >
                     {lastSignIn}
                   </span>
                 </div>
@@ -467,9 +555,11 @@ export default function PainelPage() {
                         ✓
                       </div>
                       <div className="border rounded-xl p-2.5 flex-1 space-y-0.5 bg-stone-50 border-stone-200 dark:bg-gray-950/60 dark:border-gray-800/80">
-                        <div className={`flex items-center justify-between text-[10px] ${textSubtleClasses}`}>
+                        <div
+                          className={`flex items-center justify-between text-[10px] ${textSubtleClasses}`}
+                        >
                           <span className="uppercase">{act.lesson_id}</span>
-                          <span>{new Date(act.updated_at).toLocaleDateString('pt-BR')}</span>
+                          <span>{formatActivityDate(act.updated_at)}</span>
                         </div>
                         <p className="text-xs font-semibold">Aula concluída</p>
                       </div>
@@ -502,7 +592,7 @@ export default function PainelPage() {
                 </div>
               )}
 
-              <form onSubmit={handleUpdateName} className="space-y-4">
+              <form onSubmit={(e) => void handleUpdateName(e)} className="space-y-4">
                 <div>
                   <label className={`block text-xs font-medium mb-1 ${textMutedClasses}`}>
                     Seu nome
@@ -511,6 +601,7 @@ export default function PainelPage() {
                     type="text"
                     value={editableName}
                     onChange={(e) => setEditableName(e.target.value)}
+                    maxLength={MAX_NOME_CHARS}
                     required
                     className={`w-full px-4 py-2.5 border rounded-xl focus:outline-none text-sm ${inputClasses}`}
                   />
@@ -556,7 +647,7 @@ export default function PainelPage() {
                 </div>
               )}
 
-              <form onSubmit={handleUpdatePassword} className="space-y-4">
+              <form onSubmit={(e) => void handleUpdatePassword(e)} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className={`block text-xs font-medium mb-1 ${textMutedClasses}`}>
@@ -594,19 +685,35 @@ export default function PainelPage() {
 
                 <div className="p-3 border rounded-xl space-y-1.5 text-xs bg-stone-50 border-stone-200 dark:bg-gray-950/60 dark:border-gray-800">
                   <p className={`font-medium mb-1 ${textMutedClasses}`}>A nova senha deve conter:</p>
-                  <div className={`flex items-center gap-2 ${hasMinLength ? accentGreenClasses : textSubtleClasses}`}>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      hasMinLength ? accentGreenClasses : textSubtleClasses
+                    }`}
+                  >
                     <span>{hasMinLength ? '✓' : '○'}</span>
                     <span>Mínimo de 8 caracteres</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${hasUpperCase ? accentGreenClasses : textSubtleClasses}`}>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      hasUpperCase ? accentGreenClasses : textSubtleClasses
+                    }`}
+                  >
                     <span>{hasUpperCase ? '✓' : '○'}</span>
                     <span>Pelo menos uma letra maiúscula</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${hasNumber ? accentGreenClasses : textSubtleClasses}`}>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      hasNumber ? accentGreenClasses : textSubtleClasses
+                    }`}
+                  >
                     <span>{hasNumber ? '✓' : '○'}</span>
                     <span>Pelo menos um número</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${hasSpecialChar ? accentGreenClasses : textSubtleClasses}`}>
+                  <div
+                    className={`flex items-center gap-2 ${
+                      hasSpecialChar ? accentGreenClasses : textSubtleClasses
+                    }`}
+                  >
                     <span>{hasSpecialChar ? '✓' : '○'}</span>
                     <span>Pelo menos um caractere especial (ex: @, #, $, !)</span>
                   </div>

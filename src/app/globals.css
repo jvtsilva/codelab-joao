@@ -7,6 +7,16 @@
 }
 
 @layer base {
+  html {
+    color-scheme: light;
+    background-color: #fafaf9;
+  }
+
+  html.dark {
+    color-scheme: dark;
+    background-color: #030712;
+  }
+
   html,
   body {
     font-family: var(--font-sans);

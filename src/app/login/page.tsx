@@ -1,12 +1,17 @@
 'use client'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile'
 
 const STORAGE_KEY = 'codelab_tema_aula'
+const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'suporte.codelab@gmail.com'
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAAGB6hl7FfTuEMZ36'
+
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,18 +23,29 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [isDark, setIsDark] = useState(true)
   const turnstileRef = useRef<TurnstileInstance | null>(null)
+  const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const router = useRouter()
 
-  const whatsappEsqueciSenha = `https://wa.me/5519995200014?text=${encodeURIComponent(
-    'Olá João, esqueci minha senha do Codelab!'
+  const suporteEsqueciSenha = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+    'Ajuda com acesso - Codelab'
+  )}&body=${encodeURIComponent(
+    'Olá, preciso de ajuda para acessar minha conta no Codelab.'
   )}`
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const salvo = localStorage.getItem(STORAGE_KEY)
     const escuro = salvo !== 'light'
     setIsDark(escuro)
     document.documentElement.classList.toggle('dark', escuro)
     document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current)
+      }
+    }
   }, [])
 
   const isValidEmail = (emailStr: string) => {
@@ -58,20 +74,26 @@ export default function LoginPage() {
       })
 
       if (error) throw error
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Erro ao entrar com o Google.'
-      setErrorMessage(msg)
+    } catch {
+      setErrorMessage('Não foi possível iniciar o login com o Google.')
     }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading || successMessage) return
+
     setErrorMessage('')
 
-    const cleanEmail = email.trim()
+    const cleanEmail = email.trim().toLowerCase()
 
     if (!isValidEmail(cleanEmail)) {
       setErrorMessage('Insira um e-mail válido (ex: seu@email.com).')
+      return
+    }
+
+    if (!password) {
+      setErrorMessage('Informe sua senha.')
       return
     }
 
@@ -86,6 +108,9 @@ export default function LoginPage() {
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: cleanEmail,
         password,
+        options: {
+          captchaToken: turnstileToken,
+        },
       })
 
       if (signInError) throw signInError
@@ -93,13 +118,11 @@ export default function LoginPage() {
       setSuccessMessage(true)
       router.refresh()
 
-      setTimeout(() => {
+      redirectTimeoutRef.current = setTimeout(() => {
         router.push('/dashboard')
       }, 1500)
-    } catch (error: unknown) {
-      const msg =
-        error instanceof Error ? error.message : 'Erro ao fazer login. Verifique suas credenciais.'
-      setErrorMessage(msg)
+    } catch {
+      setErrorMessage('E-mail ou senha inválidos.')
       setTurnstileToken(null)
       turnstileRef.current?.reset()
       setLoading(false)
@@ -149,6 +172,7 @@ export default function LoginPage() {
       <main className="flex-1 flex items-center justify-center my-auto py-4">
         <form
           onSubmit={handleLogin}
+          noValidate
           className="max-w-md w-full border px-6 pb-6 pt-4 sm:px-8 sm:pb-8 sm:pt-5 rounded-3xl space-y-4 bg-white border-stone-200 text-stone-900 shadow-xl dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-2xl"
         >
           <div className="text-center">
@@ -220,6 +244,7 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -243,9 +268,7 @@ export default function LoginPage() {
                   {showPassword ? 'Ocultar' : 'Mostrar'}
                 </button>
                 <a
-                  href={whatsappEsqueciSenha}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={suporteEsqueciSenha}
                   className="text-[11px] hover:underline font-medium text-emerald-700 dark:text-emerald-400"
                 >
                   Esqueceu a senha?
@@ -254,6 +277,7 @@ export default function LoginPage() {
             </div>
             <input
               type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -267,9 +291,10 @@ export default function LoginPage() {
           <div className="flex justify-center my-3" suppressHydrationWarning>
             <Turnstile
               ref={turnstileRef}
-              siteKey="0x4AAAAAAGB6hl7FfTuEMZ36"
+              siteKey={TURNSTILE_SITE_KEY}
               onSuccess={(token) => setTurnstileToken(token)}
               onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
               options={{ theme: isDark ? 'dark' : 'light' }}
             />
           </div>

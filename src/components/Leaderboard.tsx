@@ -5,8 +5,14 @@ import { supabase } from '@/lib/supabase'
 
 interface Profile {
   id: string
-  full_name?: string
-  email: string
+  full_name?: string | null
+  xp: number | string | null
+  streak?: number | string | null
+}
+
+interface LeaderboardEntry {
+  id: string
+  displayName: string
   xp: number
   streak: number
 }
@@ -19,9 +25,20 @@ interface LeaderboardProps {
 type TemaLeaderboard = 'dark' | 'light'
 
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+const MAX_NOME_EXIBICAO = 60
+
+function sanitizeName(rawName: unknown): string {
+  const cleaned = String(rawName || '').trim().slice(0, MAX_NOME_EXIBICAO)
+  return cleaned || 'Estudante Codelab'
+}
+
+function sanitizeNonNegativeInt(rawValue: unknown): number {
+  const parsed = Number(rawValue)
+  return Number.isFinite(parsed) && parsed >= 0 ? Math.floor(parsed) : 0
+}
 
 export default function Leaderboard({ isOpen, onClose }: LeaderboardProps) {
-  const [ranking, setRanking] = useState<Profile[]>([])
+  const [ranking, setRanking] = useState<LeaderboardEntry[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -31,8 +48,10 @@ export default function Leaderboard({ isOpen, onClose }: LeaderboardProps) {
     const temaSalvo = localStorage.getItem('codelab_tema_aula')
     if (temaSalvo === 'light' || temaSalvo === 'dark') {
       setTema(temaSalvo)
+    } else if (typeof document !== 'undefined') {
+      setTema(document.documentElement.classList.contains('dark') ? 'dark' : 'light')
     }
-  }, [])
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen) return
@@ -43,30 +62,51 @@ export default function Leaderboard({ isOpen, onClose }: LeaderboardProps) {
       setLoading(true)
       setErrorMessage('')
 
-      const [{ data: sessionData }, { data, error }] = await Promise.all([
-        supabase.auth.getSession(),
-        supabase
-          .from('profiles')
-          .select('id, full_name, email, xp, streak')
-          .order('xp', { ascending: false })
-          .limit(10),
-      ])
+      try {
+        const [{ data: sessionData }, { data, error }] = await Promise.all([
+          supabase.auth.getSession(),
+          supabase
+            .from('profiles')
+            .select('id, full_name, xp, streak')
+            .order('xp', { ascending: false })
+            .limit(10),
+        ])
 
-      if (!active) return
+        if (!active) return
 
-      setCurrentUserId(sessionData?.session?.user?.id ?? null)
+        setCurrentUserId(sessionData?.session?.user?.id ?? null)
 
-      if (error) {
-        setErrorMessage('Não foi possível carregar o ranking.')
-        setRanking([])
-      } else if (data) {
-        setRanking(data)
+        if (error) {
+          console.error('Erro ao carregar ranking no modal:', error.message)
+          setErrorMessage('Não foi possível carregar o ranking.')
+          setRanking([])
+        } else if (Array.isArray(data)) {
+          const sanitizedRows: LeaderboardEntry[] = (data as Profile[])
+            .filter((row) => typeof row?.id === 'string' && row.id.trim().length > 0)
+            .map((row) => ({
+              id: row.id.trim(),
+              displayName: sanitizeName(row.full_name),
+              xp: sanitizeNonNegativeInt(row.xp),
+              streak: sanitizeNonNegativeInt(row.streak),
+            }))
+          setRanking(sanitizedRows)
+        } else {
+          setRanking([])
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao carregar ranking:', err)
+        if (active) {
+          setErrorMessage('Não foi possível carregar o ranking.')
+          setRanking([])
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
       }
-
-      setLoading(false)
     }
 
-    loadRanking()
+    void loadRanking()
 
     return () => {
       active = false
@@ -179,7 +219,6 @@ export default function Leaderboard({ isOpen, onClose }: LeaderboardProps) {
               else if (index === 1) medal = '🥈'
               else if (index === 2) medal = '🥉'
 
-              const displayName = user.full_name?.trim() || user.email.split('@')[0]
               const isCurrentUser = Boolean(currentUserId && user.id === currentUserId)
 
               return (
@@ -196,7 +235,7 @@ export default function Leaderboard({ isOpen, onClose }: LeaderboardProps) {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <h4 className="font-bold text-sm truncate">
-                          {displayName}
+                          {user.displayName}
                         </h4>
                         {isCurrentUser && (
                           <span

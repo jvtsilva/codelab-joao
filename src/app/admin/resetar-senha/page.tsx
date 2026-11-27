@@ -6,6 +6,22 @@ import Link from 'next/link'
 const STORAGE_KEY = 'codelab_tema_aula'
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
+function randomIndex(max: number): number {
+  if (max <= 0) return 0
+  if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+    const maxUint32 = 0xffffffff
+    const limit = maxUint32 - (maxUint32 % max)
+    const buffer = new Uint32Array(1)
+    let value = 0
+    do {
+      window.crypto.getRandomValues(buffer)
+      value = buffer[0]
+    } while (value >= limit)
+    return value % max
+  }
+  return Math.floor(Math.random() * max)
+}
+
 function gerarSenhaForte(tamanho = 12): string {
   const maiusculas = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
   const minusculas = 'abcdefghijkmnopqrstuvwxyz'
@@ -14,19 +30,26 @@ function gerarSenhaForte(tamanho = 12): string {
   const todos = maiusculas + minusculas + numeros + especiais
 
   const obrigatorios = [
-    maiusculas[Math.floor(Math.random() * maiusculas.length)],
-    minusculas[Math.floor(Math.random() * minusculas.length)],
-    numeros[Math.floor(Math.random() * numeros.length)],
-    especiais[Math.floor(Math.random() * especiais.length)],
+    maiusculas[randomIndex(maiusculas.length)],
+    minusculas[randomIndex(minusculas.length)],
+    numeros[randomIndex(numeros.length)],
+    especiais[randomIndex(especiais.length)],
   ]
 
-  const restante = Array.from({ length: Math.max(4, tamanho - obrigatorios.length) }, () =>
-    todos[Math.floor(Math.random() * todos.length)]
+  const restante = Array.from(
+    { length: Math.max(4, tamanho - obrigatorios.length) },
+    () => todos[randomIndex(todos.length)]
   )
 
-  return [...obrigatorios, ...restante]
-    .sort(() => Math.random() - 0.5)
-    .join('')
+  const combinados = [...obrigatorios, ...restante]
+  for (let i = combinados.length - 1; i > 0; i--) {
+    const j = randomIndex(i + 1)
+    const temp = combinados[i]
+    combinados[i] = combinados[j]
+    combinados[j] = temp
+  }
+
+  return combinados.join('')
 }
 
 export default function AdminResetPasswordPage() {
@@ -66,12 +89,23 @@ export default function AdminResetPasswordPage() {
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (loading) return
+
     setMessage({ text: '', type: '' })
 
-    const cleanEmail = email.trim()
+    const cleanEmail = email.trim().toLowerCase()
+    if (!cleanEmail) {
+      setMessage({ text: 'Informe um e-mail válido.', type: 'error' })
+      return
+    }
 
     if (newPassword.length < 8) {
       setMessage({ text: 'A nova senha precisa ter pelo menos 8 caracteres.', type: 'error' })
+      return
+    }
+
+    if (!adminSecret.trim()) {
+      setMessage({ text: 'Informe a chave mestra do admin.', type: 'error' })
       return
     }
 
@@ -88,15 +122,16 @@ export default function AdminResetPasswordPage() {
         }),
       })
 
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
 
       if (!res.ok) {
-        throw new Error(data.error || 'Erro ao redefinir senha.')
+        throw new Error(data?.error || 'Erro ao redefinir senha.')
       }
 
       setMessage({ text: 'Senha alterada. O aluno já pode entrar.', type: 'success' })
       setEmail('')
       setNewPassword('')
+      setAdminSecret('')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Erro inesperado.'
       setMessage({ text: msg, type: 'error' })
@@ -120,7 +155,6 @@ export default function AdminResetPasswordPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-between p-4 selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
-      {/* Header */}
       <header className="max-w-md w-full mx-auto pt-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <span className="px-2.5 py-1.5 font-bold text-xs rounded-lg border shrink-0 bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
@@ -157,7 +191,6 @@ export default function AdminResetPasswordPage() {
         </div>
       </header>
 
-      {/* Formulário Centralizado */}
       <main className="flex-1 flex items-center justify-center my-auto py-4">
         <form
           onSubmit={handleReset}

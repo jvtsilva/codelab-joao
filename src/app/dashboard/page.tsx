@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { aulasData } from '@/data/lessonsData'
@@ -206,6 +206,29 @@ const MODULES = MODULES_BASE.map((mod) => ({
 
 const ALL_LESSONS = MODULES.flatMap((mod) => mod.aulas)
 
+function normalizeLessonKey(rawId: unknown): string | null {
+  if (typeof rawId === 'number' && Number.isFinite(rawId)) {
+    return `lesson-${Math.floor(rawId)}`
+  }
+  if (typeof rawId === 'string') {
+    const trimmed = rawId.trim()
+    if (/^lesson-\d+$/.test(trimmed)) return trimmed
+    if (/^\d+$/.test(trimmed)) return `lesson-${Number(trimmed)}`
+  }
+  return null
+}
+
+function clearGuestLessonStorage(totalLessons: number) {
+  if (typeof window === 'undefined') return
+  try {
+    for (let i = 1; i <= totalLessons; i++) {
+      localStorage.removeItem(`codelab_visitante_aula_${i}`)
+    }
+  } catch {
+    // Ignora falha de storage
+  }
+}
+
 export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>({})
@@ -230,48 +253,81 @@ export default function DashboardPage() {
     document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
   }, [])
 
-  useEffect(() => {
-    let active = true
+  const loadProgress = useCallback(
+    async (isCancelled: () => boolean) => {
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
 
-    async function checkUserAndProgress() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      const progressMap: Record<string, boolean> = {}
-
-      if (session) {
-        if (active) setUserId(session.user.id)
-        const { data } = await supabase
-          .from('user_progress')
-          .select('lesson_id, completed')
-          .eq('user_id', session.user.id)
-
-        if (data) {
-          data.forEach((item) => {
-            if (item.completed) progressMap[item.lesson_id] = true
-          })
+        if (sessionError) {
+          console.error('Erro ao obter sessão no dashboard:', sessionError.message)
         }
-      }
 
-      if (typeof window !== 'undefined') {
-        for (let i = 1; i <= totalLessonsCount; i++) {
-          if (localStorage.getItem(`codelab_visitante_aula_${i}`) === 'true') {
-            progressMap[`lesson-${i}`] = true
+        const progressMap: Record<string, boolean> = {}
+        const currentUserId = session?.user?.id ?? null
+
+        if (currentUserId) {
+          clearGuestLessonStorage(totalLessonsCount)
+
+          const { data, error: progressError } = await supabase
+            .from('user_progress')
+            .select('lesson_id, completed')
+            .eq('user_id', currentUserId)
+
+          if (progressError) {
+            console.error('Erro ao carregar user_progress:', progressError.message)
+          } else if (Array.isArray(data)) {
+            data.forEach((item) => {
+              const key = normalizeLessonKey(item?.lesson_id)
+              if (key && item?.completed === true) {
+                progressMap[key] = true
+              }
+            })
+          }
+        } else if (typeof window !== 'undefined') {
+          for (let i = 1; i <= totalLessonsCount; i++) {
+            if (localStorage.getItem(`codelab_visitante_aula_${i}`) === 'true') {
+              progressMap[`lesson-${i}`] = true
+            }
           }
         }
+
+        if (isCancelled()) return
+        setUserId(currentUserId)
+        setCompletedLessons(progressMap)
+      } catch (err) {
+        console.error('Erro inesperado ao carregar progresso:', err)
+      } finally {
+        if (!isCancelled()) {
+          setLoading(false)
+        }
       }
+    },
+    [totalLessonsCount]
+  )
 
-      if (!active) return
-      setCompletedLessons(progressMap)
-      setLoading(false)
-    }
+  useEffect(() => {
+    let cancelled = false
 
-    checkUserAndProgress()
+    void loadProgress(() => cancelled)
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
+      if (cancelled) return
+      if (event === 'SIGNED_OUT') {
+        clearGuestLessonStorage(totalLessonsCount)
+      }
+      void loadProgress(() => cancelled)
+    })
 
     return () => {
-      active = false
+      cancelled = true
+      subscription.unsubscribe()
     }
-  }, [totalLessonsCount])
+  }, [loadProgress, totalLessonsCount])
 
   const alternarTema = () => {
     setIsDark((atual) => {
@@ -396,6 +452,7 @@ export default function DashboardPage() {
               <div key={modulo.id} className={`border rounded-2xl overflow-hidden ${cardClasses}`}>
                 <button
                   type="button"
+                  aria-expanded={isOpen}
                   onClick={() => toggleModulo(modulo.id)}
                   className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 text-left cursor-pointer hover:bg-stone-50 dark:hover:bg-gray-800/60"
                 >
