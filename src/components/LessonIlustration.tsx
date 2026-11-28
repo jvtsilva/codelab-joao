@@ -16,9 +16,10 @@ export function LessonIllustration({ lessonNumber }: LessonIllustrationProps) {
         viewBox="0 0 640 150"
         className="w-full h-auto"
         role="img"
+        aria-labelledby="algoritmo-fluxo-titulo"
         aria-label="Fluxo de um algoritmo: 1. Início, 2. Passo a passo, 3. Execução e 4. Resultado"
       >
-        <title>Fluxo de um algoritmo</title>
+        <title id="algoritmo-fluxo-titulo">Fluxo de um algoritmo</title>
 
         {/* Linha conectora decorativa */}
         <line

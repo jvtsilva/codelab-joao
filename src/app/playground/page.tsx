@@ -1,47 +1,43 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/hooks/useTheme'
 import { Navbar } from '@/components/Navbar'
+import { stripDangerousHtml } from '@/lib/security'
 
-const STORAGE_KEY = 'codelab_tema_aula'
+type PlaygroundMode = 'js' | 'web'
 
-type AbaMobile = 'tudo' | 'html' | 'css' | 'js' | 'resultado'
+const STARTER_JS = `// Experimente escrever JavaScript no seu ritmo
+const topicos = ['Variáveis', 'Funções', 'Arrays', 'DOM']
 
-const HTML_INICIAL = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Playground Codelab</title>
-</head>
-<body>
-  <main class="card">
-    <h1>Laboratório HTML, CSS e JS</h1>
-    <p id="mensagem">Clique no botão para testar o JavaScript na prática.</p>
-    <div class="acoes">
-      <button id="btn-contar" type="button">Contar: 0</button>
-      <button id="btn-mudar" type="button" class="secundario">Mudar texto</button>
-    </div>
-  </main>
-</body>
-</html>`
-
-const CSS_INICIAL = `* {
-  box-sizing: border-box;
+function resumirTopicos(lista) {
+  return lista.map((item, indice) => \`\${indice + 1}. \${item}\`)
 }
 
-body {
+console.log('Tópicos da trilha:')
+resumirTopicos(topicos).forEach((linha) => console.log(linha))
+`
+
+const STARTER_HTML = `<main class="card">
+  <span class="tag">Preview Web</span>
+  <h1>Estúdio de Código</h1>
+  <p id="status">Clique no botão para testar o JavaScript na página.</p>
+  <button id="btn-acao" type="button">Atualizar mensagem</button>
+</main>`
+
+const STARTER_CSS = `body {
   margin: 0;
   padding: 24px;
   font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f5f4;
-  color: #1c1917;
+  background: #f8f7f4;
+  color: #18181b;
 }
 
 .card {
-  max-width: 520px;
+  max-width: 420px;
   margin: 0 auto;
   padding: 24px;
   border-radius: 16px;
@@ -49,94 +45,168 @@ body {
   border: 1px solid #e7e5e4;
 }
 
-h1 {
-  margin-top: 0;
-  font-size: 1.5rem;
-}
-
-.acoes {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 16px;
+.tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #047857;
+  margin-bottom: 8px;
 }
 
 button {
+  margin-top: 12px;
   padding: 10px 16px;
-  border: none;
   border-radius: 10px;
+  border: 0;
+  background: #047857;
+  color: #ffffff;
   font-weight: 700;
   cursor: pointer;
-  background: #10b981;
-  color: #052e16;
-}
-
-button.secundario {
-  background: #e7e5e4;
-  color: #1c1917;
 }`
 
-const JS_INICIAL = `let contador = 0
-const btnContar = document.getElementById('btn-contar')
-const btnMudar = document.getElementById('btn-mudar')
-const mensagem = document.getElementById('mensagem')
+const STARTER_WEB_JS = `let cliques = 0
+const btn = document.getElementById('btn-acao')
+const statusEl = document.getElementById('status')
 
-btnContar?.addEventListener('click', () => {
-  contador += 1
-  btnContar.textContent = 'Contar: ' + contador
-})
+if (btn && statusEl) {
+  btn.addEventListener('click', () => {
+    cliques += 1
+    statusEl.textContent = 'Interação registrada ' + cliques + ' vez(es) no preview.'
+  })
+}`
 
-btnMudar?.addEventListener('click', () => {
-  if (mensagem) {
-    mensagem.textContent = 'JS rodando ao vivo! Cliques registrados: ' + contador
-  }
-})`
+function buildJsSandboxDoc(code: string, runId: number): string {
+  const safeCode = code.replace(/<\/script/gi, '<\\/script')
 
-function escapeClosingStyle(cssCode: string): string {
-  return cssCode.replace(/<\/style/gi, '<\\/style')
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+</head>
+<body>
+  <script>
+    (function () {
+      const runId = ${runId};
+      const logs = [];
+
+      function formatArg(value) {
+        if (typeof value === 'string') return value;
+        if (value === undefined) return 'undefined';
+        if (typeof value === 'function') return value.toString();
+        try {
+          return JSON.stringify(value);
+        } catch {
+          return String(value);
+        }
+      }
+
+      const sandboxConsole = {
+        log: (...args) => logs.push(args.map(formatArg).join(' ')),
+        warn: (...args) => logs.push('[Aviso] ' + args.map(formatArg).join(' ')),
+        error: (...args) => logs.push('[Erro] ' + args.map(formatArg).join(' ')),
+      };
+
+      try {
+        const fn = new Function('console', ${JSON.stringify(safeCode)});
+        fn(sandboxConsole);
+        parent.postMessage(
+          {
+            source: 'codelab-js-sandbox',
+            runId,
+            logs: logs.length > 0 ? logs : ['Código executado sem saída no console.'],
+          },
+          '*'
+        );
+      } catch (err) {
+        const msg = err && err.message ? err.message : 'Erro ao executar JavaScript.';
+        parent.postMessage(
+          {
+            source: 'codelab-js-sandbox',
+            runId,
+            logs: ['Erro: ' + msg],
+          },
+          '*'
+        );
+      }
+    })();
+  </script>
+</body>
+</html>`
 }
 
-function escapeClosingScript(jsCode: string): string {
-  return jsCode.replace(/<\/script/gi, '<\\/script')
+function buildWebPreviewDoc(html: string, css: string, js: string): string {
+  const cleanHtml = stripDangerousHtml(html)
+  const cleanCss = css.replace(/<\/style/gi, '<\\/style')
+  const cleanScript = js.replace(/<\/script/gi, '<\\/script')
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>${cleanCss}</style>
+</head>
+<body>
+  ${cleanHtml}
+  <script>
+    try {
+      ${cleanScript}
+    } catch (err) {
+      const pre = document.createElement('pre');
+      pre.style.color = '#b45309';
+      pre.style.fontFamily = 'monospace';
+      pre.textContent = 'Erro no script: ' + (err && err.message ? err.message : String(err));
+      document.body.appendChild(pre);
+    }
+  </script>
+</body>
+</html>`
 }
 
 export default function PlaygroundPage() {
-  const [html, setHtml] = useState(HTML_INICIAL)
-  const [css, setCss] = useState(CSS_INICIAL)
-  const [js, setJs] = useState(JS_INICIAL)
-  const [resetKey, setResetKey] = useState(0)
-  const [expandido, setExpandido] = useState(false)
-  const [abaMobile, setAbaMobile] = useState<AbaMobile>('tudo')
+  const { isDark, alternarTema } = useTheme()
   const [userId, setUserId] = useState<string | null>(null)
-  const [isDark, setIsDark] = useState(true)
+  const [mode, setMode] = useState<PlaygroundMode>('js')
 
-  useLayoutEffect(() => {
-    const salvo = localStorage.getItem(STORAGE_KEY)
-    const escuro = salvo !== 'light'
-    setIsDark(escuro)
-    document.documentElement.classList.toggle('dark', escuro)
-    document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
-  }, [])
+  // Estado modo JS
+  const [jsCode, setJsCode] = useState<string>(STARTER_JS)
+  const [consoleLogs, setConsoleLogs] = useState<string[]>([])
+  const [jsSandboxDoc, setJsSandboxDoc] = useState<string>('')
+  const [jsSandboxKey, setJsSandboxKey] = useState<number>(0)
+  const runCounterRef = useRef(0)
+  const activeRunIdRef = useRef(0)
+
+  // Estado modo HTML/CSS/JS
+  const [htmlCode, setHtmlCode] = useState<string>(STARTER_HTML)
+  const [cssCode, setCssCode] = useState<string>(STARTER_CSS)
+  const [webJsCode, setWebJsCode] = useState<string>(STARTER_WEB_JS)
+  const [previewDoc, setPreviewDoc] = useState<string>(() =>
+    buildWebPreviewDoc(STARTER_HTML, STARTER_CSS, STARTER_WEB_JS)
+  )
 
   useEffect(() => {
     let active = true
 
-    supabase.auth
-      .getSession()
-      .then(({ data }) => {
+    async function initSession() {
+      try {
+        const { data } = await supabase.auth.getSession()
         if (!active) return
         setUserId(data.session?.user?.id ?? null)
-      })
-      .catch((err) => {
-        console.error('Erro ao obter sessão no playground:', err)
-      })
+      } catch {
+        // Ignora falha de leitura de sessão
+      }
+    }
+
+    void initSession()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!active) return
-      setUserId(session?.user?.id ?? null)
-    })
+    } = supabase.auth.onAuthStateChange(
+      (_event: AuthChangeEvent, session: Session | null) => {
+        if (!active) return
+        setUserId(session?.user?.id ?? null)
+      }
+    )
 
     return () => {
       active = false
@@ -145,275 +215,314 @@ export default function PlaygroundPage() {
   }, [])
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      setAbaMobile('html')
+    function handleMessage(event: MessageEvent) {
+      const data = event.data
+      if (!data || data.source !== 'codelab-js-sandbox') return
+      if (data.runId !== activeRunIdRef.current) return
+      if (Array.isArray(data.logs)) {
+        setConsoleLogs(data.logs.map(String))
+      }
     }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
   }, [])
 
-  const alternarTema = () => {
-    setIsDark((atual) => {
-      const proximo = !atual
-      localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', proximo)
-      document.documentElement.style.backgroundColor = proximo ? '#030712' : '#fafaf9'
-      return proximo
-    })
-  }
+  const runJsPlayground = useCallback(() => {
+    runCounterRef.current += 1
+    const nextRunId = runCounterRef.current
+    activeRunIdRef.current = nextRunId
+    setJsSandboxKey(nextRunId)
+    setConsoleLogs(['Executando...'])
+    setJsSandboxDoc(buildJsSandboxDoc(jsCode, nextRunId))
+  }, [jsCode])
 
-  const srcDoc = useMemo(() => {
-    const safeCss = escapeClosingStyle(css)
-    const safeJs = escapeClosingScript(js)
-    const scriptTag = `<script>\n${safeJs}\n</script>`
-    const styleTag = `<style>\n${safeCss}\n</style>`
+  const buildWebPreview = useCallback(() => {
+    setPreviewDoc(buildWebPreviewDoc(htmlCode, cssCode, webJsCode))
+  }, [htmlCode, cssCode, webJsCode])
 
-    const trimmed = html.trimStart().toLowerCase()
-    const temDocumentoCompleto =
-      trimmed.startsWith('<!doctype') || trimmed.startsWith('<html')
-
-    if (temDocumentoCompleto) {
-      let documento = html
-      if (/<\/head>/i.test(documento)) {
-        documento = documento.replace(/<\/head>/i, `${styleTag}\n</head>`)
-      } else {
-        documento = `${styleTag}\n${documento}`
-      }
-
-      if (/<\/body>/i.test(documento)) {
-        return documento.replace(/<\/body>/i, `${scriptTag}\n</body>`)
-      }
-      return `${documento}\n${scriptTag}`
-    }
-
-    return `<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    ${styleTag}
-  </head>
-  <body>
-    ${html}
-    ${scriptTag}
-  </body>
-</html>`
-  }, [html, css, js])
-
-  function resetarTudo() {
-    setHtml(HTML_INICIAL)
-    setCss(CSS_INICIAL)
-    setJs(JS_INICIAL)
-    setResetKey((prev) => prev + 1)
-  }
-
-  const mostrarHtml = abaMobile === 'tudo' || abaMobile === 'html'
-  const mostrarCss = abaMobile === 'tudo' || abaMobile === 'css'
-  const mostrarJs = abaMobile === 'tudo' || abaMobile === 'js'
-  const mostrarResultado = abaMobile === 'tudo' || abaMobile === 'resultado'
-
-  const editorClasse =
-    'w-full flex-1 min-h-[170px] sm:min-h-[200px] resize-y rounded-xl border border-stone-300 bg-white p-3 font-mono text-xs sm:text-sm leading-relaxed text-stone-900 focus:border-emerald-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-emerald-300'
-
-  const workspaceClasse = expandido
-    ? 'fixed inset-0 z-50 flex flex-col overflow-y-auto bg-stone-50 px-3.5 pb-6 pt-0 sm:px-6 text-stone-900 dark:bg-gray-950 dark:text-white'
-    : 'flex flex-col gap-3 rounded-2xl border border-stone-200 bg-white p-3.5 sm:p-5 shadow-xs dark:border-gray-800 dark:bg-gray-900'
+  const resetWebPlayground = useCallback(() => {
+    setHtmlCode(STARTER_HTML)
+    setCssCode(STARTER_CSS)
+    setWebJsCode(STARTER_WEB_JS)
+    setPreviewDoc(buildWebPreviewDoc(STARTER_HTML, STARTER_CSS, STARTER_WEB_JS))
+  }, [])
 
   return (
-    <div className="min-h-screen flex flex-col relative selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
+    <div className="min-h-screen flex flex-col justify-between bg-[#F8F7F4] bg-lab-dots text-[#18181B] dark:bg-[#0B0F14] dark:text-[#F1F5F9]">
       <Navbar
-        activeTab="playground"
-        subtitle="Playground Livre"
+        subtitle="Playground de Código"
         userId={userId}
         isDark={isDark}
         onToggleTheme={alternarTema}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8 space-y-5 sm:space-y-6 pb-12">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 border-b border-stone-200 dark:border-gray-800 pb-4">
-          <div className="space-y-1">
-            <span className="inline-block px-3 py-1 border font-bold text-[11px] rounded-full bg-emerald-50 text-emerald-700 border-emerald-600/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-              LABORATÓRIO LIVRE • HTML + CSS + JS
-            </span>
-            <h2 className="text-xl sm:text-3xl font-black tracking-tight">
-              Playground de Código
-            </h2>
-            <p className="text-sm sm:text-base text-stone-600 dark:text-gray-400">
-              Escreva HTML, CSS e JavaScript à vontade e veja o resultado ao vivo no navegador.
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 md:px-8 py-8 sm:py-10 space-y-6">
+        <section className="border rounded-2xl p-6 sm:p-7 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[11px] font-mono font-semibold bg-[#047857]/10 border-[#047857]/25 text-[#047857] dark:bg-[#34D399]/10 dark:border-[#34D399]/25 dark:text-[#34D399]">
+              Ambiente isolado • Prática livre
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              Playground Interativo
+            </h1>
+            <p className="text-xs sm:text-sm text-[#57534E] dark:text-[#94A3B8]">
+              Teste lógica em JavaScript puro ou monte pequenas interfaces com HTML, CSS e JS em preview isolado.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
-            <Link
-              href="/playground/js"
-              className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 hover:underline"
-            >
-              Modo só JavaScript →
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-xs sm:text-sm font-semibold text-stone-600 dark:text-gray-400 hover:text-emerald-700 dark:hover:text-emerald-400"
-            >
-              ← Voltar para a Trilha
-            </Link>
-          </div>
-        </div>
-
-        <div className={workspaceClasse}>
           <div
-            className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-stone-200 dark:border-gray-800 ${
-              expandido
-                ? 'sticky top-0 z-10 -mx-3.5 sm:-mx-6 bg-stone-50/95 px-3.5 py-2.5 sm:px-6 backdrop-blur dark:bg-gray-950/95'
-                : 'pb-3'
-            }`}
+            role="tablist"
+            aria-label="Modo do playground"
+            className="inline-flex rounded-xl p-1 border bg-[#F8F7F4] border-[#E7E5E4] dark:bg-[#0E131A] dark:border-[#1E293B] shrink-0"
           >
-            <div className="grid grid-cols-5 gap-1.5 w-full md:hidden">
-              {(
-                [
-                  { id: 'tudo', rotulo: 'Tudo' },
-                  { id: 'html', rotulo: 'HTML' },
-                  { id: 'css', rotulo: 'CSS' },
-                  { id: 'js', rotulo: 'JS' },
-                  { id: 'resultado', rotulo: 'Tela' },
-                ] as const
-              ).map((aba) => (
-                <button
-                  key={aba.id}
-                  type="button"
-                  onClick={() => setAbaMobile(aba.id)}
-                  className={`h-9 w-full inline-flex items-center justify-center rounded-lg px-1.5 text-[11px] font-bold whitespace-nowrap cursor-pointer ${
-                    abaMobile === aba.id
-                      ? 'bg-emerald-500 text-gray-950'
-                      : 'bg-stone-100 text-stone-700 border border-stone-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700'
-                  }`}
-                >
-                  {aba.rotulo}
-                </button>
-              ))}
-            </div>
-
-            <span className="hidden md:inline text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-gray-400">
-              Ambiente ao Vivo • HTML + CSS + JavaScript
-            </span>
-
-            <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto sm:items-center shrink-0">
-              <button
-                type="button"
-                onClick={resetarTudo}
-                className="h-9 w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-stone-300 bg-white px-3.5 text-xs font-bold whitespace-nowrap text-stone-700 hover:bg-stone-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 cursor-pointer"
-              >
-                Resetar
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setExpandido((prev) => !prev)}
-                className="h-9 w-full sm:w-auto inline-flex items-center justify-center rounded-lg bg-emerald-500 hover:bg-emerald-400 px-3.5 text-xs font-extrabold whitespace-nowrap text-gray-950 cursor-pointer"
-              >
-                {expandido ? 'Fechar tela' : 'Expandir tela'}
-              </button>
-            </div>
-          </div>
-
-          {!expandido && (
-            <p className="text-[11px] sm:text-xs text-stone-500 dark:text-gray-400">
-              Dica: clique em{' '}
-              <strong className="font-semibold text-stone-700 dark:text-gray-200">
-                Expandir tela
-              </strong>{' '}
-              para ter mais espaço ao testar HTML, CSS e JavaScript.
-            </p>
-          )}
-
-          <div
-            className={`grid gap-4 pt-1 grid-cols-1 lg:grid-cols-12 ${
-              expandido ? 'flex-1 min-h-[500px]' : ''
-            }`}
-          >
-            <div
-              className={`flex flex-col gap-3 lg:col-span-6 ${
-                !mostrarHtml && !mostrarCss && !mostrarJs ? 'hidden md:flex' : 'flex'
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'js'}
+              onClick={() => setMode('js')}
+              className={`px-4 py-2 rounded-lg text-xs font-extrabold cursor-pointer transition-colors ${
+                mode === 'js'
+                  ? 'bg-[#047857] dark:bg-[#34D399] text-white dark:text-[#0B0F14]'
+                  : 'text-[#57534E] dark:text-[#94A3B8]'
               }`}
             >
-              <div className={`${mostrarHtml ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
+              JavaScript
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'web'}
+              onClick={() => setMode('web')}
+              className={`px-4 py-2 rounded-lg text-xs font-extrabold cursor-pointer transition-colors ${
+                mode === 'web'
+                  ? 'bg-[#047857] dark:bg-[#34D399] text-white dark:text-[#0B0F14]'
+                  : 'text-[#57534E] dark:text-[#94A3B8]'
+              }`}
+            >
+              HTML / CSS / JS
+            </button>
+          </div>
+        </section>
+
+        {mode === 'js' ? (
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 border rounded-2xl p-5 sm:p-6 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] space-y-3">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <label
-                  htmlFor="playground-html"
-                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                  htmlFor="pg-js-editor"
+                  className="text-xs font-mono font-semibold text-[#57534E] dark:text-[#94A3B8]"
+                >
+                  Editor JavaScript (Ctrl/Cmd + Enter)
+                </label>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJsCode(STARTER_JS)
+                      setConsoleLogs([])
+                      setJsSandboxDoc('')
+                      setJsSandboxKey(0)
+                    }}
+                    className="press-tactile px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer bg-[#F8F7F4] hover:bg-[#F1EFEA] border-[#E7E5E4] dark:bg-[#0E131A] dark:hover:bg-[#121821] dark:border-[#1E293B]"
+                  >
+                    Resetar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={runJsPlayground}
+                    className="press-tactile px-4 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer bg-[#047857] hover:bg-[#065F46] dark:bg-[#34D399] dark:hover:bg-[#6EE7B7] text-white dark:text-[#0B0F14]"
+                  >
+                    Executar
+                  </button>
+                </div>
+              </div>
+
+              <textarea
+                id="pg-js-editor"
+                rows={15}
+                value={jsCode}
+                onChange={(e) => setJsCode(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                    e.preventDefault()
+                    runJsPlayground()
+                  }
+                }}
+                spellCheck={false}
+                className="w-full p-4 rounded-xl border font-mono text-xs sm:text-sm leading-relaxed bg-[#F8F7F4] border-[#E7E5E4] text-[#18181B] dark:bg-[#0E131A] dark:border-[#1E293B] dark:text-[#F1F5F9]"
+              />
+
+              {jsSandboxDoc && (
+                <iframe
+                  key={jsSandboxKey}
+                  title="Executor isolado de JavaScript"
+                  sandbox="allow-scripts"
+                  srcDoc={jsSandboxDoc}
+                  className="hidden"
+                />
+              )}
+            </div>
+
+            <div className="lg:col-span-5 border rounded-2xl p-5 sm:p-6 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] flex flex-col justify-between space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-mono text-[#57534E] dark:text-[#94A3B8]">
+                  <span>Console</span>
+                  <button
+                    type="button"
+                    onClick={() => setConsoleLogs([])}
+                    className="underline cursor-pointer hover:text-[#18181B] dark:hover:text-[#F1F5F9]"
+                  >
+                    Limpar saída
+                  </button>
+                </div>
+
+                <div className="min-h-64 p-4 rounded-xl border font-mono text-xs space-y-1.5 bg-[#F8F7F4] border-[#E7E5E4] dark:bg-[#0E131A] dark:border-[#1E293B]">
+                  {consoleLogs.length === 0 ? (
+                    <p className="text-[#57534E] dark:text-[#94A3B8]">
+                      Clique em “Executar” para rodar o código.
+                    </p>
+                  ) : (
+                    consoleLogs.map((line, i) => (
+                      <p key={i} className="whitespace-pre-wrap break-words">
+                        {line}
+                      </p>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="text-xs text-[#57534E] dark:text-[#94A3B8] flex items-center justify-between pt-2 border-t border-[#E7E5E4] dark:border-[#1E293B]">
+                <span>Precisa de roteiro?</span>
+                <Link
+                  href="/dashboard"
+                  className="font-bold text-[#047857] dark:text-[#34D399] hover:underline"
+                >
+                  Ir para a Trilha →
+                </Link>
+              </div>
+            </div>
+          </section>
+        ) : (
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-6 space-y-4">
+              <div className="border rounded-2xl p-4 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] space-y-2">
+                <label
+                  htmlFor="pg-html"
+                  className="block text-xs font-mono font-semibold text-[#57534E] dark:text-[#94A3B8]"
                 >
                   HTML
                 </label>
                 <textarea
-                  id="playground-html"
-                  value={html}
-                  onChange={(e) => setHtml(e.target.value)}
+                  id="pg-html"
+                  rows={6}
+                  value={htmlCode}
+                  onChange={(e) => setHtmlCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                      e.preventDefault()
+                      buildWebPreview()
+                    }
+                  }}
                   spellCheck={false}
-                  className={editorClasse}
+                  className="w-full p-3 rounded-xl border font-mono text-xs bg-[#F8F7F4] border-[#E7E5E4] text-[#18181B] dark:bg-[#0E131A] dark:border-[#1E293B] dark:text-[#F1F5F9]"
                 />
               </div>
 
-              <div className={`${mostrarCss ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
+              <div className="border rounded-2xl p-4 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] space-y-2">
                 <label
-                  htmlFor="playground-css"
-                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                  htmlFor="pg-css"
+                  className="block text-xs font-mono font-semibold text-[#57534E] dark:text-[#94A3B8]"
                 >
                   CSS
                 </label>
                 <textarea
-                  id="playground-css"
-                  value={css}
-                  onChange={(e) => setCss(e.target.value)}
+                  id="pg-css"
+                  rows={6}
+                  value={cssCode}
+                  onChange={(e) => setCssCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                      e.preventDefault()
+                      buildWebPreview()
+                    }
+                  }}
                   spellCheck={false}
-                  className={editorClasse}
+                  className="w-full p-3 rounded-xl border font-mono text-xs bg-[#F8F7F4] border-[#E7E5E4] text-[#18181B] dark:bg-[#0E131A] dark:border-[#1E293B] dark:text-[#F1F5F9]"
                 />
               </div>
 
-              <div className={`${mostrarJs ? 'flex' : 'hidden md:flex'} flex-col flex-1`}>
+              <div className="border rounded-2xl p-4 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] space-y-2">
                 <label
-                  htmlFor="playground-js"
-                  className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400"
+                  htmlFor="pg-web-js"
+                  className="block text-xs font-mono font-semibold text-[#57534E] dark:text-[#94A3B8]"
                 >
-                  JavaScript
+                  JavaScript (Ctrl/Cmd + Enter atualiza)
                 </label>
                 <textarea
-                  id="playground-js"
-                  value={js}
-                  onChange={(e) => setJs(e.target.value)}
+                  id="pg-web-js"
+                  rows={6}
+                  value={webJsCode}
+                  onChange={(e) => setWebJsCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                      e.preventDefault()
+                      buildWebPreview()
+                    }
+                  }}
                   spellCheck={false}
-                  className={editorClasse}
+                  className="w-full p-3 rounded-xl border font-mono text-xs bg-[#F8F7F4] border-[#E7E5E4] text-[#18181B] dark:bg-[#0E131A] dark:border-[#1E293B] dark:text-[#F1F5F9]"
                 />
               </div>
             </div>
 
-            <div
-              className={`${
-                mostrarResultado ? 'flex' : 'hidden md:flex'
-              } flex-col flex-1 lg:col-span-6`}
-            >
-              <span className="mb-1 text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-gray-400">
-                Resultado na tela
-              </span>
+            <div className="lg:col-span-6 border rounded-2xl p-4 sm:p-5 bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B] flex flex-col space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-mono font-semibold text-[#57534E] dark:text-[#94A3B8]">
+                  Preview isolado (sandbox)
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={resetWebPlayground}
+                    className="press-tactile px-3 py-1.5 rounded-lg border text-xs font-bold cursor-pointer bg-[#F8F7F4] hover:bg-[#F1EFEA] border-[#E7E5E4] dark:bg-[#0E131A] dark:hover:bg-[#121821] dark:border-[#1E293B]"
+                  >
+                    Resetar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={buildWebPreview}
+                    className="press-tactile px-4 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer bg-[#047857] hover:bg-[#065F46] dark:bg-[#34D399] dark:hover:bg-[#6EE7B7] text-white dark:text-[#0B0F14]"
+                  >
+                    Atualizar preview
+                  </button>
+                </div>
+              </div>
+
               <iframe
-                key={resetKey}
                 title="Preview HTML, CSS e JavaScript"
-                srcDoc={srcDoc}
                 sandbox="allow-scripts"
-                className={`w-full flex-1 rounded-xl border border-stone-300 bg-white dark:border-gray-700 ${
-                  expandido
-                    ? 'min-h-[340px] lg:min-h-[540px]'
-                    : 'min-h-[280px] sm:min-h-[380px] lg:min-h-[540px]'
-                }`}
+                srcDoc={previewDoc}
+                className="w-full flex-1 min-h-96 rounded-xl border border-[#E7E5E4] dark:border-[#1E293B] bg-[#F8F7F4]"
               />
             </div>
-          </div>
-        </div>
+          </section>
+        )}
       </main>
 
-      <footer className="border-t border-stone-200 dark:border-gray-800/80 px-4 sm:px-8 py-6 text-center text-xs max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-500 dark:text-gray-500">
-        <p>Codelab João • Aprendizado prático de JavaScript</p>
-        <Link
-          href="/contato"
-          className="font-medium hover:text-emerald-700 text-stone-600 dark:hover:text-emerald-400 dark:text-gray-400"
-        >
-          💬 Contato e Suporte
-        </Link>
+      <footer className="border-t border-[#E7E5E4] dark:border-[#1E293B] px-4 sm:px-8 py-6 text-center text-xs max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-3 text-[#57534E] dark:text-[#94A3B8]">
+        <p>Codelab João • Playground educativo</p>
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard" className="hover:text-[#047857] dark:hover:text-[#34D399]">
+            Trilha
+          </Link>
+          <Link href="/desafios" className="hover:text-[#047857] dark:hover:text-[#34D399]">
+            Desafios
+          </Link>
+          <Link href="/privacidade" className="hover:text-[#047857] dark:hover:text-[#34D399]">
+            Privacidade e LGPD
+          </Link>
+        </div>
       </footer>
     </div>
   )

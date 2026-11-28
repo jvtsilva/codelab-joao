@@ -113,53 +113,53 @@ export const aulasData: AulaItem[] = [
     modulo: 1,
     titulo: 'Como o Código Pensa: Sequência e Ordem',
     resumo:
-      'Entenda por que o computador executa instruções uma por vez, na ordem certa, e o que acontece quando a sequência sai errada.',
+      'Entenda por que o computador executa tudo uma linha por vez — e o que quebra quando a ordem sai errada.',
 
     introducao: {
       objetivo:
-        'Compreender a execução sequencial de instruções e perceber por que a ordem dos passos muda o resultado final.',
+        'Perceber como a ordem das instruções muda o resultado final.',
       contexto:
-        'Programar não é mágica: é escrever passos claros para uma máquina que segue ordens literalmente, do começo ao fim, sem adivinhar o que você quis dizer.',
+        'O código não adivinha intenções: ele segue cada passo na ordem exata em que aparece.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O computador executa passo a passo',
+          titulo: '1. Passo a passo, sem pular etapas',
           explicacao:
-            'Um programa funciona como uma receita ou um roteiro: cada linha ou instrução é avaliada na sequência em que aparece. Se um passo depende de outro anterior, pular ou inverter a ordem quebra o processo.',
+            'Um programa roda em sequência. Se um passo depende do anterior, inverter a ordem quebra o fluxo.',
         },
         {
-          titulo: '2. Literalidade: ele faz o que foi escrito, não o que você imaginou',
+          titulo: '2. Literalidade total',
           explicacao:
-            'Pessoas completam lacunas sozinhas no dia a dia; o código não. Se você manda abrir a porta antes de destrancar, ou mostrar o resultado antes de calcular, o processo falha exatamente por causa da ordem.',
+            'Pessoas completam o que faltou; o código faz só o que foi mandado. Pedir o resultado antes de calcular dá ruim.',
         },
         {
-          titulo: '3. Pré-requisito antes de usar',
+          titulo: '3. Prepare antes de usar',
           explicacao:
-            'Quase toda tarefa tem um antes e um depois: primeiro você prepara ou obtém o dado/estado, depois usa ou transforma esse valor. Essa base de "preparar antes de usar" vai acompanhar você em variáveis, funções e listas.',
+            'Primeiro você obtém ou prepara o dado; depois usa ou transforma. Isso vale para variáveis, funções e listas.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — fazer café coado:\nVocê não coloca a água quente na xícara antes de colocar o pó no filtro e posicionar a xícara embaixo. A ordem dos passos define se o resultado sai certo.',
+        'Café coado:\nColocar água quente antes de pôr o pó e a jarra no lugar faz bagunça. A ordem define o resultado.',
 
       exemploCodigo:
-        '// A ordem das instruções define o resultado\npasso1: preparar o ingrediente base\npasso2: aplicar a regra ou transformação\npasso3: exibir o resultado final',
+        '// 1. Preparar o dado\n// 2. Processar a etapa\n// 3. Mostrar o resultado',
 
       resumo:
-        'O código roda de forma sequencial e literal: cada passo precisa vir na ordem certa para que o próximo funcione.',
+        'Sequência importa: o que vem antes precisa estar pronto para o que vem depois.',
     },
 
     pratica: {
-      titulo: 'Ordene os passos de uma tarefa simples',
+      titulo: 'Ordene os passos da tarefa',
       enunciado:
-        'Coloque as ações abaixo na sequência lógica correta do início ao fim para salvar e abrir um documento:',
-      codigoInicial: '// Organize os passos da primeira etapa até a última',
+        'Coloque na ordem certa do início ao fim para salvar e abrir um documento:',
+      codigoInicial: '// Do primeiro passo até o último',
       resultadoEsperado:
-        'Ordenar os passos do início ao fim respeitando a dependência entre cada ação.',
+        'Ordenar os passos respeitando o que precisa acontecer primeiro.',
       dica:
-        'Pense no que precisa acontecer primeiro: escrever o conteúdo, salvar o arquivo, fechar e só depois reabrir.',
+        'Escreva primeiro, salve em seguida, feche e só depois abra de novo.',
       frases: [
         'Salvar o arquivo no computador',
         'Escrever o texto no documento',
@@ -172,56 +172,59 @@ export const aulasData: AulaItem[] = [
         'Fechar o documento aberto',
         'Abrir o arquivo novamente para conferir',
       ],
-      acertoMsg:
-        'Mandou bem! Cada passo ficou na ordem certa, respeitando o que vem antes e o que vem depois.',
+      acertoMsg: 'Mandou bem! A sequência ficou na ordem exata.',
       erroMsg:
-        'Algum passo está fora de ordem. Confira o que precisa acontecer primeiro antes de fechar ou reabrir.',
+        'Quase lá! Revise o que precisa acontecer antes de fechar ou abrir.',
     },
 
     quiz: [
       {
-        pergunta: 'O que significa dizer que um programa é executado de forma sequencial?',
+        pergunta: 'O que significa execução sequencial?',
         opcoes: [
-          'Que as instruções são processadas uma após a outra, seguindo uma ordem',
-          'Que todas as linhas rodam ao mesmo tempo em ordem aleatória',
-          'Que o computador pula automaticamente os passos que parecem difíceis',
+          'As instruções rodam uma após a outra, na ordem definida',
+          'Todas as linhas rodam ao mesmo tempo em ordem aleatória',
+          'O código pula automaticamente os passos difíceis',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Execução sequencial significa seguir as instruções na ordem definida, passo a passo.',
+          'Execução sequencial é seguir os passos um por vez, na ordem certa.',
       },
       {
-        pergunta: 'Por que inverter dois passos dependentes costuma causar erro ou resultado errado?',
+        pergunta: 'Por que inverter dois passos dependentes causa problema?',
         opcoes: [
-          'Porque o segundo passo pode depender de algo que ainda não foi feito ou preparado',
-          'Porque o computador muda o idioma do código sozinho',
-          'Porque a última linha sempre apaga as anteriores',
+          'Porque o próximo passo pode exigir algo que ainda não aconteceu',
+          'Porque o código muda de idioma sozinho',
+          'Porque a última linha apaga tudo',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Quando um passo exige um pré-requisito, executá-lo antes da hora quebra a lógica.',
+          'Sem o pré-requisito pronto, a etapa seguinte não encontra o que precisa.',
       },
       {
-        pergunta: 'Como o computador lida com instruções em comparação ao raciocínio humano?',
+        pergunta: 'Como o código interpreta ordens em comparação a nós?',
         opcoes: [
-          'Ele segue exatamente o que foi instruído, sem "adivinhar" intenções implícitas',
-          'Ele sempre entende o que o programador quis dizer mesmo se faltar um passo',
-          'Ele ignora a ordem das linhas quando o código é curto',
+          'De forma literal, sem adivinhar o que você quis dizer',
+          'Completando sozinho qualquer passo esquecido',
+          'Ignorando a ordem quando o código é curto',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'A execução é literal: o comportamento depende da sequência exata escrita.',
+        explicacao: 'O computador executa literalmente a sequência escrita.',
       },
     ],
 
     conclusao: {
+      titulo: 'Sequência dominada',
+      mensagem:
+        'Você viu que a ordem dos passos define o resultado e que pular etapas quebra a lógica.',
+      proximoPasso:
+        'Partiu Aula 2: veja como condições desviam o caminho com SE e SENÃO.',
       aprendizados: [
-        'O código executa instruções passo a passo na ordem em que são organizadas.',
-        'A ordem dos passos importa porque ações posteriores costumam depender de ações anteriores.',
-        'Pensar na sequência antes de codificar evita falhas lógicas simples.',
+        'Instruções seguem uma ordem do início ao fim.',
+        'Etapas dependentes exigem preparo antes de serem usadas.',
+        'Pensar na ordem evita bugs simples.',
       ],
       reflexao:
-        'Na sua rotina, qual tarefa já deu errado ou ficou estranha simplesmente porque dois passos foram feitos fora de ordem?',
+        'Qual tarefa do seu dia já deu errado só porque dois passos foram feitos fora de ordem?',
       proximaAulaId: 'lesson-2',
     },
   },
@@ -231,63 +234,59 @@ export const aulasData: AulaItem[] = [
     modulo: 1,
     titulo: 'Condições no Dia a Dia: Se Isso, Faça Aquilo',
     resumo:
-      'Veja como decisões mudam o caminho de uma sequência quando uma condição é atendida ou não.',
+      'Veja como uma verificação muda o caminho do código conforme a situação.',
 
     introducao: {
-      objetivo:
-        'Entender o raciocínio condicional ("se uma condição acontecer, siga um caminho; senão, siga outro") e como ele se encaixa na ordem dos passos.',
+      objetivo: 'Entender decisões com SE e SENÃO dentro do fluxo.',
       contexto:
-        'Na Aula 1, vimos que a ordem dos passos define o resultado. Mas nem toda sequência é reta: às vezes o próximo passo depende de uma verificação no meio do caminho, como checar se há saldo, se chove ou se o campo está preenchido.',
+        'Nem todo caminho é reto: às vezes o código precisa checar uma condição antes de agir.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. Uma condição é uma pergunta com resposta sim ou não',
+          titulo: '1. Condição = pergunta de sim ou não',
           explicacao:
-            'No dia a dia, tomamos decisões o tempo todo avaliando uma situação: "A bateria está baixa?", "O usuário digitou a senha?", "Tem item em estoque?". Cada verificação dessas funciona como um filtro que aponta para uma resposta clara: verdadeiro (sim) ou falso (não).',
+            'Tem bateria? Tem saldo? O campo está preenchido? Toda condição responde verdadeiro ou falso.',
         },
         {
-          titulo: '2. O caminho do "SE" e o caminho do "SENÃO"',
+          titulo: '2. Caminho do SE vs. caminho do SENÃO',
           explicacao:
-            'Quando a condição é verdadeira, o programa executa uma ação específica. Quando ela é falsa, ele pode seguir um caminho alternativo (o "senão") ou simplesmente pular aquela ação e continuar o fluxo.',
+            'Se for verdadeiro, segue um caminho; se for falso, vai para o SENÃO (ou segue direto). Só um lado acontece.',
         },
         {
-          titulo: '3. A condição precisa ser verificada no momento certo',
+          titulo: '3. Checar na hora certa',
           explicacao:
-            'Assim como na Aula 1, a ordem importa: testar uma condição depois que o passo já aconteceu tarde demais não impede o efeito. Primeiro você avalia a condição; depois escolhe o que fazer.',
+            'Avaliar a condição depois que o passo já aconteceu não adianta. A checagem vem antes da ação.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — sair de casa com guarda-chuva:\nAntes de sair, você olha para o céu ("está chovendo?"). Se sim, pega o guarda-chuva; senão, segue direto sem ele. A decisão acontece antes do passo de atravessar a rua.',
+        'Sair com guarda-chuva:\nOlha o céu antes de sair. Se estiver chovendo, pega o guarda-chuva; senão, vai sem ele.',
 
-      exemploCodigo:
-        '// Raciocínio condicional em pseudocódigo\nSE bateria <= 15%:\n  ativar modo economia\nSENAO:\n  manter desempenho normal',
+      exemploCodigo: 'SE bateria <= 15:\n  ativar economia\nSENAO:\n  manter normal',
 
       resumo:
-        'Condições avaliam uma situação para escolher entre caminhos diferentes — sempre no momento certo da sequência.',
+        'Condições escolhem qual caminho seguir no momento certo da sequência.',
     },
 
     pratica: {
-      titulo: 'Classifique qual ação acontece em cada cenário',
+      titulo: 'Classifique a ação de cada cenário',
       enunciado:
-        'Considere a regra abaixo para liberar entrada em uma sala de estudo e toque na ação correta para cada situação:\n\nRegra: SE crachaValido === "sim", liberar catraca; SENAO, chamar recepcao.',
+        'Regra: SE crachaValido === "sim", liberar catraca; SENAO, chamar recepção. Escolha a ação de cada caso:',
       codigoInicial:
-        '// Regra de acesso:\n// crachaValido === "sim" -> "Liberar catraca"\n// caso contrário -> "Chamar recepção"',
-      resultadoEsperado:
-        'Associar corretamente cada situação de entrada à ação correspondente da regra condicional.',
-      dica:
-        'Veja quando a condição do crachá é atendida ("sim") e quando ela falha ("não" ou ausente).',
+        '// crachaValido === "sim" -> "Liberar catraca"\n// senão -> "Chamar recepção"',
+      resultadoEsperado: 'Escolher a ação correta para cada situação.',
+      dica: 'Só passa direto quem tem crachá válido ("sim").',
       classificacao: {
         categorias: ['Liberar catraca', 'Chamar recepção'],
         itens: [
           {
-            texto: 'Aluno apresenta crachá válido ("sim")',
+            texto: 'Aluno com crachá válido ("sim")',
             categoriaCorreta: 'Liberar catraca',
           },
           {
-            texto: 'Aluno esqueceu o crachá ("não")',
+            texto: 'Aluno sem crachá ("não")',
             categoriaCorreta: 'Chamar recepção',
           },
           {
@@ -295,57 +294,60 @@ export const aulasData: AulaItem[] = [
             categoriaCorreta: 'Chamar recepção',
           },
         ],
-        acertoMsg:
-          'Mandou bem! Você ligou cada situação à resposta certa da condição.',
+        acertoMsg: 'Mandou bem! Cada caso foi para o caminho certo.',
         erroMsg:
-          'Alguma situação ficou sem resposta ou com a ação trocada. Confira quando a condição é verdadeira ou falsa.',
+          'Confira quando a condição é verdadeira ("sim") ou falsa ("não").',
       },
     },
 
     quiz: [
       {
-        pergunta: 'O que uma condição faz dentro de uma sequência de passos?',
+        pergunta: 'Qual o papel de uma condição no código?',
         opcoes: [
-          'Avalia uma situação para decidir qual caminho ou ação seguir',
-          'Repete um bloco de código para sempre sem olhar o estado atual',
-          'Substitui a necessidade de ter uma ordem entre os passos',
+          'Decidir qual caminho seguir com base em uma verificação',
+          'Repetir uma linha para sempre sem checar nada',
+          'Anular a ordem dos passos',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Condições servem para direcionar o fluxo conforme uma situação seja verdadeira ou falsa.',
+          'Condições direcionam o fluxo conforme o resultado da verificação.',
       },
       {
-        pergunta: 'Se uma regra diz "SE estoque > 0, confirmar pedido; SENAO, avisar esgotado", o que acontece quando estoque é 0?',
+        pergunta:
+          'Se a regra é "SE estoque > 0, liberar; SENAO, avisar esgotado" e estoque é 0, o que ocorre?',
         opcoes: [
-          'A condição falha e o caminho do "SENAO" avisa que está esgotado',
-          'A condição passa e o pedido é confirmado mesmo sem estoque',
-          'Nenhuma das ações acontece e o fluxo trava',
+          'A condição falha e segue o caminho do SENÃO (avisar esgotado)',
+          'Libera mesmo sem estoque',
+          'O programa trava',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Como estoque > 0 não é atendido quando vale 0, o fluxo segue para o caminho alternativo.',
+        explicacao: 'Quando estoque > 0 é falso, o fluxo vai para o SENÃO.',
       },
       {
-        pergunta: 'Por que verificar uma condição antes da ação principal costuma ser essencial?',
+        pergunta: 'Por que checar a condição antes de agir?',
         opcoes: [
-          'Porque a decisão precisa orientar o próximo passo antes que ele seja executado',
-          'Porque o código só lê condições no final do arquivo',
-          'Porque condições não funcionam se vierem antes de uma ação',
+          'Para decidir o próximo passo antes de executar a ação',
+          'Porque condições só rodam no final do código',
+          'Porque não funciona antes de uma ação',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Checar o estado antes de agir evita executar um passo indevido.',
+        explicacao: 'Checar antes evita executar uma ação na hora errada.',
       },
     ],
 
     conclusao: {
+      titulo: 'Decisões com SE e SENÃO',
+      mensagem:
+        'Você entendeu como condições desviam o fluxo conforme o cenário.',
+      proximoPasso:
+        'Siga para a Aula 3 e aprenda a quebrar problemas grandes em partes.',
       aprendizados: [
-        'Condições avaliam uma situação para escolher entre caminhos diferentes.',
-        'Quando a condição não é atendida, o fluxo pode seguir um caminho alternativo ou continuar sem aquela ação.',
-        'A ordem de verificar a condição antes de agir mantém a lógica coerente.',
+        'Condições avaliam cenários como verdadeiro ou falso.',
+        'SE e SENÃO separam caminhos alternativos.',
+        'A verificação precisa vir antes da ação.',
       ],
       reflexao:
-        'Em um formulário de cadastro, qual condição você checaria antes de permitir enviar os dados?',
+        'Em um login ou cadastro, o que você checaria antes de avançar?',
       proximaAulaId: 'lesson-3',
     },
   },
@@ -355,114 +357,113 @@ export const aulasData: AulaItem[] = [
     modulo: 1,
     titulo: 'Decomposição e Resolução de Problemas',
     resumo:
-      'Quebre problemas grandes em etapas pequenas e claras antes de escrever código, preparando o terreno para guardar dados.',
+      'Quebre problemas grandes em partes pequenas antes de montar a solução.',
 
     introducao: {
-      objetivo:
-        'Aprender a dividir um problema complexo em partes menores e independentes para resolver cada etapa com clareza.',
+      objetivo: 'Dividir um problema maior em etapas simples e independentes.',
       contexto:
-        'Até aqui vimos a importância da ordem dos passos (Aula 1) e como condições desviam caminhos (Aula 2). Quando um problema parece grande demais de uma vez, o segredo é fatiá-lo em etapas simples — um hábito essencial antes de começar a guardar valores e escrever regras.',
+        'Quando o desafio parece grande demais de uma vez, fatiar em passos claros facilita tudo.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que é decompor um problema',
+          titulo: '1. Decompor é fatiar o problema',
           explicacao:
-            'Decompor significa pegar um objetivo maior — como "calcular o frete e liberar o pedido" — e dividi-lo em partes menores: ler os dados, verificar condições, calcular o valor e mostrar o resultado.',
+            'Em vez de tentar resolver tudo de uma vez, quebre o objetivo em etapas pequenas e claras.',
         },
         {
-          titulo: '2. Resolver uma parte de cada vez reduz erros',
+          titulo: '2. Menos confusão, menos erro',
           explicacao:
-            'Tentar resolver tudo mentalmente de uma só vez sobrecarrega a atenção e esconde falhas. Ao isolar cada etapa, você consegue testar se aquela parte faz sentido antes de juntar com a próxima.',
+            'Resolver uma parte por vez ajuda a enxergar onde está o problema quando algo falha.',
         },
         {
-          titulo: '3. Identificar o que entra, o que muda e o que sai',
+          titulo: '3. Entrada → Regra → Saída',
           explicacao:
-            'Em quase todo problema, vale perguntar: quais informações eu recebo ou guardo no início, qual decisão ou conta acontece no meio e qual resposta eu preciso entregar no final? Essa visão vai guiar o uso de variáveis a partir da próxima aula.',
+            'Pense no dado que entra, na conta/regra no meio e no resultado que sai. Isso já prepara o terreno para variáveis.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — organizar uma viagem curta:\nEm vez de pensar em "viajar" como um bloco único, você divide em: escolher o destino, checar o orçamento, separar os itens essenciais e definir o horário de saída.',
+        'Planejar uma viagem curta:\nDivida em escolher destino, conferir orçamento, separar itens e definir a hora de sair.',
 
       exemploCodigo:
-        '// Decompondo um problema em etapas claras\n// 1. Coletar/guardar os dados necessários\n// 2. Avaliar a regra ou condição\n// 3. Produzir e exibir o resultado',
+        '// 1. Pegar/guardar dados\n// 2. Aplicar regra\n// 3. Mostrar saída',
 
       resumo:
-        'Dividir um problema grande em etapas menores torna cada passo mais simples de entender, conferir e conectar.',
+        'Dividir um problema grande em etapas curtas deixa a solução mais simples e clara.',
     },
 
     pratica: {
-      titulo: 'Ordene as etapas para resolver um problema por partes',
+      titulo: 'Ordene as etapas da solução',
       enunciado:
-        'Coloque as etapas abaixo na sequência lógica para resolver o problema de "verificar se o aluno passou na atividade e exibir o status":',
-      codigoInicial:
-        '// Do primeiro passo de análise até a resposta final',
-      resultadoEsperado:
-        'Ordenar as etapas de decomposição do problema da entrada de dados até a exibição do resultado.',
+        'Coloque na ordem lógica para verificar se o aluno passou e mostrar o status:',
+      codigoInicial: '// Do início até o resultado final',
+      resultadoEsperado: 'Ordenar entrada, comparação e exibição do resultado.',
       dica:
-        'Primeiro você reúne os valores necessários, depois compara com a regra de aprovação, e por fim monta ou exibe a mensagem.',
+        'Primeiro reúna os valores, depois compare com a meta e só então mostre o status.',
       frases: [
-        'Exibir a mensagem de aprovado ou ajuste necessário',
-        'Obter a pontuação do aluno e a meta mínima',
-        'Comparar a pontuação obtida com a meta mínima',
+        'Exibir mensagem de aprovado ou ajuste',
+        'Obter nota do aluno e meta mínima',
+        'Comparar nota com a meta mínima',
       ],
       ordemCorreta: [
-        'Obter a pontuação do aluno e a meta mínima',
-        'Comparar a pontuação obtida com a meta mínima',
-        'Exibir a mensagem de aprovado ou ajuste necessário',
+        'Obter nota do aluno e meta mínima',
+        'Comparar nota com a meta mínima',
+        'Exibir mensagem de aprovado ou ajuste',
       ],
-      acertoMsg:
-        'Mandou bem! Você dividiu o problema em entrada, decisão e resultado na ordem certa.',
+      acertoMsg: 'Boa! Entrada, regra e saída na ordem certa.',
       erroMsg:
-        'A ordem das etapas não ficou natural. Veja o que precisa existir primeiro antes de comparar ou exibir.',
+        'Revise o que vem antes de comparar e exibir o resultado.',
     },
 
     quiz: [
       {
-        pergunta: 'O que significa decompor um problema na resolução lógica?',
+        pergunta: 'O que é decompor um problema?',
         opcoes: [
-          'Dividir um problema maior em etapas menores e mais fáceis de resolver',
-          'Apagar partes do problema até sobrar apenas uma linha de código',
-          'Executar todas as etapas ao mesmo tempo sem ordem',
+          'Dividir um problema grande em etapas menores e simples',
+          'Apagar parte do problema até sobrar uma linha',
+          'Rodar tudo junto sem ordem',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Decompor é quebrar um desafio complexo em partes manejáveis e verificáveis.',
+          'Decompor é quebrar um problema complexo em partes fáceis de resolver.',
       },
       {
-        pergunta: 'Qual é a principal vantagem de quebrar um problema em partes antes de programar?',
+        pergunta: 'Qual a vantagem de quebrar em etapas antes de codar?',
         opcoes: [
-          'Facilita enxergar cada etapa, testar a lógica e evitar confusão com tudo junto',
-          'Elimina a necessidade de pensar em condições ou sequências',
-          'Faz o código rodar mais rápido sem variáveis',
+          'Deixa o raciocínio claro e facilita achar falhas',
+          'Elimina a necessidade de lógica',
+          'Dispensa entender o problema',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Separar em etapas clareia o raciocínio e torna mais simples localizar onde uma regra falha.',
+        explicacao: 'Etapas menores facilitam testar e ajustar cada parte.',
       },
       {
-        pergunta: 'Ao planejar a solução de uma tarefa, qual trio ajuda a estruturar o raciocínio?',
+        pergunta: 'Qual sequência ajuda a organizar a solução de um problema?',
         opcoes: [
-          'Dados/entradas iniciais, verificação ou processamento, e resultado final',
-          'Apenas cores de tela, fontes e animações',
-          'Repetição infinita, salto de linha e comentário',
+          'Entrada de dados, processamento/regra e saída do resultado',
+          'Apenas estilo visual e cores',
+          'Repetição infinita sem critério',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Pensar no que entra, como é avaliado/transformado e o que sai dá base para organizar o código.',
+        explicacao: 'Mapear entrada, regra e saída organiza bem a lógica.',
       },
     ],
 
     conclusao: {
+      titulo: 'Decomposição em ação',
+      mensagem:
+        'Agora você sabe dividir um problema em partes simples antes de montar o código.',
+      proximoPasso:
+        'Próxima parada: guardar valores em variáveis com const e let.',
       aprendizados: [
-        'Decompor ajuda a enfrentar problemas grandes dividindo-os em passos simples.',
-        'Separar o que entra, o que é avaliado e o que sai deixa a solução mais organizada.',
-        'Com a base de lógica e decomposição pronta, fica mais claro guardar e manipular valores em variáveis.',
+        'Problemas grandes ficam mais fáceis divididos em etapas.',
+        'Separar entrada, regra e saída clareia a lógica.',
+        'Você está pronto para guardar dados em variáveis.',
       ],
       reflexao:
-        'Se você fosse criar uma calculadora simples de gorjeta ou divisão de conta, quais seriam as 3 primeiras etapas?',
+        'Se fosse criar uma calculadora de divisão de conta, quais seriam os 3 primeiros passos?',
       proximaAulaId: 'lesson-4',
     },
   },
@@ -472,130 +473,112 @@ export const aulasData: AulaItem[] = [
     modulo: 2,
     titulo: 'Variáveis, const e let: Guardando Valores',
     resumo:
-      'Aprenda a nomear e guardar informações em variáveis e saiba quando escolher const ou let sem errar.',
+      'Guarde dados com nomes claros e saiba quando escolher const ou let.',
 
     introducao: {
       objetivo:
-        'Entender o papel das variáveis como espaços nomeados na memória e decidir quando usar const ou let.',
+        'Entender variáveis e escolher entre const (fixo) e let (mutável por reatribuição).',
       contexto:
-        'Na Aula 3, vimos que resolver um problema começa reunindo os dados de que precisamos. No código, guardamos esses valores em variáveis com nomes claros para reaproveitá-los ao longo do programa.',
+        'Depois de quebrar o problema em etapas, o próximo passo é dar nome e guardar os valores que o programa usa.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que é uma variável e por que dar bons nomes',
+          titulo: '1. Variável = nome para um valor',
           explicacao:
-            'Uma variável guarda um valor sob um nome (identificador) para que você possa ler ou reutilizar esse dado depois. Nomes claros como pontuacao ou metaMinima deixam o código legível; nomes vagos como x ou coisa1 escondem o sentido do valor.',
+            'Uma variável guarda um valor sob um nome claro (como pontuacao ou metaMinima) para você ler e reutilizar depois.',
         },
         {
-          titulo: '2. const: valor fixo que não será reatribuído',
+          titulo: '2. const para valores fixos',
           explicacao:
-            'Use const por padrão quando o valor não deve ser trocado por outra atribuição após ser criado — por exemplo, a taxa fixa de entrega, o limite de tentativas ou o nome de um usuário fixo naquele contexto.',
+            'Use const quando o valor não será reatribuído depois — como uma taxa fixa ou limite padrão.',
         },
         {
-          titulo: '3. let: valor que muda durante a execução',
+          titulo: '3. let para valores que mudam',
           explicacao:
-            'Use let quando você sabe que o valor vai ser atualizado ao longo do caminho — como um contador de pontos, o saldo restante ou o status de uma etapa que muda de "pendente" para "concluida".',
-        },
-        {
-          titulo: '4. Regra prática de escolha',
-          explicacao:
-            'Comece perguntando: esse valor vai mudar por reatribuição durante o fluxo? Se não vai, prefira const; se vai mudar, use let. Isso evita alterações acidentais em dados que deveriam permanecer estáveis.',
+            'Use let quando o valor vai ser atualizado no caminho — como um contador de pontos ou saldo.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — placar de uma partida:\nO nome do time (const time = "CodeLab FC") permanece o mesmo durante o jogo, enquanto o placar (let gols = 0) muda cada vez que sai um gol.',
+        'Placar do jogo:\nO nome do time (const) não muda na partida; os gols (let) sobem a cada jogada.',
 
       exemploCodigo:
-        '// const para valores fixos; let para valores que mudam\nconst metaPontos = 100\nlet pontosAtuais = 40\n\npontosAtuais = pontosAtuais + 20\nconsole.log(pontosAtuais) // 60',
+        'const metaPontos = 100\nlet pontosAtuais = 40\n\npontosAtuais = pontosAtuais + 20\nconsole.log(pontosAtuais) // 60',
 
       resumo:
-        'Variáveis guardam dados com nomes claros: use const quando o valor não muda por reatribuição e let quando ele precisa ser atualizado.',
+        'Prefira const quando não há reatribuição e use let quando o valor muda durante a execução.',
     },
 
     pratica: {
-      titulo: 'Classifique quando usar const ou let',
+      titulo: 'Monte uma variável que atualiza a pontuação',
       enunciado:
-        'Leia cada cenário de variável e toque na palavra-chave (const ou let) mais adequada para declará-la:',
-      codigoInicial:
-        '// Escolha const (fixo) ou let (variável que muda)\n// para cada dado abaixo',
+        'Organize os blocos para declarar pontos com let e somar 10 pontos:',
+      codigoInicial: '// Monte a declaração e a atualização da variável',
       resultadoEsperado:
-        'Diferenciar corretamente valores que permanecem fixos (const) de valores que mudam (let).',
+        'Declarar let pontos = 0 e somar 10 em seguida.',
       dica:
-        'Se o valor vai ser atualizado várias vezes ao longo do processo, escolha let; se é uma referência ou limite fixo, escolha const.',
-      classificacao: {
-        categorias: ['const', 'let'],
-        itens: [
-          {
-            texto: 'Pontuação atual do jogador que sobe a cada acerto',
-            categoriaCorreta: 'let',
-          },
-          {
-            texto: 'Valor máximo permitido em uma tentativa (100)',
-            categoriaCorreta: 'const',
-          },
-          {
-            texto: 'Contador de passos que avança a cada rodada',
-            categoriaCorreta: 'let',
-          },
-          {
-            texto: 'Moeda padrão do sistema ("BRL")',
-            categoriaCorreta: 'const',
-          },
+        'Como a pontuação vai mudar, comece com let pontos = 0; e depois faça pontos = pontos + 10;.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          'let pontos = 0;',
+          'pontos = pontos + 10;',
+          'const pontos = 0;',
         ],
+        respostaCorreta: ['let pontos = 0;', 'pontos = pontos + 10;'],
         acertoMsg:
-          'Mandou bem! Você separou os valores que mudam (let) dos valores que se mantêm fixos (const).',
+          'Mandou bem! Você usou let para um valor que muda e atualizou a pontuação.',
         erroMsg:
-          'Algum item ficou sem escolha ou trocado. Pergunte-se se o valor vai mudar por reatribuição durante a execução.',
+          'Confira se usou let (e não const) e se somou 10 depois de criar a variável.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Qual é a diferença principal entre usar const e let no JavaScript?',
+        pergunta: 'Qual a diferença prática entre const e let?',
         opcoes: [
-          'const impede reatribuir um novo valor à variável; let permite reatribuir novos valores depois',
-          'const só funciona com textos e let só funciona com números',
-          'let não pode mudar de valor em nenhuma hipótese',
+          'const não permite reatribuir novo valor; let permite reatribuir depois',
+          'const só guarda texto e let só guarda número',
+          'let nunca pode mudar de valor',
         ],
         respostaCorreta: 0,
         explicacao:
-          'const não permite reatribuição direta após a criação, enquanto let permite atualizar o valor guardado.',
+          'const trava reatribuição direta; let permite atualizar o valor guardado.',
       },
       {
-        pergunta: 'Qual nome de variável é mais claro para guardar a quantidade de vidas restantes?',
-        opcoes: [
-          'vidasRestantes',
-          'v1',
-          'dado',
-        ],
+        pergunta: 'Qual nome de variável deixa o código mais claro?',
+        opcoes: ['vidasRestantes', 'v1', 'coisa'],
         respostaCorreta: 0,
         explicacao:
-          'Nomes descritivos como vidasRestantes deixam explícito o que o valor representa no código.',
+          'Nomes descritivos como vidasRestantes mostram o sentido do dado.',
       },
       {
-        pergunta: 'Se você vai somar pontos a cada resposta certa durante uma rodada, qual declaração faz mais sentido para a pontuação atual?',
+        pergunta: 'Qual declaração faz mais sentido para um contador de acertos?',
         opcoes: [
-          'let pontuacaoAtual = 0',
-          'const pontuacaoAtual = 0 (e depois fazer pontuacaoAtual = 10)',
-          'Nenhuma declaração, basta escrever o número solto',
+          'let acertos = 0',
+          'const acertos = 0 (e depois acertos = 1)',
+          'Escrever apenas o número 0 solto',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Como a pontuação será atualizada com novos valores ao longo da rodada, let é a escolha adequada.',
+          'Como acertos vai ser atualizado, let é a escolha certa.',
       },
     ],
 
     conclusao: {
+      titulo: 'Variáveis com const e let',
+      mensagem:
+        'Você aprendeu a guardar valores com nomes claros e escolher entre const e let.',
+      proximoPasso:
+        'Vá para a Aula 5 e veja como textos, números e booleanos se comportam.',
       aprendizados: [
-        'Variáveis armazenam valores em espaços nomeados para serem reutilizados com clareza.',
-        'const é indicado para valores que não devem ser reatribuídos.',
-        'let é indicado quando o valor precisa mudar durante o fluxo do programa.',
+        'Variáveis guardam dados com nomes legíveis.',
+        'const evita reatribuição de valores fixos.',
+        'let atende valores que mudam no fluxo.',
       ],
       reflexao:
-        'Em uma lista de compras simples, o que faria sentido ser const e o que faria sentido ser let?',
+        'Em um carrinho de compras, o que seria const e o que seria let?',
       proximaAulaId: 'lesson-5',
     },
   },
@@ -605,130 +588,107 @@ export const aulasData: AulaItem[] = [
     modulo: 2,
     titulo: 'Tipos de Dados e Operações: Textos, Números e Booleanos',
     resumo:
-      'Reconheça string, number e boolean e entenda como o tipo do valor muda o resultado das operações.',
+      'Reconheça string, number e boolean e veja como o tipo muda o resultado de +.',
 
     introducao: {
       objetivo:
-        'Identificar os tipos primitivos fundamentais (string, number e boolean) e evitar confusões comuns entre operações matemáticas e de texto.',
+        'Identificar string, number e boolean e evitar confusão entre soma e junção de texto.',
       contexto:
-        'Na Aula 4, guardamos valores em variáveis com const e let. Agora precisamos olhar para o conteúdo dentro dessas variáveis: um número se comporta diferente de um texto, e valores booleanos representam estados de verdadeiro ou falso.',
+        'O mesmo símbolo + pode somar números ou colar textos — tudo depende do tipo do dado.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. string: textos entre aspas',
+          titulo: '1. string: texto entre aspas',
           explicacao:
-            'Uma string representa texto — como "Olá, CodeLab", "10" ou "ativo" — sempre delimitada por aspas. Repare que "10" entre aspas é um texto, não um valor numérico para fazer contas.',
+            '"Olá", "ativo" e até "10" entre aspas são string (texto). "10" não é um número para conta.',
         },
         {
-          titulo: '2. number: números para cálculos e medidas',
+          titulo: '2. number: números para cálculos',
           explicacao:
-            'O tipo number guarda números inteiros ou decimais (como 10, 0 ou 19.9) usados em somas, subtrações, multiplicações e divisões.',
+            'Valores como 10, 0 ou 19.9 são number e servem para contas e comparações numéricas.',
         },
         {
-          titulo: '3. boolean: apenas true ou false',
+          titulo: '3. boolean (true / false) e o efeito do +',
           explicacao:
-            'Um boolean só assume dois valores: true (verdadeiro) ou false (falso). Ele é ideal para flags e estados, como estaLogado = true ou pagamentoAprovado = false, preparando o caminho para comparações e condições.',
-        },
-        {
-          titulo: '4. Cuidado ao misturar texto e número com +',
-          explicacao:
-            'Com números, + soma (10 + 5 vira 15). Quando há uma string envolvida, + junta textos (concatena): "10" + 5 vira "105". Saber o tipo evita resultados inesperados.',
+            'boolean guarda apenas true ou false. Já com +: 10 + 5 soma (15), mas "10" + 5 junta texto ("105").',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — quantidade de itens no carrinho:\nSe qtd = 2 (number) e voce adiciona mais 1, o total vira 3. Já se alguem guarda "2" como texto e junta com "1", vira "21" — um erro clássico de tipo.',
+        'Quantidade de itens:\n2 + 1 vira 3. Já "2" + 1 vira "21" (texto colado).',
 
       exemploCodigo:
-        '// Tipos básicos e comportamento de + \nconst nomeCurso = "CodeLab" // string\nconst aulasFeitas = 5     // number\nconst concluido = false   // boolean\n\nconsole.log(aulasFeitas + 1)      // 6\nconsole.log("Aula " + aulasFeitas) // "Aula 5"',
+        'const curso = "CodeLab"\nconst aulas = 5\nconst ativo = true\n\nconsole.log(aulas + 1)        // 6\nconsole.log("Aula " + aulas)  // "Aula 5"',
 
       resumo:
-        'string guarda texto, number guarda números para cálculos e boolean guarda true ou false — e o tipo define como + atua.',
+        'string é texto, number é número e boolean é true/false — fique atento ao tipo antes de usar +.',
     },
 
     pratica: {
-      titulo: 'Classifique o tipo ou o resultado de cada expressão',
-      enunciado:
-        'Observe cada valor ou expressão abaixo e toque na classificação correta:',
-      codigoInicial:
-        '// Identifique o tipo (string, number, boolean)\n// ou o resultado exato da expressão',
+      titulo: 'Classifique o tipo ou o resultado',
+      enunciado: 'Toque na classificação correta para cada expressão:',
+      codigoInicial: '// Observe aspas, números e o operador +',
       resultadoEsperado:
-        'Diferenciar corretamente string, number, boolean e o efeito de + entre números e textos.',
-      dica:
-        'Aspas indicam string; números sem aspas são number; true e false são boolean.',
+        'Identificar boolean, string, number e o resultado de "10" + 5.',
+      dica: 'Aspas viram string; sem aspas é number; true/false é boolean.',
       classificacao: {
         categorias: ['string', 'number', 'boolean', '"105"'],
         itens: [
-          {
-            texto: 'true',
-            categoriaCorreta: 'boolean',
-          },
-          {
-            texto: '"CodeLab"',
-            categoriaCorreta: 'string',
-          },
-          {
-            texto: '42',
-            categoriaCorreta: 'number',
-          },
-          {
-            texto: '"10" + 5',
-            categoriaCorreta: '"105"',
-          },
+          { texto: 'true', categoriaCorreta: 'boolean' },
+          { texto: '"CodeLab"', categoriaCorreta: 'string' },
+          { texto: '42', categoriaCorreta: 'number' },
+          { texto: '"10" + 5', categoriaCorreta: '"105"' },
         ],
-        acertoMsg:
-          'Mandou bem! Você identificou os tipos primitivos e viu como "10" + 5 junta texto.',
+        acertoMsg: 'Mandou bem! Tipos e concatenação sob controle.',
         erroMsg:
-          'Algum item ficou sem escolha ou com classificação trocada. Confira aspas, booleanos e a junção com +.',
+          'Confira aspas, booleanos e como "10" + 5 junta os valores.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Qual tipo de dado assume exclusivamente os valores true ou false?',
-        opcoes: [
-          'boolean',
-          'number',
-          'string',
-        ],
+        pergunta: 'Qual tipo aceita apenas true ou false?',
+        opcoes: ['boolean', 'number', 'string'],
         respostaCorreta: 0,
-        explicacao:
-          'O tipo boolean representa valores lógicos: true ou false.',
+        explicacao: 'boolean representa valores lógicos: true ou false.',
       },
       {
-        pergunta: 'Qual é o resultado da expressão "7" + 3 em JavaScript?',
+        pergunta: 'Qual o resultado de "7" + 3 em JavaScript?',
         opcoes: [
-          '"73" (concatenação de texto, pois "7" é uma string)',
+          '"73" (junta como texto por causa de "7")',
           '10 (soma matemática)',
           'false',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Como "7" é uma string, o operador + concatena e produz a string "73".',
+        explicacao: 'Com "7" sendo string, + concatena e gera "73".',
       },
       {
-        pergunta: 'Por que guardar uma idade como 18 (number) em vez de "18" (string) é melhor para fazer contas?',
+        pergunta: 'Por que guardar idade como 18 (number) em vez de "18"?',
         opcoes: [
-          'Porque number permite operações numéricas diretas sem risco de virar texto colado',
-          'Porque números com aspas não podem ser guardados em variáveis',
-          'Porque number sempre vira true em qualquer conta',
+          'Para fazer contas e comparações numéricas sem virar texto colado',
+          'Porque aspas impedem usar variáveis',
+          'Porque number vira true sozinho',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Trabalhar com number mantém o dado pronto para contas e comparações numéricas.',
+        explicacao: 'number mantém o valor pronto para operações numéricas.',
       },
     ],
 
     conclusao: {
+      titulo: 'Tipos primitivos dominados',
+      mensagem:
+        'Você diferenciou string, number e boolean e viu quando + soma ou junta texto.',
+      proximoPasso:
+        'Siga para a Aula 6 e veja como comparações geram true ou false.',
       aprendizados: [
-        'string representa textos, number representa números e boolean representa true ou false.',
-        'O operador + soma valores numéricos, mas concatena quando há string envolvida.',
-        'Reconhecer o tipo de cada dado previne bugs antes mesmo de escrever comparações e condições.',
+        'string guarda texto; number guarda números; boolean guarda true/false.',
+        '+ soma números e concatena quando há string.',
+        'Tipo certo evita bugs silenciosos.',
       ],
       reflexao:
-        'Se um campo de formulário chega como texto "25", o que você precisaria considerar antes de somar 5 a ele?',
+        'Se um valor vier como texto "25", o que você checaria antes de somar 5?',
       proximaAulaId: 'lesson-6',
     },
   },
@@ -738,130 +698,103 @@ export const aulasData: AulaItem[] = [
     modulo: 2,
     titulo: 'Comparações: Produzindo true ou false',
     resumo:
-      'Compare valores com ===, !==, >, <, >= e <= e entenda como toda comparação gera um resultado booleano.',
+      'Compare valores com ===, !==, >, <, >= e <= e entenda o resultado booleano.',
 
     introducao: {
       objetivo:
-        'Aprender a usar os operadores de comparação do JavaScript e prever com segurança se uma expressão resulta em true ou false.',
+        'Usar operadores de comparação e prever se a expressão resulta em true ou false.',
       contexto:
-        'Na Aula 5, vimos que booleanos guardam true ou false. Mas de onde vêm esses valores na prática? Muitas vezes, eles nascem de comparações entre variáveis — como conferir se a pontuação atingiu a meta ou se a senha digitada confere.',
+        'Comparações transformam perguntas sobre valores em respostas true ou false.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. Toda comparação responde true ou false',
+          titulo: '1. === e !==: comparação estrita',
           explicacao:
-            'Quando você compara dois valores, o resultado é sempre um boolean: true se a afirmação for verdadeira, ou false se for falsa. Esse resultado é exatamente o que vai alimentar regras e condições nas próximas aulas.',
+            '=== compara valor e tipo juntos ("5" === 5 é false). Prefira === e !== para evitar surpresas.',
         },
         {
-          titulo: '2. Igualdade e diferença estrita: === e !==',
+          titulo: '2. >, <, >= e <=',
           explicacao:
-            'Use === para verificar se dois valores são iguais no conteúdo e no tipo, e !== para verificar se são diferentes. Prefira === e !== em vez de == e != para evitar conversões implícitas surpresa, como "5" == 5 virando true enquanto "5" === 5 é false.',
+            '> e < exigem passar do limite; >= e <= incluem o próprio limite (70 >= 70 é true).',
         },
         {
-          titulo: '3. Maior, menor e limites: >, <, >= e <=',
+          titulo: '3. = não é ===',
           explicacao:
-            'Operadores como > (maior que) e < (menor que) exigem passar do limite, enquanto >= (maior ou igual) e <= (menor ou igual) incluem o próprio valor limite. Em uma meta de 70 pontos, 70 >= 70 é true, mas 70 > 70 é false.',
-        },
-        {
-          titulo: '4. Atenção à diferença entre = e ===',
-          explicacao:
-            'Um único sinal de igual (=) guarda/atribui um valor a uma variável; três sinais (===) comparam se dois valores são estritamente iguais. Confundir os dois é um erro comum no início.',
+            '= atribui valor a uma variável; === compara se dois valores são iguais.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — limite de compras ou meta de aprovação:\nSe a meta de aprovação é 70 pontos, quem faz exatamente 70 atinge a meta com >= 70 (true), mas não ultrapassa com > 70 (false).',
+        'Meta de 70 pontos:\nQuem faz 70 atinge a meta com >= 70 (true), mas não passa de 70 com > 70 (false).',
 
       exemploCodigo:
-        '// Comparações retornam boolean (true ou false)\nconst pontos = 70\nconst meta = 70\n\nconsole.log(pontos >= meta) // true\nconsole.log(pontos > meta)  // false\nconsole.log(pontos === 70)  // true\nconsole.log("70" === 70)    // false',
+        'const pontos = 70\nconst meta = 70\n\nconsole.log(pontos >= meta) // true\nconsole.log(pontos > meta)  // false\nconsole.log("70" === 70)    // false',
 
       resumo:
-        'Comparações avaliam relações entre valores e retornam true ou false; === e !== evitam surpresas de tipo, e >= / <= incluem o limite.',
+        'Toda comparação retorna true ou false; === evita troca de tipo e >= / <= incluem o limite.',
     },
 
     pratica: {
-      titulo: 'Classifique o resultado booleano de cada comparação',
+      titulo: 'Simule a meta com o comparador',
       enunciado:
-        'Considere os valores abaixo e toque em true ou false para cada comparação:\n\nconst idade = 18\nconst codigo = "10"',
-      codigoInicial:
-        'const idade = 18\nconst codigo = "10"\n// Avalie cada comparação abaixo',
-      resultadoEsperado:
-        'Identificar corretamente true ou false em comparações estritas e de limite.',
-      dica:
-        'Confira se a comparação exige igualdade exata de tipo (===), se inclui o limite (>=) ou se está fora do esperado.',
-      classificacao: {
-        categorias: ['true', 'false'],
-        itens: [
-          {
-            texto: 'idade >= 18 (com idade = 18)',
-            categoriaCorreta: 'true',
-          },
-          {
-            texto: 'codigo === 10 (com codigo = "10")',
-            categoriaCorreta: 'false',
-          },
-          {
-            texto: 'idade !== 18 (com idade = 18)',
-            categoriaCorreta: 'false',
-          },
-          {
-            texto: '15 < idade (com idade = 18)',
-            categoriaCorreta: 'true',
-          },
+        'Ajuste o valor atual até atingir exatamente a meta 70 (usando == para meta exata) e clique em Verificar meta:',
+      codigoInicial: '// Meta: chegar ao valor 70',
+      resultadoEsperado: 'Levar o valor atual para 70 e validar.',
+      dica: 'Use +10 e +5 até chegar em 70.',
+      simuladorEstado: {
+        rotulo: 'Pontuação atual',
+        valorInicial: 0,
+        alvo: 70,
+        comparador: '==',
+        acoes: [
+          { rotulo: '+10', delta: 10 },
+          { rotulo: '+5', delta: 5 },
         ],
-        acertoMsg:
-          'Mandou bem! Você avaliou comparações de limite e igualdade estrita sem cair em pegadinhas.',
-        erroMsg:
-          'Alguma comparação ficou sem resposta ou com booleano trocado. Revise limites (>= vs >) e tipos em ===.',
+        acertoMsg: 'Mandou bem! Você atingiu a meta 70 certinho.',
+        erroMsg: 'Ainda não chegou a 70. Ajuste o valor e confira de novo.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Por que usar === é recomendado no lugar de == na maioria das comparações?',
+        pergunta: 'Por que usar === costuma ser melhor que ==?',
         opcoes: [
-          'Porque === compara valor e tipo sem fazer conversões implícitas inesperadas',
-          'Porque === altera o valor da variável da esquerda para igualar à direita',
-          'Porque == só funciona com números negativos',
+          'Porque compara valor e tipo sem forçar conversão implícita',
+          'Porque altera a variável da esquerda',
+          'Porque só funciona com números negativos',
         ],
         respostaCorreta: 0,
-        explicacao:
-          '=== exige que valor e tipo coincidam, tornando o comportamento mais previsível.',
+        explicacao: '=== exige valor e tipo iguais, deixando o resultado previsível.',
       },
       {
-        pergunta: 'Se o limite de faltas permitido é 3, qual comparação inclui exatamente 3 faltas como dentro do limite?',
-        opcoes: [
-          'faltas <= 3',
-          'faltas < 3',
-          'faltas === 0',
-        ],
+        pergunta: 'Qual comparação inclui o limite exato de 3 faltas?',
+        opcoes: ['faltas <= 3', 'faltas < 3', 'faltas === 0'],
         respostaCorreta: 0,
-        explicacao:
-          '<= significa "menor ou igual a", incluindo o próprio valor 3.',
+        explicacao: '<= significa menor ou igual a 3.',
       },
       {
-        pergunta: 'Qual é o valor booleano produzido pela expressão 10 !== 10?',
-        opcoes: [
-          'false, pois 10 e 10 não são diferentes',
-          'true, pois são números iguais',
-          'undefined',
-        ],
+        pergunta: 'Qual o resultado de 10 !== 10?',
+        opcoes: ['false', 'true', 'undefined'],
         respostaCorreta: 0,
-        explicacao:
-          '!== verifica diferença estrita; como os dois lados têm o mesmo valor e tipo, o resultado é false.',
+        explicacao: '10 e 10 não são diferentes, então !== retorna false.',
       },
     ],
 
     conclusao: {
+      titulo: 'Comparações dominadas',
+      mensagem:
+        'Você viu como ===, !==, >, <, >= e <= produzem true ou false.',
+      proximoPasso:
+        'Vá para a Aula 7 e combine condições com &&, || e !.',
       aprendizados: [
-        'Operadores de comparação sempre retornam um valor booleano (true ou false).',
-        '=== e !== verificam igualdade e diferença estrita sem forçar conversão de tipo.',
-        '>=, <=, > e < controlam limites com ou sem inclusão do valor exato.',
+        'Comparações retornam true ou false.',
+        '=== e !== verificam igualdade/diferença estrita.',
+        '>= e <= incluem o valor limite.',
       ],
       reflexao:
-        'Em uma verificação de senha ou código de acesso, qual é a diferença entre comparar o texto exato com === e checar apenas se não está vazio?',
+        'Quando faz sentido usar >= em vez de > em uma regra de limite?',
       proximaAulaId: 'lesson-7',
     },
   },
@@ -871,130 +804,104 @@ export const aulasData: AulaItem[] = [
     modulo: 2,
     titulo: 'Operadores Lógicos: Combinando Regras com &&, || e !',
     resumo:
-      'Combine condições com && (E) e || (OU) e inverta booleanos com ! (NÃO) para montar regras realistas.',
+      'Combine condições com && (E) e || (OU) e inverta booleanos com ! (NÃO).',
 
     introducao: {
       objetivo:
-        'Entender como os operadores lógicos &&, || e ! combinam ou invertem valores booleanos para formar regras mais completas.',
+        'Combinar e inverter valores booleanos com &&, || e ! para montar regras.',
       contexto:
-        'Na Aula 6, cada comparação gerava um true ou false isolado. Na vida real, uma regra raramente depende de uma única pergunta: muitas vezes você precisa que duas coisas sejam verdadeiras juntas, que pelo menos uma seja verdadeira ou que um estado seja negado.',
+        'Muitas decisões exigem mais de uma condição ao mesmo tempo ou checar o oposto de um estado.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. && (E lógico): todas as condições precisam ser verdadeiras',
+          titulo: '1. && (E): tudo precisa ser true',
           explicacao:
-            'A expressão A && B só resulta em true quando A é true E B também é true. Se qualquer um dos lados for false, o resultado geral é false — como exigir saldo suficiente E conta ativa para concluir uma compra.',
+            'A && B só é true quando A e B são true. Se um lado for false, o resultado é false.',
         },
         {
-          titulo: '2. || (OU lógico): basta uma condição ser verdadeira',
+          titulo: '2. || (OU): basta um ser true',
           explicacao:
-            'A expressão A || B resulta em true sempre que pelo menos um dos lados for true. Ela só é false quando ambos os lados forem false — como liberar desconto se for estudante OU tiver cupom válido.',
+            'A || B é true se ao menos um lado for true; só vira false quando ambos são false.',
         },
         {
-          titulo: '3. ! (NÃO lógico): inverte o valor booleano',
+          titulo: '3. ! (NÃO): inverte o booleano',
           explicacao:
-            'O operador ! inverte o booleano à frente dele: !true vira false e !false vira true. Ele é útil para checar o oposto de um estado, como !bloqueado ou !estaVazio.',
-        },
-        {
-          titulo: '4. Agrupando com parênteses para deixar a intenção clara',
-          explicacao:
-            'Quando você mistura && e || na mesma expressão, usar parênteses () deixa explícito o que é avaliado primeiro e evita que alguém (ou o código) leia a regra de um jeito diferente do que você planejou.',
+            '!true vira false e !false vira true. Ótimo para ler condições como !bloqueado.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — acesso a um evento:\nPara entrar com ingresso padrão, vale ter ingressoValido && !estaNaListaNegra; já para acesso VIP, pode ter pulseiraVip || conviteEspecial.',
+        'Acesso a evento:\nIngresso válido E não bloqueado (ingressoValido && !bloqueado).',
 
       exemploCodigo:
-        '// Operadores lógicos combinando booleanos\nconst temSaldo = true\nconst contaAtiva = true\nconst bloqueado = false\n\nconsole.log(temSaldo && contaAtiva) // true\nconsole.log(temSaldo && !bloqueado) // true\nconsole.log(false || temSaldo)      // true',
+        'const temSaldo = true\nconst bloqueado = false\n\nconsole.log(temSaldo && !bloqueado) // true\nconsole.log(false || temSaldo)      // true',
 
       resumo:
-        '&& exige ambos verdadeiros, || aceita ao menos um verdadeiro e ! inverte true/false — use parênteses para clareza.',
+        '&& exige ambos verdadeiros, || exige ao menos um verdadeiro e ! inverte true/false.',
     },
 
     pratica: {
-      titulo: 'Classifique o resultado booleano de cada expressão lógica',
+      titulo: 'Classifique cada expressão lógica',
       enunciado:
-        'Considere os valores abaixo e toque em true ou false para cada expressão:\n\nconst logado = true\nconst temCupom = false\nconst bloqueado = false',
+        'Com logado = true, temCupom = false e bloqueado = false, toque em true ou false:',
       codigoInicial:
-        'const logado = true\nconst temCupom = false\nconst bloqueado = false\n// Avalie cada expressão lógica',
-      resultadoEsperado:
-        'Prever corretamente true ou false em combinações com &&, || e !.',
-      dica:
-        'Lembre-se: && precisa de ambos true, || precisa de pelo menos um true e ! inverte o valor.',
+        'const logado = true\nconst temCupom = false\nconst bloqueado = false',
+      resultadoEsperado: 'Avaliar corretamente expressões com &&, || e !.',
+      dica: '!bloqueado vira true porque bloqueado é false.',
       classificacao: {
         categorias: ['true', 'false'],
         itens: [
-          {
-            texto: 'logado && !bloqueado',
-            categoriaCorreta: 'true',
-          },
-          {
-            texto: 'logado && temCupom',
-            categoriaCorreta: 'false',
-          },
-          {
-            texto: 'temCupom || !bloqueado',
-            categoriaCorreta: 'true',
-          },
-          {
-            texto: '!logado',
-            categoriaCorreta: 'false',
-          },
+          { texto: 'logado && !bloqueado', categoriaCorreta: 'true' },
+          { texto: 'logado && temCupom', categoriaCorreta: 'false' },
+          { texto: 'temCupom || !bloqueado', categoriaCorreta: 'true' },
+          { texto: '!logado', categoriaCorreta: 'false' },
         ],
-        acertoMsg:
-          'Mandou bem! Você combinou &&, || e ! e previu cada resultado booleano com precisão.',
+        acertoMsg: 'Mandou bem! Você avaliou &&, || e ! sem tropeçar.',
         erroMsg:
-          'Alguma expressão ficou sem escolha ou com resultado trocado. Confira cada booleano e o efeito de !, && e ||.',
+          'Revise cada booleano e como &&, || e ! combinam os valores.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Quando a expressão A && B retorna true?',
+        pergunta: 'Quando A && B retorna true?',
         opcoes: [
           'Apenas quando A e B forem true ao mesmo tempo',
-          'Sempre que pelo menos um dos dois for true',
+          'Quando pelo menos um for true',
           'Quando ambos forem false',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'No operador && (E), todas as partes envolvidas precisam ser verdadeiras para o resultado ser true.',
+        explicacao: '&& exige que todas as partes sejam verdadeiras.',
       },
       {
-        pergunta: 'Se temDescontoSocio é false e temCupomValido é true, qual o resultado de temDescontoSocio || temCupomValido?',
-        opcoes: [
-          'true, pois pelo menos uma condição é verdadeira',
-          'false, pois uma das condições é falsa',
-          'undefined',
-        ],
+        pergunta: 'Com a = false e b = true, qual o resultado de a || b?',
+        opcoes: ['true', 'false', 'undefined'],
         respostaCorreta: 0,
-        explicacao:
-          'O operador || retorna true quando ao menos um dos operandos é true.',
+        explicacao: '|| retorna true quando ao menos um lado é true.',
       },
       {
-        pergunta: 'O que !estaConcluida faz quando estaConcluida vale false?',
-        opcoes: [
-          'Inverte false para true',
-          'Altera permanentemente a variável estaConcluida para true',
-          'Converte o booleano em texto "false"',
-        ],
+        pergunta: 'O que !false retorna?',
+        opcoes: ['true', 'false', 'null'],
         respostaCorreta: 0,
-        explicacao:
-          '! retorna o booleano oposto ao valor avaliado, sem reatribuir a variável.',
+        explicacao: '! inverte false para true.',
       },
     ],
 
     conclusao: {
+      titulo: 'Operadores lógicos dominados',
+      mensagem:
+        'Você combinou condições com && e || e inverteu booleanos com !.',
+      proximoPasso:
+        'Siga para a Aula 8 e pratique regras combinando tudo isso.',
       aprendizados: [
-        '&& retorna true somente quando todas as condições combinadas são verdadeiras.',
-        '|| retorna true quando ao menos uma condição é verdadeira.',
-        '! inverte um valor booleano e ajuda a ler condições negativas com clareza.',
+        '&& exige todas as condições verdadeiras.',
+        '|| exige ao menos uma condição verdadeira.',
+        '! inverte o valor booleano.',
       ],
       reflexao:
-        'Em uma regra de "pode publicar post se estiver logado e não estiver suspenso", como você escreveria essa condição com && e !?',
+        'Como escreveria "pode comentar se estiver logado e não estiver mutado"?',
       proximaAulaId: 'lesson-8',
     },
   },
@@ -1004,54 +911,53 @@ export const aulasData: AulaItem[] = [
     modulo: 2,
     titulo: 'Prática Combinada de Dados e Regras',
     resumo:
-      'Junte variáveis, tipos, comparações e operadores lógicos para avaliar regras completas antes de avançar para if e else.',
+      'Junte variáveis, tipos, comparações e operadores lógicos em regras completas.',
 
     introducao: {
       objetivo:
-        'Consolidar tudo o que foi visto no Módulo 2 avaliando expressões que combinam valores, tipos, comparações e lógica booleana.',
+        'Avaliar expressões que misturam comparações e operadores lógicos.',
       contexto:
-        'Nas aulas anteriores você viu variáveis, tipos, comparações e operadores lógicos separadamente. Agora chegou a hora de juntar essas peças em situações mais próximas do dia a dia para ganhar segurança antes de usar if, else if e else na Aula 9.',
+        'Antes de usar if e else, vale treinar a leitura de regras compostas com calma.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. Lendo uma regra de fora para dentro',
+          titulo: '1. Resolva as partes primeiro',
           explicacao:
-            'Quando uma expressão mistura comparações e && / || / !, avalie primeiro as partes menores (como pontuacao >= 70 ou !bloqueado) até virarem true ou false, e só então combine esses resultados.',
+            'Transforme cada comparação (como pontos >= 70 ou !bloqueado) em true/false antes de juntar com && ou ||.',
         },
         {
-          titulo: '2. Tipo certo evita falha silenciosa',
+          titulo: '2. Fique de olho no tipo',
           explicacao:
-            'Antes de comparar ou somar, confira se o dado está no tipo esperado: um número em formato de texto como "10" não é estritamente igual a 10 em ===, e somar com + pode concatenar em vez de calcular.',
+            'Confira se os valores têm o tipo esperado antes de comparar ou somar.',
         },
         {
-          titulo: '3. Expressão booleana pronta para virar decisão',
+          titulo: '3. Base pronta para o if',
           explicacao:
-            'Toda condição de um if no código é, no fundo, uma expressão que resulta em true ou false. Saber montar e ler bem essa expressão facilita muito escrever decisões limpas a partir da próxima aula.',
+            'A expressão dentro de um if nada mais é do que uma pergunta que vira true ou false.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — liberar acesso a um desafio bônus:\nO aluno precisa estar com ativo === true, ter feito ao menos 5 aulas (aulasFeitas >= 5) e não estar suspenso (!suspenso). Tudo isso forma uma única regra booleana.',
+        'Desbloqueio de bônus:\nAtivo, sem bloqueio e com pelo menos 5 aulas feitas.',
 
       exemploCodigo:
-        '// Combinando variáveis, comparação e lógica\nconst ativo = true\nconst suspenso = false\nconst aulasFeitas = 6\n\nconst podeAcessarBonus = ativo && !suspenso && aulasFeitas >= 5\nconsole.log(podeAcessarBonus) // true',
+        'const ativo = true\nconst bloqueado = false\nconst aulas = 6\n\nconst liberado = ativo && !bloqueado && aulas >= 5 // true',
 
       resumo:
-        'Avalie cada comparação para true/false, respeite os tipos dos dados e combine tudo com &&, || e ! para formar regras claras.',
+        'Avalie cada comparação para true/false e combine tudo com &&, || e !.',
     },
 
     pratica: {
-      titulo: 'Classifique o resultado de regras combinadas',
+      titulo: 'Classifique as regras combinadas',
       enunciado:
-        'Considere os dados abaixo e toque em true ou false para cada regra combinada:\n\nconst pontos = 85\nconst meta = 70\nconst ativo = true\nconst bloqueado = false',
+        'Com pontos = 85, meta = 70, ativo = true e bloqueado = false, escolha true ou false:',
       codigoInicial:
-        'const pontos = 85\nconst meta = 70\nconst ativo = true\nconst bloqueado = false\n// Avalie cada regra combinada abaixo',
+        'const pontos = 85, meta = 70, ativo = true, bloqueado = false',
       resultadoEsperado:
-        'Avaliar corretamente expressões que misturam comparações e operadores lógicos.',
-      dica:
-        'Resolva cada comparação (pontos >= meta, !bloqueado) primeiro e depois veja o efeito de && ou ||.',
+        'Avaliar corretamente expressões compostas com comparações e lógica.',
+      dica: 'pontos >= meta é true e !bloqueado é true.',
       classificacao: {
         categorias: ['true', 'false'],
         itens: [
@@ -1059,70 +965,60 @@ export const aulasData: AulaItem[] = [
             texto: 'ativo && !bloqueado && pontos >= meta',
             categoriaCorreta: 'true',
           },
-          {
-            texto: 'pontos < meta || bloqueado',
-            categoriaCorreta: 'false',
-          },
-          {
-            texto: 'pontos === 85 && bloqueado',
-            categoriaCorreta: 'false',
-          },
-          {
-            texto: '!ativo || pontos >= meta',
-            categoriaCorreta: 'true',
-          },
+          { texto: 'pontos < meta || bloqueado', categoriaCorreta: 'false' },
+          { texto: 'pontos === 85 && bloqueado', categoriaCorreta: 'false' },
+          { texto: '!ativo || pontos >= meta', categoriaCorreta: 'true' },
         ],
-        acertoMsg:
-          'Mandou bem! Você juntou tipos, comparações e lógica booleana com segurança.',
+        acertoMsg: 'Mandou bem! Regras compostas avaliadas com segurança.',
         erroMsg:
-          'Alguma regra ficou sem escolha ou com resultado trocado. Avalie cada comparação isolada primeiro e depois combine.',
+          'Resolva cada comparação separada primeiro e depois veja && ou ||.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Com pontos = 60, meta = 70 e temRecuperacao = true, qual o resultado de pontos >= meta || temRecuperacao?',
+        pergunta: 'Com pontos = 60, meta = 70 e recuperacao = true, o que retorna pontos >= meta || recuperacao?',
         opcoes: [
-          'true, pois embora 60 >= 70 seja false, temRecuperacao é true e o operador é ||',
-          'false, pois pontos está abaixo da meta',
+          'true (pois recuperacao é true e o operador é ||)',
+          'false (pois 60 < 70)',
           'undefined',
         ],
         respostaCorreta: 0,
         explicacao:
-          'pontos >= meta avalia para false, mas como temRecuperacao é true e o operador é ||, o resultado final é true.',
+          'Mesmo com pontos >= meta falso, || retorna true porque recuperacao é true.',
       },
       {
-        pergunta: 'Qual é o melhor primeiro passo ao ler uma expressão longa com &&, || e comparações?',
+        pergunta: 'Qual o melhor jeito de ler uma expressão longa com && e ||?',
         opcoes: [
-          'Avaliar cada comparação e negação para true ou false antes de combinar o todo',
-          'Ignorar os operadores lógicos e olhar apenas o último valor',
-          'Converter todos os números em strings antes de comparar',
+          'Avaliar cada comparação para true/false antes de combinar',
+          'Ignorar os operadores lógicos',
+          'Converter tudo em texto antes de comparar',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Quebrar a expressão nos valores booleanos parciais evita erro de leitura e deixa o resultado claro.',
+          'Avaliar partes menores reduz erros de leitura em condições compostas.',
       },
       {
-        pergunta: 'Se codigoDigitado = "123" e codigoCorreto = 123, o que acontece em codigoDigitado === codigoCorreto?',
-        opcoes: [
-          'Retorna false porque um é string e o outro é number',
-          'Retorna true porque os caracteres parecem iguais',
-          'Altera codigoDigitado para number automaticamente',
-        ],
+        pergunta: 'Com senha = "123" e correta = 123, o que retorna senha === correta?',
+        opcoes: ['false (string !== number)', 'true', '123'],
         respostaCorreta: 0,
-        explicacao:
-          '=== exige igualdade de valor e tipo; string e number não são estritamente iguais.',
+        explicacao: '=== exige igualdade de valor e de tipo.',
       },
     ],
 
     conclusao: {
+      titulo: 'Módulo 2 concluído',
+      mensagem:
+        'Você conectou variáveis, tipos, comparações e operadores lógicos.',
+      proximoPasso:
+        'Avance para a Aula 9 e direcione o fluxo com if, else if e else.',
       aprendizados: [
-        'Expressões lógicas combinam comparações e booleanos para representar regras reais.',
-        'Avaliar partes menores primeiro facilita prever o resultado de condições compostas.',
-        'Com os valores e regras dominados, o próximo passo é direcionar o fluxo com if, else if e else.',
+        'Regras combinam comparações e operadores booleanos.',
+        'Avaliar partes menores facilita prever o resultado.',
+        'Você está pronto para controlar caminhos com if/else.',
       ],
       reflexao:
-        'Qual regra do dia a dia (como liberar entrega grátis ou aprovar um pedido) você já consegue escrever como uma expressão booleana?',
+        'Qual regra do dia a dia você já consegue escrever como uma expressão booleana?',
       proximaAulaId: 'lesson-9',
     },
   },
@@ -1132,118 +1028,119 @@ export const aulasData: AulaItem[] = [
     modulo: 3,
     titulo: 'Decisões com if, else if e else: Direcionando o Fluxo',
     resumo:
-      'Use if, else if e else para escolher caminhos no código e entenda por que a ordem das condições importa.',
+      'Use if, else if e else para escolher caminhos e entenda por que a ordem importa.',
 
     introducao: {
       objetivo:
-        'Aprender a estruturar decisões condicionais com if, else if e else e evitar armadilhas na ordem das verificações.',
+        'Estruturar decisões com if, else if e else evitando erros de ordem.',
       contexto:
-        'Na Aula 8, você avaliou expressões booleanas que resultam em true ou false. Agora vamos usar esses resultados dentro de if, else if e else para fazer o programa reagir de um jeito ou de outro conforme o estado atual.',
+        'Agora que você já gera true ou false, vamos usar isso para escolher o caminho do código.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. if: executa quando a condição é true',
+          titulo: '1. if e else',
           explicacao:
-            'O bloco if (condicao) { ... } só roda o código interno quando a condição avalia para true. Se for false, o JavaScript pula aquele bloco e segue em frente.',
+            'if roda quando a condição é true; else roda quando nenhuma condição anterior foi true.',
         },
         {
-          titulo: '2. else if e else: caminhos alternativos e fallback',
+          titulo: '2. else if para faixas e etapas',
           explicacao:
-            'Quando há mais de uma faixa ou possibilidade, else if testa outra condição caso o if anterior tenha sido false. Já o else funciona como o caminho padrão quando nenhuma condição anterior foi atendida.',
+            'else if testa uma nova condição caso a anterior tenha sido falsa.',
         },
         {
-          titulo: '3. Apenas o primeiro bloco verdadeiro roda (e a ordem importa)',
+          titulo: '3. Só o primeiro true roda',
           explicacao:
-            'Em uma cadeia if / else if / else, o JavaScript avalia de cima para baixo e executa apenas o primeiro bloco cuja condição for true. Por isso, colocar uma regra ampla antes de uma regra específica pode engolir casos que deveriam cair em outro lugar.',
+            'A verificação vai de cima para baixo e para no primeiro true. Coloque regras específicas antes das amplas.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — classificação de desempenho em uma prova:\nSe nota >= 90, destaque; senão se nota >= 70, aprovado; senão, em revisão. Se você checar nota >= 70 antes de nota >= 90, quem tirou 95 já cai no "aprovado" e nunca chega ao "destaque".',
+        'Faixa de nota:\nChecar >= 90 antes de >= 70 evita que nota 95 caia na faixa de 70.',
 
       exemploCodigo:
-        '// Decisão encadeada do caso mais específico para o geral\nconst nota = 85\n\nif (nota >= 90) {\n  console.log("Destaque")\n} else if (nota >= 70) {\n  console.log("Aprovado")\n} else {\n  console.log("Em revisão")\n}',
+        'const nota = 85\n\nif (nota >= 90) {\n  console.log("Destaque")\n} else if (nota >= 70) {\n  console.log("Aprovado")\n} else {\n  console.log("Em revisão")\n}',
 
       resumo:
-        'if, else if e else escolhem caminhos com base em booleanos; apenas o primeiro bloco verdadeiro executa, então a ordem das condições importa.',
+        'if / else if / else escolhe caminhos; apenas o primeiro bloco verdadeiro executa.',
     },
 
     pratica: {
-      titulo: 'Ordene a estrutura de decisão do início ao fim',
+      titulo: 'Ordene a estrutura if / else',
       enunciado:
-        'Coloque as linhas abaixo na ordem correta para montar uma decisão que avalia se o saldo cobre o valor da compra:',
-      codigoInicial:
-        'const saldo = 120\nconst valorCompra = 90\n// Organize os blocos da decisão abaixo',
+        'Coloque as linhas na ordem para checar se o saldo cobre a compra:',
+      codigoInicial: 'const saldo = 120, valorCompra = 90',
       resultadoEsperado:
-        'Ordenar corretamente a abertura do if, o bloco executado quando verdadeiro, o else e o bloco alternativo.',
+        'Montar if (saldo >= valorCompra), bloco verdadeiro, else e bloco alternativo.',
       dica:
-        'Comece pela linha com if (saldo >= valorCompra) {, siga com a ação de compra aprovada, depois } else { e por fim a ação de saldo insuficiente com }.',
+        'Comece com if (saldo >= valorCompra) { e feche cada bloco com }.',
       frases: [
-        'console.log("Compra aprovada")',
+        '  console.log("Compra aprovada")',
         'if (saldo >= valorCompra) {',
         '} else {',
-        'console.log("Saldo insuficiente")',
+        '  console.log("Saldo insuficiente")',
         '}',
       ],
       ordemCorreta: [
         'if (saldo >= valorCompra) {',
-        'console.log("Compra aprovada")',
+        '  console.log("Compra aprovada")',
         '} else {',
-        'console.log("Saldo insuficiente")',
+        '  console.log("Saldo insuficiente")',
         '}',
       ],
-      acertoMsg:
-        'Mandou bem! A estrutura if / else ficou montada na sequência exata.',
+      acertoMsg: 'Mandou bem! Estrutura if / else montada na ordem certa.',
       erroMsg:
-        'Alguma linha ficou fora de ordem. Confira onde abre o if, onde entra o else e onde fecham as chaves.',
+        'Confira onde abre o if, onde entra o else e o fechamento das chaves.',
     },
 
     quiz: [
       {
-        pergunta: 'Em uma sequência if / else if / else, quantos blocos costumam ser executados quando uma condição intermediária é verdadeira?',
+        pergunta: 'Em if / else if / else, quantos blocos executam quando uma condição é true?',
         opcoes: [
-          'Apenas o primeiro bloco cuja condição for verdadeira',
-          'Todos os blocos que vierem depois dele, mesmo que sejam falsos',
-          'Sempre o bloco else no final, junto com o else if',
+          'Apenas o primeiro bloco cuja condição for true',
+          'Todos os blocos seguintes',
+          'Sempre o else junto',
         ],
         respostaCorreta: 0,
         explicacao:
-          'Assim que uma condição avalia para true na cadeia, seu bloco roda e os demais ramos do encadeamento são ignorados.',
+          'O encadeamento executa apenas o primeiro ramo verdadeiro encontrado.',
       },
       {
-        pergunta: 'Por que colocar uma condição mais específica antes de uma mais ampla costuma fazer sentido em faixas de valores?',
+        pergunta: 'Por que testar uma condição específica antes de uma ampla?',
         opcoes: [
-          'Para evitar que uma condição ampla capture valores que deveriam ter um tratamento específico',
-          'Porque o else if não aceita comparações com >= ou <=',
-          'Porque o JavaScript proíbe usar mais de um if no mesmo arquivo',
+          'Para a regra ampla não engolir casos específicos antes da hora',
+          'Porque else if não aceita >=',
+          'Porque só pode haver um if no código',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Avaliar casos específicos primeiro impede que regras mais abrangentes interceptem valores antes da hora.',
+        explicacao: 'Casos específicos vêm antes para não serem interceptados.',
       },
       {
-        pergunta: 'Quando o bloco else é executado?',
+        pergunta: 'Quando o bloco else executa?',
         opcoes: [
-          'Quando nenhuma das condições anteriores (if ou else if) foi verdadeira',
-          'Sempre que o if for verdadeiro',
-          'Antes mesmo de o if ser testado',
+          'Quando nenhuma condição anterior foi true',
+          'Sempre que o if for true',
+          'Antes de testar o if',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'O else serve como caminho alternativo quando todas as condições anteriores resultam em false.',
+        explicacao: 'else é o caminho alternativo quando tudo anterior deu false.',
       },
     ],
 
     conclusao: {
+      titulo: 'Decisões com if / else',
+      mensagem:
+        'Você aprendeu a direcionar o fluxo com if, else if e else.',
+      proximoPasso:
+        'Vá para a Aula 10 e aprenda a repetir ações com for e while.',
       aprendizados: [
-        'if, else if e else permitem escolher caminhos diferentes conforme o resultado das condições.',
-        'Apenas o primeiro ramo verdadeiro é executado, tornando a ordem das condições decisiva.',
-        'else trata os casos restantes quando nenhuma condição anterior é atendida.',
+        'if, else if e else escolhem caminhos conforme condições.',
+        'A ordem das condições importa em faixas de valores.',
+        'else trata o caso padrão quando nada anterior passou.',
       ],
       reflexao:
-        'Em um sistema de desconto progressivo (acima de 200 e acima de 100), qual condição você testaria primeiro para não errar a faixa?',
+        'Em descontos acima de 200 e acima de 100, qual você checaria primeiro?',
       proximaAulaId: 'lesson-10',
     },
   },
@@ -1253,121 +1150,106 @@ export const aulasData: AulaItem[] = [
     modulo: 3,
     titulo: 'Loops com for e while: Repetindo com Segurança',
     resumo:
-      'Repita ações com for e while, entenda como o contador e a condição de parada funcionam e evite loops infinitos.',
+      'Repita ações com for e while, entenda a parada e evite loops infinitos.',
 
     introducao: {
       objetivo:
-        'Aprender a repetir tarefas com for e while e garantir que toda repetição tenha uma condição clara de parada.',
+        'Repetir instruções com for e while garantindo condição de parada.',
       contexto:
-        'Na Aula 9, você usou if e else para escolher um caminho em um momento específico. Muitas vezes, porém, precisamos executar a mesma etapa várias vezes — como contar rodadas, processar itens ou tentar até atingir um limite — sem copiar e colar código.',
+        'Em vez de repetir código na mão, loops executam um bloco várias vezes com controle.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. for: ideal quando você sabe o início, o limite e o passo',
+          titulo: '1. for: início, condição e passo',
           explicacao:
-            'O loop for reúne três partes na mesma linha: inicialização (ex.: let i = 1), condição de continuação (ex.: i <= 3) e atualização (ex.: i++). Enquanto a condição for true, o bloco interno roda e depois i é atualizado.',
+            'for (let i = 1; i <= 3; i++) junta início, regra de continuação e incremento.',
         },
         {
-          titulo: '2. while: repete enquanto a condição for verdadeira',
+          titulo: '2. while: repete enquanto for true',
           explicacao:
-            'O loop while (condicao) { ... } verifica a condição antes de cada repetição. Ele é muito natural quando a repetição depende de um estado que vai mudando dentro do bloco até deixar de atender à condição.',
+            'while (condicao) roda enquanto a condição for verdadeira — atualize o estado dentro.',
         },
         {
-          titulo: '3. Condição de parada e o perigo do loop infinito',
+          titulo: '3. Evite loop infinito',
           explicacao:
-            'Todo loop precisa avançar em direção ao fim. Se a variável de controle nunca muda ou a condição nunca se torna false, o loop vira um loop infinito e trava a execução. Sempre confira o que muda a cada volta.',
+            'Se nada muda para tornar a condição false em algum momento, o loop nunca termina.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — fazer 3 séries de alongamento:\nVocê começa na série 1, confere se ainda não passou de 3, faz a série e anota que avançou para a próxima até terminar as 3.',
+        '3 séries de exercício:\nConta da série 1 até 3 e para ao concluir a terceira.',
 
       exemploCodigo:
-        '// Repetição controlada com for e while\nfor (let rodada = 1; rodada <= 3; rodada++) {\n  console.log("Rodada " + rodada)\n}\n\nlet tentativas = 0\nwhile (tentativas < 2) {\n  tentativas++\n}',
+        'for (let i = 1; i <= 3; i++) {\n  console.log("Série " + i)\n}',
 
       resumo:
-        'for organiza início, condição e passo em uma linha; while repete enquanto a condição for true — e ambos exigem avanço para não travar.',
+        'for e while repetem blocos enquanto a condição for true — garanta sempre o avanço até o fim.',
     },
 
     pratica: {
-      titulo: 'Classifique o comportamento de cada loop',
+      titulo: 'Identifique a linha que causa loop infinito',
       enunciado:
-        'Leia cada trecho de repetição abaixo e toque na classificação correta:',
-      codigoInicial:
-        '// Analise o início, a condição e a atualização\n// de cada loop antes de escolher',
-      resultadoEsperado:
-        'Identificar corretamente loops que terminam normalmente, quantas vezes rodam ou se têm risco de loop infinito.',
-      dica:
-        'Observe o valor inicial, o limite da condição e se o contador avança em direção ao fim.',
-      classificacao: {
-        categorias: ['Roda 3 vezes', 'Roda 2 vezes', 'Risco de loop infinito'],
-        itens: [
-          {
-            texto: 'for (let i = 1; i <= 3; i++) { ... }',
-            categoriaCorreta: 'Roda 3 vezes',
-          },
-          {
-            texto: 'let n = 0; while (n < 2) { n++ }',
-            categoriaCorreta: 'Roda 2 vezes',
-          },
-          {
-            texto: 'let x = 1; while (x > 0) { console.log(x) }',
-            categoriaCorreta: 'Risco de loop infinito',
-          },
+        'Toque na linha que mantém o loop rodando sem parar:',
+      codigoInicial: 'let x = 1',
+      resultadoEsperado: 'Encontrar a linha sem atualização que trava a parada.',
+      dica: 'Se x começa em 1 e x > 0 nunca muda, x > 0 continua true para sempre.',
+      cacaErro: {
+        linhas: [
+          'let x = 1;',
+          'while (x > 0) {',
+          '  console.log(x); // x nunca muda!',
+          '}',
         ],
-        acertoMsg:
-          'Mandou bem! Você identificou o número de execuções e reconheceu quando uma condição não tem parada.',
-        erroMsg:
-          'Algum loop ficou sem classificação ou trocado. Confira o valor inicial, a condição e o que acontece com a variável a cada volta.',
+        indiceErro: 2,
+        acertoMsg: 'Mandou bem! Sem atualizar x, a condição x > 0 nunca vira false.',
+        erroMsg: 'Olhe o que acontece com x dentro do while.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'O que acontece se um loop while tiver uma condição sempre true e nada alterar os valores envolvidos?',
+        pergunta: 'O que acontece se um while tiver condição sempre true sem mudança?',
         opcoes: [
-          'Ele tende a virar um loop infinito, repetindo sem condição de parada',
-          'Ele executa apenas uma vez e encerra automaticamente',
-          'Ele pula o bloco e executa o else',
+          'Tende a virar loop infinito',
+          'Roda só uma vez e para',
+          'Executa o else automaticamente',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Sem mudança que torne a condição false em algum momento, a repetição não encontra um fim.',
+        explicacao: 'Sem mudança que torne a condição falsa, a repetição não encerra.',
       },
       {
-        pergunta: 'Em for (let i = 0; i < 4; i++), quais valores de i entram na repetição?',
-        opcoes: [
-          '0, 1, 2 e 3 (4 execuções ao todo)',
-          '1, 2, 3 e 4',
-          'Apenas 0 e 4',
-        ],
+        pergunta: 'Em for (let i = 0; i < 4; i++), quantas vezes roda?',
+        opcoes: ['4 vezes (0, 1, 2 e 3)', '3 vezes', '5 vezes'],
         respostaCorreta: 0,
-        explicacao:
-          'Começa em 0 e continua enquanto i < 4, rodando para 0, 1, 2 e 3 antes de i chegar a 4.',
+        explicacao: 'Roda para i = 0, 1, 2 e 3 e para quando i vira 4.',
       },
       {
-        pergunta: 'Quando costuma ser mais direto usar for em vez de while?',
+        pergunta: 'Quando for costuma ser mais direto que while?',
         opcoes: [
-          'Quando você já tem um contador numérico com início, limite e passo definidos',
-          'Quando você quer evitar usar variáveis',
-          'Quando a condição nunca pode usar < ou <=',
+          'Quando há contador com início, limite e passo definidos',
+          'Quando não se quer usar variáveis',
+          'Quando não se usa < ou <=',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'O for deixa explícitos na mesma estrutura o início, o teste de continuação e o incremento.',
+        explicacao: 'for reúne início, condição e passo de forma clara.',
       },
     ],
 
     conclusao: {
+      titulo: 'Loops com segurança',
+      mensagem:
+        'Você aprendeu a repetir tarefas com for e while e a evitar loops infinitos.',
+      proximoPasso:
+        'Siga para a Aula 11 e trabalhe com listas ordenadas em arrays.',
       aprendizados: [
-        'for e while repetem blocos enquanto uma condição for verdadeira.',
-        'Garantir o avanço e a condição de parada evita loops infinitos.',
-        'Saber repetir passos abre caminho para trabalhar com listas (arrays) na próxima aula.',
+        'for organiza início, condição e passo.',
+        'while repete enquanto a condição for true.',
+        'Toda repetição precisa de avanço e parada.',
       ],
       reflexao:
-        'Se você precisa repetir uma verificação até o usuário acertar ou atingir 3 tentativas, qual informação precisa mudar a cada volta?',
+        'Qual variável precisa mudar a cada volta em um loop de tentativas?',
       proximaAulaId: 'lesson-11',
     },
   },
@@ -1377,114 +1259,91 @@ export const aulasData: AulaItem[] = [
     modulo: 3,
     titulo: 'Arrays e Acesso por Índice: Listas em Ordem',
     resumo:
-      'Crie arrays, entenda por que o índice começa em 0, use .length com segurança e evite acessar posições inexistentes.',
+      'Crie arrays, entenda o índice começando em 0 e use .length com segurança.',
 
     introducao: {
       objetivo:
-        'Compreender como arrays armazenam listas ordenadas de valores e como acessar elementos pelo índice sem ultrapassar o tamanho da lista.',
+        'Guardar listas ordenadas em arrays e acessar posições sem estourar o tamanho.',
       contexto:
-        'Na Aula 10, você aprendeu a repetir passos com segurança. Muitas vezes, esses passos envolvem uma coleção de itens na mesma ordem — como tarefas do dia, notas ou etapas de um pedido — em vez de criar uma variável separada para cada item.',
+        'Em vez de criar várias variáveis soltas, um array reúne vários itens na mesma lista.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que é um array e como ele guarda itens em sequência',
+          titulo: '1. Array = lista entre colchetes',
           explicacao:
-            'Um array (lista) guarda vários valores dentro de colchetes [...], separados por vírgula, mantendo a ordem em que foram colocados. Ele pode guardar strings, numbers, booleans ou outros valores.',
+            'const lista = ["A", "B", "C"] guarda valores em ordem dentro de [...].',
         },
         {
-          titulo: '2. O índice começa em 0, não em 1',
+          titulo: '2. Índice começa em 0',
           explicacao:
-            'No JavaScript, cada posição de um array tem um índice numérico começando em 0: o primeiro elemento está em array[0], o segundo em array[1], o terceiro em array[2], e assim por diante.',
+            'O primeiro item é lista[0], o segundo é lista[1], o terceiro é lista[2].',
         },
         {
-          titulo: '3. .length e o último índice válido (length - 1)',
+          titulo: '3. .length e último índice (length - 1)',
           explicacao:
-            'A propriedade .length informa quantos itens existem no array. Se um array tem 3 itens (length === 3), seus índices válidos vão de 0 até 2 — tentar acessar array[3] aponta para uma posição além do fim e retorna undefined.',
+            'Se há 3 itens, length é 3 e os índices válidos vão de 0 até 2. lista[3] dá undefined.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — fila de atendimento com 3 pessoas:\nAna (posição 0), Bruno (posição 1) e Carla (posição 2). O tamanho da fila é 3 (.length === 3), mas o último índice válido é 2.',
+        'Fila de 3 pessoas:\nPosições 0, 1 e 2. O tamanho é 3, mas o último índice é 2.',
 
       exemploCodigo:
-        '// Array com índice começando em 0 e uso de .length\nconst tarefas = ["Ler teoria", "Fazer prática", "Revisar quiz"]\n\nconsole.log(tarefas[0])                   // "Ler teoria"\nconsole.log(tarefas.length)              // 3\nconsole.log(tarefas[tarefas.length - 1]) // "Revisar quiz"',
+        'const tarefas = ["Ler", "Praticar", "Revisar"]\nconsole.log(tarefas[0])              // "Ler"\nconsole.log(tarefas.length)         // 3',
 
       resumo:
-        'Arrays guardam listas ordenadas com índice iniciando em 0; .length indica a quantidade de itens e o último índice é length - 1.',
+        'Arrays começam no índice 0 e vão até length - 1.',
     },
 
     pratica: {
-      titulo: 'Ordene o acesso aos itens de um array do primeiro ao último',
+      titulo: 'Ordene o acesso do primeiro ao último item',
       enunciado:
-        'Considere a lista const etapas = ["Planejar", "Codar", "Testar"] e coloque os acessos abaixo na ordem do primeiro até o último elemento:',
-      codigoInicial:
-        'const etapas = ["Planejar", "Codar", "Testar"]\n// Ordene do índice inicial até o final',
-      resultadoEsperado:
-        'Ordenar corretamente o acesso do primeiro elemento (índice 0) ao último elemento (índice 2) do array.',
-      dica:
-        'Lembre-se de que o primeiro item está no índice 0 e, em um array de 3 itens, o último está no índice 2.',
-      frases: [
-        'etapas[1]',
-        'etapas[0]',
-        'etapas[2]',
-      ],
-      ordemCorreta: [
-        'etapas[0]',
-        'etapas[1]',
-        'etapas[2]',
-      ],
-      acertoMsg:
-        'Mandou bem! Você acessou os elementos do array na ordem exata, começando do índice 0.',
-      erroMsg:
-        'A ordem de acesso não ficou certa. Lembre-se de que o primeiro elemento fica em etapas[0].',
+        'Dado const etapas = ["Planejar", "Codar", "Testar"], ordene do primeiro ao último:',
+      codigoInicial: 'const etapas = ["Planejar", "Codar", "Testar"]',
+      resultadoEsperado: 'Ordenar etapas[0], etapas[1] e etapas[2].',
+      dica: 'O primeiro item fica no índice 0.',
+      frases: ['etapas[1]', 'etapas[0]', 'etapas[2]'],
+      ordemCorreta: ['etapas[0]', 'etapas[1]', 'etapas[2]'],
+      acertoMsg: 'Mandou bem! Acesso do índice 0 até o final na ordem certa.',
+      erroMsg: 'Lembre-se de que o primeiro elemento está em etapas[0].',
     },
 
     quiz: [
       {
-        pergunta: 'Em const frutas = ["maçã", "banana", "uva"], qual expressão acessa "banana"?',
-        opcoes: [
-          'frutas[1]',
-          'frutas[2]',
-          'frutas[0]',
-        ],
+        pergunta: 'Em const frutas = ["maçã", "banana", "uva"], o que é frutas[1]?',
+        opcoes: ['"banana"', '"maçã"', '"uva"'],
         respostaCorreta: 0,
-        explicacao:
-          '"maçã" está no índice 0 e "banana" está no índice 1.',
+        explicacao: '"maçã" é índice 0 e "banana" é índice 1.',
       },
       {
-        pergunta: 'Se um array tem 4 elementos (array.length === 4), qual é o índice do último elemento?',
-        opcoes: [
-          '3 (que equivale a array.length - 1)',
-          '4',
-          '1',
-        ],
+        pergunta: 'Se um array tem 4 itens (length === 4), qual o último índice válido?',
+        opcoes: ['3', '4', '1'],
         respostaCorreta: 0,
-        explicacao:
-          'Como os índices começam em 0, 4 itens ocupam as posições 0, 1, 2 e 3.',
+        explicacao: 'Os índices vão de 0 até length - 1 (0, 1, 2 e 3).',
       },
       {
-        pergunta: 'O que acontece se você tenta ler um índice maior ou igual ao .length de um array?',
-        opcoes: [
-          'Acessa uma posição além dos elementos existentes, resultando em undefined',
-          'Apaga o último item do array automaticamente',
-          'Reinicia a contagem a partir do índice 0',
-        ],
+        pergunta: 'O que acontece ao acessar um índice igual ou maior que .length?',
+        opcoes: ['Retorna undefined', 'Apaga o array', 'Reinicia em 0'],
         respostaCorreta: 0,
-        explicacao:
-          'Índices fora do intervalo válido de 0 até length - 1 não possuem elemento atribuído e retornam undefined.',
+        explicacao: 'Posições fora do limite válido retornam undefined.',
       },
     ],
 
     conclusao: {
+      titulo: 'Arrays e índices dominados',
+      mensagem:
+        'Você aprendeu a usar arrays, índices começando em 0 e .length.',
+      proximoPasso:
+        'Vá para a Aula 12 e percorra listas tomando decisões.',
       aprendizados: [
-        'Arrays armazenam coleções ordenadas de valores acessíveis por índice numérico.',
-        'O primeiro elemento de um array sempre começa no índice 0.',
-        '.length mostra a quantidade de itens, e o último índice válido é length - 1.',
+        'Arrays guardam listas ordenadas com [...].',
+        'O primeiro índice é sempre 0.',
+        'O último índice válido é length - 1.',
       ],
       reflexao:
-        'Por que começar a contar em 0 faz diferença quando você quer percorrer todos os itens de um array usando um contador?',
+        'Por que começar em 0 importa quando percorremos uma lista com um contador?',
       proximaAulaId: 'lesson-12',
     },
   },
@@ -1494,59 +1353,57 @@ export const aulasData: AulaItem[] = [
     modulo: 3,
     titulo: 'Percorrendo Listas e Tomando Decisões',
     resumo:
-      'Combine for, índices de array e if para visitar cada item de uma lista, filtrar cenários e somar ou contar resultados.',
+      'Combine for, índices e if para contar, filtrar ou acumular dados de uma lista.',
 
     introducao: {
       objetivo:
-        'Unir loops, arrays e condições para percorrer uma lista do início ao fim e tomar decisões sobre cada elemento.',
+        'Percorrer arrays com for e aplicar if/acumuladores para resolver regras.',
       contexto:
-        'Nas aulas anteriores você viu como repetir com for (Aula 10), acessar itens de um array do índice 0 até length - 1 (Aula 11) e decidir caminhos com if (Aula 9). Juntar essas três peças permite inspecionar coleções inteiras — como somar valores, contar acertos ou identificar itens que atendem a uma regra.',
+        'Juntar loop, índice e condição permite inspecionar cada item de uma lista.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O padrão clássico de percorrer um array com for',
+          titulo: '1. Padrão i = 0 até i < lista.length',
           explicacao:
-            'Para visitar todos os itens de uma lista sem errar limites, usamos i começando em 0 e a condição i < lista.length com passo i++. A cada volta, lista[i] entrega o elemento atual daquela posição.',
+            'Começa em 0 e vai enquanto i < lista.length com i++, acessando lista[i].',
         },
         {
-          titulo: '2. Tomando decisões para cada item com if',
+          titulo: '2. Decisão por item com if',
           explicacao:
-            'Dentro do loop, você pode usar if para checar uma condição em cada elemento — por exemplo, verificar se um valor atinge a meta ou se um status é válido — e atualizar uma variável acumuladora (como total ou aprovados) declarada fora do loop.',
+            'Dentro do for, use if para checar cada elemento e atualizar um resultado.',
         },
         {
-          titulo: '3. Acumulador fora, atualização dentro',
+          titulo: '3. Acumulador fora do loop',
           explicacao:
-            'Se você quer contar quantos itens passaram ou somar números da lista, inicialize o acumulador (ex.: let contador = 0) antes do for e atualize-o apenas quando o if for verdadeiro. Se zerar dentro do loop, o valor se perde a cada volta.',
+            'Declare let total = 0 ou let contador = 0 antes do for para não zerar a cada volta.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — conferir notas de uma turma:\nVocê começa com aprovados = 0 antes de olhar a lista. Para cada nota, confere se nota >= 70: se for, soma 1 em aprovados; se não for, segue para a próxima nota.',
+        'Contar notas >= 70:\nComeça com aprovados = 0 fora do loop e soma 1 a cada nota que passa.',
 
       exemploCodigo:
-        '// Percorrendo array, testando condição e acumulando resultado\nconst notas = [80, 55, 90, 65]\nlet aprovados = 0\n\nfor (let i = 0; i < notas.length; i++) {\n  if (notas[i] >= 70) {\n    aprovados++\n  }\n}\n\nconsole.log(aprovados) // 2',
+        'const notas = [80, 55, 90, 65]\nlet aprovados = 0\n\nfor (let i = 0; i < notas.length; i++) {\n  if (notas[i] >= 70) aprovados++\n}\nconsole.log(aprovados) // 2',
 
       resumo:
-        'Use i = 0 até i < array.length para visitar cada item com array[i], aplique if para avaliar regras e mantenha acumuladores fora do loop.',
+        'Percorra com i < lista.length, decida com if e mantenha acumuladores fora do loop.',
     },
 
     pratica: {
-      titulo: 'Classifique o comportamento ao percorrer a lista',
+      titulo: 'Classifique o comportamento do loop na lista',
       enunciado:
-        'Considere a lista const valores = [10, 50, 20, 80] e uma regra que conta quantos itens são maiores ou iguais a 50 (valores[i] >= 50):\n\nToque na classificação correta para cada afirmação:',
-      codigoInicial:
-        'const valores = [10, 50, 20, 80]\nlet contagem = 0\nfor (let i = 0; i < valores.length; i++) {\n  if (valores[i] >= 50) { contagem++ }\n}',
+        'Com valores = [10, 50, 20, 80] e regra valores[i] >= 50, classifique cada afirmação:',
+      codigoInicial: 'const valores = [10, 50, 20, 80]',
       resultadoEsperado:
-        'Identificar corretamente a condição do loop, os itens que satisfazem o if e o resultado final da contagem.',
-      dica:
-        'Olhe quais números em [10, 50, 20, 80] são >= 50 e como o loop avança do índice 0 até o último.',
+        'Identificar acertos na contagem, no índice inicial e na condição.',
+      dica: '50 e 80 são >= 50; valores[0] é 10.',
       classificacao: {
         categorias: ['Verdadeiro', 'Falso'],
         itens: [
           {
-            texto: 'Ao final do loop, contagem vale 2 (50 e 80 atendem >= 50)',
+            texto: 'Contagem final de itens >= 50 é 2',
             categoriaCorreta: 'Verdadeiro',
           },
           {
@@ -1554,65 +1411,61 @@ export const aulasData: AulaItem[] = [
             categoriaCorreta: 'Falso',
           },
           {
-            texto: 'A condição i < valores.length percorre índices de 0 até 3',
+            texto: 'i < valores.length percorre índices de 0 até 3',
             categoriaCorreta: 'Verdadeiro',
           },
-          {
-            texto: 'Colocar let contagem = 0 dentro do for manteria a soma total ao final',
-            categoriaCorreta: 'Falso',
-          },
         ],
-        acertoMsg:
-          'Mandou bem! Você conectou índice, condição de parada, if e acumulador sem deixar passar nenhuma armadilha.',
-        erroMsg:
-          'Alguma afirmação ficou sem resposta ou com julgamento trocado. Confira valores[0], a condição i < valores.length e onde fica o acumulador.',
+        acertoMsg: 'Mandou bem! Loop, índice e condição bem encaixados.',
+        erroMsg: 'Confira valores[0], a condição i < valores.length e a contagem.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Por que a condição do for ao percorrer um array costuma ser i < lista.length em vez de i <= lista.length?',
+        pergunta: 'Por que usar i < lista.length em vez de i <= lista.length?',
         opcoes: [
-          'Porque o último índice válido de um array é length - 1, e i <= lista.length acessaria uma posição além do fim',
-          'Porque o operador <= não funciona com a propriedade .length',
-          'Porque i < lista.length faz o loop começar pelo último elemento',
+          'Porque o último índice válido é length - 1',
+          'Porque <= não funciona com .length',
+          'Porque começa do último item',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Como os índices começam em 0, parar antes de lista.length garante visitar de 0 até lista.length - 1.',
+        explicacao: 'i < lista.length para em length - 1 sem acessar fora do array.',
       },
       {
-        pergunta: 'Se você precisa somar apenas os números maiores que 10 de um array, onde deve ficar a variável let soma = 0?',
+        pergunta: 'Onde deve ficar let soma = 0 ao somar itens de um array?',
         opcoes: [
-          'Antes do loop for, para acumular os valores ao longo de todas as voltas',
-          'Dentro do if, recriada a cada item encontrado',
-          'Depois do loop for, logo após o console.log',
+          'Antes do loop for',
+          'Dentro do if a cada volta',
+          'Depois do console.log final',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Declarar let soma = 0 antes do loop preserva o total acumulado a cada iteração.',
+        explicacao: 'Fora do loop, a soma acumula ao longo de todas as voltas.',
       },
       {
-        pergunta: 'Em const itens = ["ok", "erro", "ok"], o que acontece se dentro do for houver um if (itens[i] === "erro")?',
+        pergunta: 'Em ["ok", "erro", "ok"], quando roda if (itens[i] === "erro")?',
         opcoes: [
-          'O bloco do if só executa na volta em que itens[i] vale "erro" (índice 1)',
-          'O bloco do if executa em todas as 3 voltas da lista',
-          'O loop para imediatamente na primeira volta',
+          'Apenas na volta em que itens[i] é "erro" (índice 1)',
+          'Em todas as 3 voltas',
+          'Nunca roda',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'A condição é testada elemento a elemento, executando o if apenas quando o item atual atende à regra.',
+        explicacao: 'A condição é testada item a item.',
       },
     ],
 
     conclusao: {
+      titulo: 'Módulo 3 concluído',
+      mensagem:
+        'Você combinou decisões, loops e arrays para processar listas.',
+      proximoPasso:
+        'Siga para a Aula 13 e organize lógicas reutilizáveis com funções.',
       aprendizados: [
-        'Percorrer arrays com i = 0 até i < array.length visita cada elemento na ordem certa.',
-        'Combinar for e if permite filtrar, contar ou acumular valores de uma coleção.',
-        'Com o fluxo e listas dominados, podemos organizar e reutilizar lógicas com funções a partir da próxima aula.',
+        'for percorre do índice 0 até length - 1.',
+        'if filtra ou conta itens durante a repetição.',
+        'Acumuladores ficam fora do loop.',
       ],
       reflexao:
-        'Se você escrevesse esse código de percorrer e contar itens em vários lugares do programa, como uma função poderia ajudar a reaproveitá-lo?',
+        'Como transformar essa lógica de lista em algo reutilizável em vários lugares?',
       proximaAulaId: 'lesson-13',
     },
   },
@@ -1622,120 +1475,109 @@ export const aulasData: AulaItem[] = [
     modulo: 4,
     titulo: 'Funções: Parâmetros e return',
     resumo:
-      'Crie funções reutilizáveis, entenda a diferença entre parâmetros e argumentos e use return para devolver resultados.',
+      'Crie funções com parâmetros e return para reutilizar lógica sem duplicar código.',
 
     introducao: {
       objetivo:
-        'Aprender a declarar funções com parâmetros e return para reutilizar lógicas sem duplicar código.',
+        'Declarar funções, passar argumentos para parâmetros e devolver valores com return.',
       contexto:
-        'Na Aula 12, vimos como percorrer listas e tomar decisões. Quando uma regra ou cálculo precisa acontecer várias vezes com valores diferentes, empacotar essa lógica em uma função evita repetição e deixa o código mais organizado.',
+        'Quando uma conta ou verificação se repete, uma função centraliza a regra.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que é uma função e por que reutilizar lógica',
+          titulo: '1. Função = bloco reutilizável',
           explicacao:
-            'Uma função é um bloco de código nomeado que executa uma tarefa quando é chamada. Em vez de reescrever a mesma conta ou verificação em vários pontos do programa, você define a lógica uma vez e a chama onde precisar.',
+            'Você define a lógica uma vez e chama a função sempre que precisar.',
         },
         {
-          titulo: '2. Parâmetros (na definição) vs. argumentos (na chamada)',
+          titulo: '2. Parâmetros vs. argumentos',
           explicacao:
-            'Parâmetros são os nomes que a função espera receber para trabalhar (como preco e desconto). Argumentos são os valores reais que você passa quando chama a função (como calcularDesconto(100, 15)).',
+            'Parâmetros são os nomes na definição (a, b); argumentos são os valores enviados na chamada (2, 3).',
         },
         {
-          titulo: '3. return: devolvendo um valor para quem chamou',
+          titulo: '3. return devolve o valor',
           explicacao:
-            'A palavra return entrega o resultado da função de volta para o ponto onde ela foi chamada, permitindo guardar esse valor em uma variável ou usá-lo em outra expressão. Além disso, return encerra a execução da função naquele momento.',
+            'return envia o resultado para quem chamou a função e encerra a execução dela.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — calcular total com taxa de entrega:\nEm vez de refazer a conta na mão toda vez que um pedido muda de valor, você cria uma função que recebe subtotal e taxa e devolve o valor final.',
+        'Calcular total com taxa:\nPassa subtotal e taxa e recebe o valor final pronto.',
 
       exemploCodigo:
-        '// Função com parâmetros e retorno de valor\nfunction calcularTotal(subtotal, taxa) {\n  return subtotal + taxa\n}\n\nconst totalPedido = calcularTotal(80, 12)\nconsole.log(totalPedido) // 92',
+        'function calcularTotal(subtotal, taxa) {\n  return subtotal + taxa\n}\n\nconsole.log(calcularTotal(80, 12)) // 92',
 
       resumo:
-        'Funções agrupam lógica reutilizável: recebem valores por parâmetros e devolvem um resultado com return para ser usado onde a função foi chamada.',
+        'Funções recebem dados por parâmetros e devolvem resultados com return.',
     },
 
     pratica: {
-      titulo: 'Ordene a declaração de uma função que calcula aprovação',
+      titulo: 'Monte uma função que soma dois números',
       enunciado:
-        'Coloque as linhas abaixo na ordem correta para formar uma função verificarAprovacao(nota, meta) que retorna true se nota >= meta e false caso contrário:',
-      codigoInicial:
-        '// Monte a função verificarAprovacao(nota, meta)\n// respeitando abertura, condição, retorno e fechamento',
-      resultadoEsperado:
-        'Ordenar corretamente a assinatura da função, a verificação da condição, o return true, o return false e o fechamento.',
-      dica:
-        'Comece com function verificarAprovacao(nota, meta) {, teste nota >= meta com if, retorne true dentro do if, depois return false e feche com }.',
-      frases: [
-        '  if (nota >= meta) {',
-        'function verificarAprovacao(nota, meta) {',
-        '    return true',
-        '  }',
-        '  return false',
-        '}',
-      ],
-      ordemCorreta: [
-        'function verificarAprovacao(nota, meta) {',
-        '  if (nota >= meta) {',
-        '    return true',
-        '  }',
-        '  return false',
-        '}',
-      ],
-      acertoMsg:
-        'Mandou bem! A função ficou estruturada na ordem certa, com parâmetro, condição e retorno.',
-      erroMsg:
-        'Alguma linha ficou fora de ordem. Confira a declaração da função, o bloco do if e a posição do return.',
+        'Organize os blocos para criar somar(a, b) e retornar a + b:',
+      codigoInicial: '// Monte a função somar(a, b)',
+      resultadoEsperado: 'Declarar function somar(a, b), return a + b e fechar }.',
+      dica: 'A função abre com function somar(a, b) {, retorna a + b e fecha com }.',
+      montarBlocos: {
+        blocosDisponiveis: [
+          'function somar(a, b) {',
+          '  return a + b;',
+          '}',
+        ],
+        respostaCorreta: [
+          'function somar(a, b) {',
+          '  return a + b;',
+          '}',
+        ],
+        acertoMsg: 'Mandou bem! Função com parâmetro e return montada.',
+        erroMsg: 'Confira a ordem: abertura da função, return e fechamento.',
+      },
     },
 
     quiz: [
       {
-        pergunta: 'Qual é o papel do return dentro de uma função?',
+        pergunta: 'O que return faz dentro de uma função?',
         opcoes: [
-          'Devolver um valor para quem chamou a função e encerrar a execução dela',
-          'Declarar variáveis globais que nunca mudam',
-          'Fazer o loop for rodar uma vez a mais',
+          'Devolve um valor para quem chamou e encerra a função',
+          'Cria uma variável global fixa',
+          'Aumenta o contador do for',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'return envia o resultado de volta ao chamador e interrompe a execução da função naquele ponto.',
+        explicacao: 'return retorna o resultado ao chamador e finaliza a função.',
       },
       {
-        pergunta: 'Na chamada somar(5, 8), o que são 5 e 8?',
-        opcoes: [
-          'Argumentos passados para os parâmetros definidos na função',
-          'Tipos booleanos convertidos automaticamente',
-          'Índices de um array externo',
-        ],
+        pergunta: 'Em somar(5, 8), o que são 5 e 8?',
+        opcoes: ['Argumentos passados na chamada', 'Tipos booleanos', 'Índices de array'],
         respostaCorreta: 0,
-        explicacao:
-          'Os valores enviados na chamada são argumentos que preenchem os parâmetros da função.',
+        explicacao: '5 e 8 são os argumentos enviados para os parâmetros.',
       },
       {
-        pergunta: 'Por que usar return costuma ser mais flexível do que apenas dar console.log dentro da função?',
+        pergunta: 'Por que usar return em vez de só console.log?',
         opcoes: [
-          'Porque o valor retornado pode ser guardado em variável, testado ou usado em outras operações',
-          'Porque console.log não funciona dentro de funções em JavaScript',
-          'Porque return apaga o valor após exibir na tela',
+          'Porque o valor retornado pode ser guardado e reutilizado em outras partes',
+          'Porque console.log não funciona em funções',
+          'Porque return apaga o valor',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Retornar o valor permite reutilizar o resultado em outras partes do código, não apenas exibi-lo.',
+        explicacao: 'Retornar permite usar o resultado em novas contas ou decisões.',
       },
     ],
 
     conclusao: {
+      titulo: 'Funções dominadas',
+      mensagem:
+        'Você criou funções com parâmetros e return para reaproveitar lógica.',
+      proximoPasso:
+        'Vá para a Aula 14 e agrupe dados nomeados em objetos.',
       aprendizados: [
-        'Funções encapsulam lógica reutilizável e evitam repetição de código.',
-        'Parâmetros recebem os dados de entrada na definição e argumentos fornecem os valores na chamada.',
-        'return devolve o resultado produzido pela função para quem a invocou.',
+        'Funções evitam repetir a mesma lógica.',
+        'Parâmetros recebem argumentos na chamada.',
+        'return devolve o resultado da função.',
       ],
       reflexao:
-        'Que cálculo ou verificação repetitiva de um sistema você transformaria em uma função com parâmetros e return?',
+        'Qual cálculo do dia a dia você transformaria em função?',
       proximaAulaId: 'lesson-14',
     },
   },
@@ -1745,125 +1587,109 @@ export const aulasData: AulaItem[] = [
     modulo: 4,
     titulo: 'Objetos: Chave, Valor e Atualização',
     resumo:
-      'Agrupe dados nomeados em objetos com chave e valor, acesse propriedades com ponto e atualize estados com clareza.',
+      'Agrupe dados nomeados em objetos, leia com ponto e atualize propriedades.',
 
     introducao: {
       objetivo:
-        'Entender como objetos representam entidades com propriedades nomeadas (chave e valor) e como ler ou atualizar seus campos.',
+        'Representar entidades com pares chave: valor, ler propriedades e atualizá-las.',
       contexto:
-        'Na Aula 11, você usou arrays para listas ordenadas por posição numérica (0, 1, 2...). Quando um mesmo registro tem várias informações com nomes próprios — como nome, pontos e status de um aluno —, os objetos deixam tudo muito mais claro e organizado.',
+        'Quando um item tem vários campos com nome próprio, objetos deixam tudo mais claro.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. O que é um objeto: pares de chave e valor',
+          titulo: '1. Pares chave: valor em { }',
           explicacao:
-            'Um objeto reúne informações relacionadas dentro de chaves { ... } no formato chave: valor. Em vez de depender da ordem de um índice numérico, cada dado tem um nome descritivo que explica o que ele significa.',
+            'Cada campo tem um nome (chave) e um valor associado, como nome: "Ana" e pontos: 40.',
         },
         {
-          titulo: '2. Acessando valores com notação de ponto',
+          titulo: '2. Leitura com ponto',
           explicacao:
-            'Para ler o valor de uma propriedade de um objeto, usamos objeto.chave — por exemplo, aluno.nome ou pedido.pago. Isso deixa a leitura do código muito próxima da linguagem natural.',
+            'Use objeto.chave (ex.: aluno.nome) para ler o valor de forma legível.',
         },
         {
-          titulo: '3. Atualizando propriedades com segurança',
+          titulo: '3. Atualizando propriedades',
           explicacao:
-            'Você pode atualizar o valor de uma propriedade existente fazendo objeto.chave = novoValor — mesmo quando o objeto foi declarado com const, pois a referência ao objeto continua ali enquanto o valor interno da propriedade muda.',
+            'Com objeto.chave = novoValor você atualiza o campo mesmo se o objeto estiver em const.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — ficha de um aluno no CodeLab:\nEm vez de guardar nome, pontos e ativo em três variáveis soltas, você agrupa tudo em um único objeto aluno e atualiza aluno.pontos conforme ele avança.',
+        'Ficha de aluno:\nNome, pontos e status agrupados em um único objeto.',
 
       exemploCodigo:
-        '// Objeto com propriedades nomeadas, leitura e atualização\nconst aluno = {\n  nome: "Ana",\n  pontos: 40,\n  ativo: true,\n}\n\naluno.pontos = aluno.pontos + 20\nconsole.log(aluno.nome)   // "Ana"\nconsole.log(aluno.pontos) // 60',
+        'const aluno = { nome: "Ana", pontos: 40 }\naluno.pontos = aluno.pontos + 20\nconsole.log(aluno.pontos) // 60',
 
       resumo:
-        'Objetos agrupam dados nomeados em pares chave: valor; você lê com objeto.chave e atualiza campos com objeto.chave = novoValor.',
+        'Objetos agrupam dados nomeados em chave: valor; leia e atualize com ponto.',
     },
 
     pratica: {
-      titulo: 'Classifique como cada ação atua sobre um objeto',
+      titulo: 'Classifique cada operação no objeto',
       enunciado:
-        'Considere o objeto const conta = { titular: "Lucas", saldo: 100, ativa: true } e toque na classificação correta para cada expressão ou instrução:',
-      codigoInicial:
-        'const conta = {\n  titular: "Lucas",\n  saldo: 100,\n  ativa: true,\n}\n// Classifique cada operação sobre o objeto',
+        'Dado const conta = { titular: "Lucas", saldo: 100, ativa: true }, classifique cada linha:',
+      codigoInicial: 'const conta = { titular: "Lucas", saldo: 100, ativa: true }',
       resultadoEsperado:
-        'Diferenciar leitura de propriedade, atualização de valor, criação de nova propriedade e comparação booleana.',
-      dica:
-        'Observe se a expressão apenas lê um valor, atribui um novo valor a uma chave ou produz true/false.',
+        'Diferenciar leitura, atualização de saldo e comparação booleana.',
+      dica: 'Veja se apenas lê, se altera saldo ou se retorna true/false.',
       classificacao: {
-        categorias: ['Lê um valor', 'Atualiza o saldo', 'Gera true ou false'],
+        categorias: ['Lê valor', 'Atualiza saldo', 'Gera true/false'],
         itens: [
-          {
-            texto: 'conta.titular',
-            categoriaCorreta: 'Lê um valor',
-          },
+          { texto: 'conta.titular', categoriaCorreta: 'Lê valor' },
           {
             texto: 'conta.saldo = conta.saldo + 50',
-            categoriaCorreta: 'Atualiza o saldo',
+            categoriaCorreta: 'Atualiza saldo',
           },
-          {
-            texto: 'conta.ativa === true',
-            categoriaCorreta: 'Gera true ou false',
-          },
-          {
-            texto: 'conta.saldo',
-            categoriaCorreta: 'Lê um valor',
-          },
+          { texto: 'conta.ativa === true', categoriaCorreta: 'Gera true/false' },
         ],
-        acertoMsg:
-          'Mandou bem! Você identificou o papel de cada operação sobre o objeto conta.',
-        erroMsg:
-          'Algum item ficou sem classificação ou com categoria trocada. Confira o que lê, o que altera conta.saldo e o que compara.',
+        acertoMsg: 'Mandou bem! Operações em objetos identificadas.',
+        erroMsg: 'Confira o que lê, o que altera saldo e o que compara.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'Qual é a principal vantagem de usar um objeto para representar um usuário com nome, idade e ativo?',
+        pergunta: 'Qual a vantagem de usar objeto para um usuário com nome, idade e ativo?',
         opcoes: [
-          'Agrupar informações relacionadas sob nomes claros em vez de depender apenas de posições numéricas',
-          'Impedir que qualquer valor seja lido ou alterado no programa',
-          'Substituir a necessidade de usar condições e loops',
+          'Agrupar dados relacionados sob nomes claros',
+          'Impedir ler ou alterar dados',
+          'Eliminar condições e loops',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Objetos associam cada dado a uma chave nomeada, tornando a estrutura autoexplicativa.',
+        explicacao: 'Chaves nomeadas deixam claro o significado de cada dado.',
       },
       {
-        pergunta: 'Dado const produto = { nome: "Teclado", estoque: 5 }, como você lê a quantidade em estoque?',
-        opcoes: [
-          'produto.estoque',
-          'produto[0]',
-          'estoque.produto',
-        ],
+        pergunta: 'Em const produto = { nome: "Mouse", estoque: 5 }, como ler o estoque?',
+        opcoes: ['produto.estoque', 'produto[0]', 'estoque.produto'],
         respostaCorreta: 0,
-        explicacao:
-          'A notação de ponto (produto.estoque) acessa diretamente a propriedade estoque do objeto.',
+        explicacao: 'A notação de ponto acessa a propriedade estoque.',
       },
       {
-        pergunta: 'Se const carrinho = { itens: 2, total: 50 }, o que acontece ao executar carrinho.total = 80?',
+        pergunta: 'Se const item = { qtd: 1 }, o que faz item.qtd = 2?',
         opcoes: [
-          'A propriedade total do objeto passa a valer 80',
-          'O JavaScript lança erro por carrinho ter sido declarado com const',
-          'A propriedade itens também muda automaticamente para 80',
+          'Atualiza a propriedade qtd para 2',
+          'Gera erro por ser const',
+          'Apaga o objeto',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Alterar uma propriedade de um objeto é válido mesmo quando a variável que guarda o objeto é const.',
+        explicacao: 'Alterar propriedades internas do objeto é permitido.',
       },
     ],
 
     conclusao: {
+      titulo: 'Objetos dominados',
+      mensagem:
+        'Você organizou dados em objetos e atualizou propriedades com clareza.',
+      proximoPasso:
+        'Siga para a Aula 15 e combine funções, objetos e arrays.',
       aprendizados: [
-        'Objetos organizam dados em pares de chave e valor dentro de chaves { ... }.',
-        'A notação de ponto (objeto.chave) lê propriedades de forma legível.',
-        'Atualizar propriedades com objeto.chave = novoValor permite acompanhar mudanças de estado.',
+        'Objetos reúnem pares chave: valor.',
+        'objeto.chave lê e atualiza propriedades.',
+        'Propriedades podem mudar mesmo em objeto com const.',
       ],
       reflexao:
-        'Quais chaves fariam sentido em um objeto que representa uma tarefa de estudo ou um pedido de compra?',
+        'Quais propriedades você colocaria em um objeto de tarefa ou pedido?',
       proximaAulaId: 'lesson-15',
     },
   },
@@ -1873,122 +1699,113 @@ export const aulasData: AulaItem[] = [
     modulo: 4,
     titulo: 'Funções Trabalhando com Objetos e Arrays',
     resumo:
-      'Passe objetos e arrays para funções, aplique regras sobre propriedades e retorne resultados claros e reutilizáveis.',
+      'Passe objetos e arrays para funções, aplique regras e retorne resultados.',
 
     introducao: {
       objetivo:
-        'Conectar funções, objetos e arrays para escrever rotinas que lêem propriedades, avaliam listas e retornam respostas consolidadas.',
+        'Unir funções, objetos e arrays para processar dados e retornar respostas.',
       contexto:
-        'Na Aula 13 você criou funções com parâmetros e return; na Aula 14 você estruturou dados em objetos; e na Aula 12 você percorreu arrays com loops e if. Agora vamos juntar tudo isso: funções que recebem um objeto ou um array e devolvem um resultado pronto.',
+        'Funções ficam ainda mais úteis quando recebem objetos ou listas e devolvem o resultado.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. Passando um objeto como parâmetro para uma função',
+          titulo: '1. Objeto como parâmetro',
           explicacao:
-            'Em vez de passar cinco variáveis soltas para uma função, você pode passar um objeto inteiro (como aluno ou pedido) e acessar internamente aluno.pontos ou pedido.pago. Se a regra do objeto mudar depois, a assinatura da função continua limpa.',
+            'Passe o objeto (como aluno ou pedido) e acesse aluno.pontos ou pedido.valor dentro da função.',
         },
         {
-          titulo: '2. Percorrendo uma lista dentro de uma função e retornando o total',
+          titulo: '2. Loop dentro da função',
           explicacao:
-            'Uma função pode receber um array, usar um loop for para inspecionar cada item (ou cada objeto dentro da lista), acumular o que interessa e usar return para devolver o resultado final.',
+            'Uma função pode percorrer um array com for, acumular o resultado e usar return no final.',
         },
         {
-          titulo: '3. Separar leitura/cálculo de exibição deixa a função mais útil',
+          titulo: '3. Retorne o resultado final',
           explicacao:
-            'Quando uma função calcula ou avalia algo e retorna o valor com return, você pode usar esse resultado em condições, somas ou mensagens em diferentes partes do código — a mesma lógica base que prepara o projeto integrador da próxima aula.',
+            'Devolver o valor com return permite reaproveitar o resultado onde a função foi chamada.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — verificar se um aluno atingiu o nível de destaque:\nVocê passa o objeto aluno para uma função que confere aluno.ativo && aluno.pontos >= 80 e retorna true ou false.',
+        'Checar destaque:\nPassa o objeto aluno para uma função que retorna aluno.ativo && aluno.pontos >= 80.',
 
       exemploCodigo:
-        '// Função avaliando propriedades de um objeto e retornando boolean\nfunction podeReceberBadge(aluno) {\n  return aluno.ativo && aluno.pontos >= 80\n}\n\nconst estudante = { nome: "Marina", pontos: 85, ativo: true }\nconsole.log(podeReceberBadge(estudante)) // true',
+        'function podeReceberBadge(aluno) {\n  return aluno.ativo && aluno.pontos >= 80\n}\n\nconsole.log(podeReceberBadge({ ativo: true, pontos: 85 })) // true',
 
       resumo:
-        'Funções podem receber objetos ou arrays, ler suas propriedades ou percorrer seus itens e devolver o resultado final com return.',
+        'Funções recebem objetos ou arrays, avaliam os dados e retornam o resultado.',
     },
 
     pratica: {
-      titulo: 'Ordene uma função que soma valores de um array',
+      titulo: 'Ordene a função que soma um array',
       enunciado:
-        'Coloque as linhas abaixo na ordem correta para formar uma função somarLista(numeros) que percorre o array e retorna a soma total:',
-      codigoInicial:
-        '// Monte a função somarLista(numeros)\n// acumulando os itens e devolvendo o total',
+        'Coloque as linhas na ordem para somar todos os números de numeros e retornar total:',
+      codigoInicial: '// Função somarLista(numeros)',
       resultadoEsperado:
-        'Ordenar corretamente a assinatura da função, o acumulador inicial, o loop pelo array, a soma do item atual, o fechamento do loop e o return.',
-      dica:
-        'Comece com a função, crie let total = 0 antes do for, some numeros[i] ao total dentro do loop, feche o for e retorne total.',
+        'Função, let total = 0, loop for, soma e return total.',
+      dica: 'return total fica depois do loop for.',
       frases: [
-        '  let total = 0',
+        '  let total = 0;',
         'function somarLista(numeros) {',
-        '    total = total + numeros[i]',
+        '    total = total + numeros[i];',
         '  for (let i = 0; i < numeros.length; i++) {',
         '  }',
-        '  return total',
+        '  return total;',
         '}',
       ],
       ordemCorreta: [
         'function somarLista(numeros) {',
-        '  let total = 0',
+        '  let total = 0;',
         '  for (let i = 0; i < numeros.length; i++) {',
-        '    total = total + numeros[i]',
+        '    total = total + numeros[i];',
         '  }',
-        '  return total',
+        '  return total;',
         '}',
       ],
-      acertoMsg:
-        'Mandou bem! A função junta parâmetro, acumulador, loop em array e return na ordem certa.',
+      acertoMsg: 'Mandou bem! Função com loop e return montada.',
       erroMsg:
-        'Alguma linha ficou fora de ordem. Confira onde entra let total = 0, como o for percorre numeros e onde fica o return total.',
+        'Confira onde fica let total = 0, a soma dentro do for e o return total.',
     },
 
     quiz: [
       {
-        pergunta: 'Ao passar um objeto pedido para verificarFreteGratis(pedido), como a função acessa o valor do pedido?',
-        opcoes: [
-          'Usando pedido.valor dentro da função',
-          'Apenas adivinhando o nome sem usar o parâmetro pedido',
-          'Convertendo o objeto inteiro em um número com ++',
-        ],
+        pergunta: 'Em verificarFreteGratis(pedido), como ler o valor do pedido?',
+        opcoes: ['pedido.valor', 'pedido[0]', 'valor.frete'],
         respostaCorreta: 0,
-        explicacao:
-          'Dentro da função, o parâmetro pedido referencia o objeto recebido e permite ler propriedades como pedido.valor.',
+        explicacao: 'Dentro da função, pedido.valor acessa a propriedade valor.',
       },
       {
-        pergunta: 'Por que return total deve ficar fora e depois do loop for dentro de somarLista(numeros)?',
+        pergunta: 'Por que return total fica após o loop for?',
         opcoes: [
-          'Porque o loop precisa percorrer todos os elementos antes de a função devolver o resultado final',
-          'Porque o JavaScript não permite escrever return dentro de um bloco com chaves',
-          'Porque colocar return depois do loop apaga a variável total',
+          'Para somar todos os itens antes de devolver o resultado final',
+          'Porque return não funciona em blocos',
+          'Porque apaga o total',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Se o return ficasse dentro do loop, a função encerraria na primeira volta antes de somar o resto da lista.',
+        explicacao: 'Se estivesse dentro do loop, encerraria na primeira volta.',
       },
       {
-        pergunta: 'O que acontece se uma função que calcula um desconto apenas usa console.log e não tem return?',
-        opcoes: [
-          'Ela exibe o valor no console, mas quem chamou a função recebe undefined como retorno',
-          'Ela impede que outras variáveis sejam criadas no programa',
-          'Ela repete o cálculo infinitamente',
-        ],
+        pergunta: 'O que uma função sem return devolve a quem chamou?',
+        opcoes: ['undefined', '0', 'true'],
         respostaCorreta: 0,
-        explicacao:
-          'Sem uma instrução return explícita, a função retorna undefined para quem a chamou.',
+        explicacao: 'Sem return explícito, a função retorna undefined.',
       },
     ],
 
     conclusao: {
+      titulo: 'Funções + objetos + arrays',
+      mensagem:
+        'Você conectou funções, objetos e arrays para processar dados e retornar valores.',
+      proximoPasso:
+        'Vá para a Aula 16 e monte o projeto integrador da base.',
       aprendizados: [
-        'Funções recebem objetos e arrays com naturalidade para ler campos ou percorrer coleções.',
-        'Manter acumuladores fora do loop e retornar o resultado ao final garante cálculos completos.',
-        'Combinar funções, objetos e arrays prepara a base para resolver problemas completos no projeto integrador.',
+        'Funções recebem objetos e arrays com facilidade.',
+        'Acumuladores ficam fora do loop e return devolve o total.',
+        'Base pronta para o projeto integrador.',
       ],
       reflexao:
-        'Como você combinaria um array de objetos (por exemplo, tarefas com titulo e concluida) com uma função que conta quantas estão concluídas?',
+        'Como contaria itens concluídos em um array de objetos usando uma função?',
       proximaAulaId: 'lesson-16',
     },
   },
@@ -1998,121 +1815,115 @@ export const aulasData: AulaItem[] = [
     modulo: 4,
     titulo: 'Projeto Integrador da Base: Resumo de Pedidos',
     resumo:
-      'Integre funções, objetos, arrays, loops, condições e lógica booleana para montar um resumo de pedidos do início ao fim.',
+      'Junte lógica, condições, loops, arrays, objetos e funções em um resumo de pedidos.',
 
     introducao: {
       objetivo:
-        'Consolidar toda a trilha base aplicando decomposição, variáveis, tipos, comparações, lógica, decisões, loops, arrays, funções e objetos em um cenário completo.',
+        'Aplicar os fundamentos da base em um cenário completo de soma de pedidos pagos.',
       contexto:
-        'Da ordem dos passos e decomposição na Aula 1 até funções manipulando objetos e arrays na Aula 15, cada etapa construiu uma peça do quebra-cabeça. Neste fechamento da trilha, vamos juntar essas peças para resumir pedidos aprovados e calcular o valor total.',
+        'Hora de juntar o que você aprendeu desde a Aula 1 em uma solução clara.',
     },
 
     teoria: {
       topicos: [
         {
-          titulo: '1. Decompondo o problema antes de montar a função',
+          titulo: '1. Decomponha antes de codar',
           explicacao:
-            'Para resumir uma lista de pedidos, separamos o trabalho em partes claras: começar com um acumulador zerado, percorrer o array de pedidos com for, checar com if e operadores lógicos se o pedido está válido/pago e somar o valor apenas quando a regra passar.',
+            'Separe em: acumulador inicial, loop pela lista, filtro com if e retorno do total.',
         },
         {
-          titulo: '2. Objetos dentro de arrays + decisões em cada volta',
+          titulo: '2. Array de objetos + condição',
           explicacao:
-            'Em um array de objetos — como uma lista de pedidos onde cada item tem valor e pago —, pedidos[i] entrega o objeto da vez, e pedidos[i].pago / pedidos[i].valor acessam as propriedades necessárias para decidir e acumular.',
+            'Em cada item da lista, confira propriedades como pago e some apenas os válidos.',
         },
         {
-          titulo: '3. Retornando o resultado final com clareza',
+          titulo: '3. Retorno reutilizável',
           explicacao:
-            'Ao fim do loop, a função retorna o total acumulado com return. Assim, o mesmo código serve tanto para exibir o resumo quanto para reaproveitar o valor em outras regras da aplicação.',
+            'Retornar o total com return deixa o cálculo pronto para ser exibido ou reaproveitado.',
         },
       ],
 
       exemploCotidiano:
-        'Situação real — fechamento de caixa de pedidos pagos:\nVocê olha cada pedido da lista: se pedido.pago && !pedido.cancelado, soma pedido.valor no total; se não estiver pago ou foi cancelado, ignora e segue para o próximo.',
+        'Fechamento de caixa:\nSoma apenas pedidos com pago === true.',
 
       exemploCodigo:
-        '// Integrando função, array de objetos, condição e acumulador\nconst pedidos = [\n  { item: "Curso JS", valor: 100, pago: true },\n  { item: "E-book", valor: 40, pago: false },\n  { item: "Mentoria", valor: 160, pago: true },\n]\n\nfunction somarPedidosPagos(lista) {\n  let total = 0\n  for (let i = 0; i < lista.length; i++) {\n    if (lista[i].pago && lista[i].valor > 0) {\n      total = total + lista[i].valor\n    }\n  }\n  return total\n}\n\nconsole.log(somarPedidosPagos(pedidos)) // 260',
+        'function somarPagos(pedidos) {\n  let total = 0\n  for (let i = 0; i < pedidos.length; i++) {\n    if (pedidos[i].pago) total += pedidos[i].valor\n  }\n  return total\n}',
 
       resumo:
-        'O projeto integrador junta decomposição, objetos, arrays, loops, condições e funções com return para resolver um problema real com clareza.',
+        'Decompor, percorrer, filtrar e retornar resume bem um problema completo.',
     },
 
     pratica: {
       titulo: 'Classifique cada parte do resumo de pedidos',
       enunciado:
-        'Considere o cenário abaixo e toque na classificação correta para cada trecho ou afirmação:\n\nconst pedidos = [\n  { valor: 50, pago: true },\n  { valor: 80, pago: false },\n  { valor: 30, pago: true },\n]',
-      codigoInicial:
-        'const pedidos = [\n  { valor: 50, pago: true },\n  { valor: 80, pago: false },\n  { valor: 30, pago: true },\n]\n// Classifique o papel de cada trecho no resumo',
+        'Com pedidos = [{ valor: 50, pago: true }, { valor: 80, pago: false }, { valor: 30, pago: true }], classifique:',
+      codigoInicial: '// Soma apenas os pedidos com pago === true',
       resultadoEsperado:
-        'Identificar corretamente o total somado apenas dos pedidos pagos, o papel de if (lista[i].pago) e a função do return.',
-      dica:
-        'Some apenas os pedidos em que pago === true (50 e 30) e observe o que cada estrutura faz no fluxo.',
+        'Identificar o total 80, o filtro com if e o papel do return.',
+      dica: '50 + 30 = 80; o pedido de 80 não está pago.',
       classificacao: {
-        categorias: ['Soma 80', 'Filtra pedidos pagos', 'Devolve o resultado'],
+        categorias: ['Soma 80', 'Filtra pagos', 'Retorna resultado'],
         itens: [
           {
-            texto: 'Total acumulado apenas dos pedidos com pago === true (50 + 30)',
+            texto: 'Total somado apenas dos pedidos pagos (50 + 30)',
             categoriaCorreta: 'Soma 80',
           },
           {
-            texto: 'Condição if (lista[i].pago) dentro do loop for',
-            categoriaCorreta: 'Filtra pedidos pagos',
+            texto: 'if (lista[i].pago) dentro do for',
+            categoriaCorreta: 'Filtra pagos',
           },
           {
-            texto: 'Instrução return total ao final da função',
-            categoriaCorreta: 'Devolve o resultado',
+            texto: 'return total ao final da função',
+            categoriaCorreta: 'Retorna resultado',
           },
         ],
-        acertoMsg:
-          'Mandou bem! Você conectou todas as peças da trilha base na Aula 16.',
-        erroMsg:
-          'Algum item ficou sem classificação ou com papel trocado. Confira a soma de 50 + 30, o filtro com if e o papel de return.',
+        acertoMsg: 'Mandou bem! Base da trilha fechada com chave de ouro.',
+        erroMsg: 'Confira a soma de 50 + 30, o filtro if e o return.',
       },
     },
 
     quiz: [
       {
-        pergunta: 'No exemplo com pedidos de 50 (pago: true), 80 (pago: false) e 30 (pago: true), qual valor a função somarPedidosPagos retorna?',
-        opcoes: [
-          '80 (apenas os pedidos com pago === true são somados)',
-          '160 (soma todos os pedidos, inclusive o não pago)',
-          '50',
-        ],
+        pergunta: 'Com pedidos de 50 (pago: true), 80 (pago: false) e 30 (pago: true), quanto retorna somarPagos?',
+        opcoes: ['80', '160', '50'],
         respostaCorreta: 0,
-        explicacao:
-          'Como o pedido de 80 tem pago: false, a condição if (lista[i].pago) não é atendida para ele, restando 50 + 30 = 80.',
+        explicacao: 'Apenas os pedidos pagos (50 e 30) são somados, resultando em 80.',
       },
       {
-        pergunta: 'Qual é o benefício de decompor um problema como esse em etapas antes de escrever o código final?',
+        pergunta: 'Qual a vantagem de decompor o problema antes de escrever a função?',
         opcoes: [
-          'Permite estruturar dados, condições, repetição e retorno em partes simples e fáceis de conferir',
-          'Dispensa testar condições e limites de array',
-          'Faz com que variáveis não precisem de nomes claros',
+          'Organiza dados, condição, loop e retorno em partes simples',
+          'Dispensa testar condições',
+          'Elimina nomes de variáveis',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Decompor organiza o raciocínio em passos claros, reduzindo erros de lógica e facilitando a manutenção.',
+        explicacao: 'Decompor deixa cada etapa clara e fácil de conferir.',
       },
       {
-        pergunta: 'Ao encerrar a base com funções, objetos, arrays, condições e lógica, o que você já consegue construir?',
+        pergunta: 'O que você já consegue construir com a base concluída?',
         opcoes: [
-          'Pequenas regras e rotinas organizadas que avaliam dados, percorrem listas e retornam resultados',
-          'Apenas declarações sem condições ou repetição',
-          'Códigos que dependem exclusivamente de copiar e colar blocos repetidos',
+          'Lógicas organizadas que avaliam dados, percorrem listas e retornam resultados',
+          'Apenas linhas sem condições ou repetição',
+          'Códigos só com cópia e cola',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'Esses fundamentos formam a base de praticamente qualquer lógica de programação em JavaScript.',
+        explicacao: 'Esses fundamentos sustentam a lógica de programação em JS.',
       },
     ],
 
     conclusao: {
+      titulo: 'Base de lógica concluída!',
+      mensagem:
+        'Você concluiu os fundamentos da linguagem e está pronto para a web.',
+      proximoPasso:
+        'Avance para a Aula 17 e conheça a estrutura da página com HTML.',
       aprendizados: [
-        'Você conectou lógica, variáveis, tipos, comparações e operadores lógicos a decisões e repetições.',
-        'Arrays e objetos permitiram estruturar listas e entidades com propriedades nomeadas.',
-        'Funções com parâmetros e return reuniram tudo em blocos reutilizáveis — concluindo a trilha base do CodeLab.',
+        'Lógica, variáveis, comparações e operadores formam a base.',
+        'Condições, loops, arrays e objetos estruturam dados e fluxo.',
+        'Funções reuniram tudo de forma reutilizável.',
       ],
       reflexao:
-        'Agora que você concluiu as 16 aulas da base, qual pequeno projeto ou rotina do dia a dia você gostaria de montar primeiro?',
+        'Qual mini-ferramenta você gostaria de criar agora que domina a base?',
       proximaAulaId: 'lesson-17',
     },
   },
@@ -2167,8 +1978,7 @@ export const aulasData: AulaItem[] = [
       codigoInicial: '// Organize as tags HTML na sequência correta',
       resultadoEsperado:
         'Montar a sequência correta de tags HTML para título, input e button.',
-      dica:
-        'Comece pelo título <h1>, depois o campo <input> e por último o <button>.',
+      dica: 'Comece pelo título <h1>, depois o campo <input> e por último o <button>.',
       montarBlocos: {
         blocosDisponiveis: [
           '<h1>Cadastro Rápido</h1>',
@@ -2324,8 +2134,7 @@ export const aulasData: AulaItem[] = [
           'Criar um banco de dados local no navegador',
         ],
         respostaCorreta: 0,
-        explicacao:
-          '<main> indica o núcleo principal de conteúdo daquela página.',
+        explicacao: '<main> indica o núcleo principal de conteúdo daquela página.',
       },
       {
         pergunta: 'Quando faz mais sentido usar uma <div>?',
@@ -2416,12 +2225,10 @@ export const aulasData: AulaItem[] = [
       titulo: 'Classifique o comportamento de cada camada do Box Model e estilo',
       enunciado:
         'Identifique qual efeito cada regra ou camada exerce na caixa do elemento:',
-      codigoInicial:
-        '// Separe o que age dentro da caixa do que afasta fora dela',
+      codigoInicial: '// Separe o que age dentro da caixa do que afasta fora dela',
       resultadoEsperado:
         'Classificar corretamente padding/borda/box-sizing e margin.',
-      dica:
-        'Lembre: padding cria espaço por dentro da borda, enquanto margin cria distância por fora.',
+      dica: 'Lembre: padding cria espaço por dentro da borda, enquanto margin cria distância por fora.',
       classificacao: {
         categorias: ['Dentro / Tamanho da caixa', 'Fora da caixa (margin)'],
         itens: [
@@ -2476,8 +2283,7 @@ export const aulasData: AulaItem[] = [
           'Qual propriedade ajuda a arredondar os cantos de um card ou botão?',
         opcoes: ['border-radius', 'font-weight', 'line-height'],
         respostaCorreta: 0,
-        explicacao:
-          'border-radius arredonda os cantos da caixa visual do elemento.',
+        explicacao: 'border-radius arredonda os cantos da caixa visual do elemento.',
       },
     ],
 
@@ -2548,8 +2354,7 @@ export const aulasData: AulaItem[] = [
       codigoInicial: '// Monte as propriedades CSS do container flex',
       resultadoEsperado:
         'Montar display: flex, gap e align-items na ordem correta.',
-      dica:
-        'Comece com display: flex;, depois gap: 12px; e por fim align-items: center;.',
+      dica: 'Comece com display: flex;, depois gap: 12px; e por fim align-items: center;.',
       montarBlocos: {
         blocosDisponiveis: [
           'display: flex;',
@@ -2563,8 +2368,7 @@ export const aulasData: AulaItem[] = [
         ],
         acertoMsg:
           'Mandou bem! Essa é uma base clássica e direta para alinhar grupos na tela.',
-        erroMsg:
-          'Ajuste a ordem dos blocos para formar a regra completa.',
+        erroMsg: 'Ajuste a ordem dos blocos para formar a regra completa.',
       },
     },
 
@@ -2596,8 +2400,7 @@ export const aulasData: AulaItem[] = [
           'Esconder todos os botões da tela',
         ],
         respostaCorreta: 0,
-        explicacao:
-          'flex-wrap: wrap permite a quebra de linha em espaços menores.',
+        explicacao: 'flex-wrap: wrap permite a quebra de linha em espaços menores.',
       },
     ],
 
@@ -2666,17 +2469,9 @@ export const aulasData: AulaItem[] = [
       enunciado:
         'Analise as linhas abaixo e toque naquela que causa problema na sequência:',
       codigoInicial: '// Observe a ordem das operações com o elemento da tela',
-      resultadoEsperado:
-        'Identificar qual linha está fora de ordem ou incorreta.',
-      dica:
-        'Você consegue usar a referência de um elemento antes de selecioná-lo?',
+      resultadoEsperado: 'Identificar qual linha está fora de ordem ou incorreta.',
+      dica: 'Você consegue usar a referência de um elemento antes de selecioná-lo?',
       cacaErro: {
-        etapas: [
-          '1. Tentar ler input.value antes de selecionar o input na página',
-          '2. Selecionar o input com document.querySelector("#campo")',
-          '3. Guardar a referência em uma constante',
-          '4. Ler o valor digitado quando o usuário agir',
-        ],
         linhas: [
           '1. Tentar ler input.value antes de selecionar o input na página',
           '2. Selecionar o input com document.querySelector("#campo")',
@@ -2795,8 +2590,7 @@ export const aulasData: AulaItem[] = [
       codigoInicial: '// Monte a estrutura do addEventListener',
       resultadoEsperado:
         'Selecionar o botão e registrar addEventListener("click", ...).',
-      dica:
-        'Selecione o botão primeiro, depois chame addEventListener("click", () => { ... }).',
+      dica: 'Selecione o botão primeiro, depois chame addEventListener("click", () => { ... }).',
       montarBlocos: {
         blocosDisponiveis: [
           'const btn = document.querySelector("#btn");',
@@ -2812,8 +2606,7 @@ export const aulasData: AulaItem[] = [
         ],
         acertoMsg:
           'Mandou bem! Você ligou a seleção do botão ao evento de clique de forma limpa.',
-        erroMsg:
-          'Confira a ordem dos blocos e o fechamento do addEventListener.',
+        erroMsg: 'Confira a ordem dos blocos e o fechamento do addEventListener.',
       },
     },
 
@@ -2834,8 +2627,7 @@ export const aulasData: AulaItem[] = [
           'Qual evento costuma ser usado para acompanhar o que o usuário digita em um input?',
         opcoes: ['input', 'scroll', 'load'],
         respostaCorreta: 0,
-        explicacao:
-          'O evento input dispara quando o valor do campo é alterado.',
+        explicacao: 'O evento input dispara quando o valor do campo é alterado.',
       },
       {
         pergunta: 'O que pode ser feito dentro da função de um evento?',
@@ -2917,8 +2709,7 @@ export const aulasData: AulaItem[] = [
       codigoInicial: '// Ordene as linhas de atualização visual',
       resultadoEsperado:
         'Atualizar textContent, alternar a classe com classList.toggle e renderizar.',
-      dica:
-        'Atualize o texto primeiro, alterne a classe em seguida e finalize atualizando a visualização.',
+      dica: 'Atualize o texto primeiro, alterne a classe em seguida e finalize atualizando a visualização.',
       montarBlocos: {
         blocosDisponiveis: [
           'item.classList.toggle("ativo");',
@@ -2932,8 +2723,7 @@ export const aulasData: AulaItem[] = [
         ],
         acertoMsg:
           'Mandou bem! Texto e classe ficam alinhados com o estado da tela.',
-        erroMsg:
-          'Revise a ordem das linhas para manter a atualização clara.',
+        erroMsg: 'Revise a ordem das linhas para manter a atualização clara.',
       },
     },
 

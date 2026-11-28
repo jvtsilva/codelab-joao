@@ -1,208 +1,166 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import type { AuthChangeEvent } from '@supabase/supabase-js'
+import { useTheme } from '@/hooks/useTheme'
 import Link from 'next/link'
 import { aulasData } from '@/data/lessonsData'
 import { Navbar } from '@/components/Navbar'
+import { PageHeaderBanner } from '@/components/PageHeaderBanner'
+import { LabSurface } from '@/components/LabSurface'
 
-const STORAGE_KEY = 'codelab_tema_aula'
-const XP_POR_AULA = 50
+interface ModuleTheme {
+  titulo: string
+  subtitulo: string
+  badge: string
+  railGradient: string
+  barGradient: string
+  glowClass: string
+  accentText: string
+  softBg: string
+  borderTone: string
+  nodeIdle: string
+  cardHover: string
+  titleHover: string
+}
 
-const MODULES_BASE = [
-  {
-    id: 1,
+const MODULE_META: Record<number, ModuleTheme> = {
+  1: {
     titulo: 'Módulo 1: Lógica e Decomposição',
-    aulas: [
-      {
-        id: 'lesson-1',
-        number: 1,
-        title: 'Como o Computador Segue Instruções',
-        desc: 'Entenda ordem de execução, clareza de passos e por que a sequência muda o resultado.',
-      },
-      {
-        id: 'lesson-2',
-        number: 2,
-        title: 'Condições no Dia a Dia e Regras de Decisão',
-        desc: 'Reconheça regras que dependem de cenários e aprenda a avaliar condições com clareza.',
-      },
-      {
-        id: 'lesson-3',
-        number: 3,
-        title: 'Decompondo Problemas em Etapas',
-        desc: 'Quebre problemas em entradas, regras/transformações e resultados esperados.',
-      },
-    ],
+    subtitulo: 'Sequência, condições do dia a dia e decomposição',
+    badge: 'Base Mental',
+    railGradient: 'from-emerald-400 via-teal-400 to-emerald-500/25',
+    barGradient: 'from-emerald-500 via-teal-400 to-emerald-300',
+    glowClass: 'bg-emerald-500/14',
+    accentText: 'text-emerald-700 dark:text-emerald-400',
+    softBg: 'bg-emerald-500/10',
+    borderTone: 'border-emerald-600/35 dark:border-emerald-500/35',
+    nodeIdle:
+      'text-emerald-700 dark:text-emerald-300 border-emerald-500/35 bg-emerald-500/8 dark:bg-emerald-500/10',
+    cardHover:
+      'hover:border-emerald-500/50 hover:shadow-md dark:hover:shadow-emerald-950/30',
+    titleHover: 'group-hover:text-emerald-700 dark:group-hover:text-emerald-400',
   },
-  {
-    id: 2,
+  2: {
     titulo: 'Módulo 2: Dados, Tipos e Lógica',
-    aulas: [
-      {
-        id: 'lesson-4',
-        number: 4,
-        title: 'Variáveis, const e let: Guardando Valores',
-        desc: 'Aprenda a nomear e guardar informações em variáveis e saiba quando escolher const ou let.',
-      },
-      {
-        id: 'lesson-5',
-        number: 5,
-        title: 'Tipos de Dados e Operações: Textos, Números e Booleanos',
-        desc: 'Reconheça string, number e boolean e entenda como o tipo muda o resultado das operações.',
-      },
-      {
-        id: 'lesson-6',
-        number: 6,
-        title: 'Comparações: Produzindo true ou false',
-        desc: 'Compare valores com ===, !==, >, <, >= e <= e entenda como toda comparação gera um booleano.',
-      },
-      {
-        id: 'lesson-7',
-        number: 7,
-        title: 'Operadores Lógicos: Combinando Regras com &&, || e !',
-        desc: 'Combine condições com && (E) e || (OU) e inverta booleanos com ! (NÃO).',
-      },
-      {
-        id: 'lesson-8',
-        number: 8,
-        title: 'Prática Combinada de Dados e Regras',
-        desc: 'Junte variáveis, tipos, comparações e operadores lógicos para avaliar regras completas.',
-      },
-    ],
+    subtitulo: 'Variáveis, tipos, comparações, operadores e regras',
+    badge: 'Fundamentos JS',
+    railGradient: 'from-cyan-400 via-sky-400 to-cyan-500/25',
+    barGradient: 'from-cyan-500 via-sky-400 to-cyan-300',
+    glowClass: 'bg-cyan-500/14',
+    accentText: 'text-cyan-700 dark:text-cyan-400',
+    softBg: 'bg-cyan-500/10',
+    borderTone: 'border-cyan-600/35 dark:border-cyan-500/35',
+    nodeIdle:
+      'text-cyan-700 dark:text-cyan-300 border-cyan-500/35 bg-cyan-500/8 dark:bg-cyan-500/10',
+    cardHover:
+      'hover:border-cyan-500/50 hover:shadow-md dark:hover:shadow-cyan-950/30',
+    titleHover: 'group-hover:text-cyan-700 dark:group-hover:text-cyan-400',
   },
-  {
-    id: 3,
+  3: {
     titulo: 'Módulo 3: Fluxo, Loops e Arrays',
-    aulas: [
-      {
-        id: 'lesson-9',
-        number: 9,
-        title: 'Decisões com if, else if e else: Direcionando o Fluxo',
-        desc: 'Use if, else if e else para escolher caminhos e entenda por que a ordem das condições importa.',
-      },
-      {
-        id: 'lesson-10',
-        number: 10,
-        title: 'Loops com for e while: Repetindo com Segurança',
-        desc: 'Repita ações com for e while, entenda contador e parada e evite loops infinitos.',
-      },
-      {
-        id: 'lesson-11',
-        number: 11,
-        title: 'Arrays e Acesso por Índice: Listas em Ordem',
-        desc: 'Crie arrays, entenda por que o índice começa em 0 e use .length com segurança.',
-      },
-      {
-        id: 'lesson-12',
-        number: 12,
-        title: 'Percorrendo Listas e Tomando Decisões',
-        desc: 'Combine for, índices de array e if para visitar cada item e somar ou contar resultados.',
-      },
-    ],
+    subtitulo: 'if/else, loops for/while, arrays e listas',
+    badge: 'Controle & Listas',
+    railGradient: 'from-violet-400 via-purple-400 to-violet-500/25',
+    barGradient: 'from-violet-500 via-purple-400 to-violet-300',
+    glowClass: 'bg-violet-500/14',
+    accentText: 'text-violet-700 dark:text-violet-400',
+    softBg: 'bg-violet-500/10',
+    borderTone: 'border-violet-600/35 dark:border-violet-500/35',
+    nodeIdle:
+      'text-violet-700 dark:text-violet-300 border-violet-500/35 bg-violet-500/8 dark:bg-violet-500/10',
+    cardHover:
+      'hover:border-violet-500/50 hover:shadow-md dark:hover:shadow-violet-950/30',
+    titleHover: 'group-hover:text-violet-700 dark:group-hover:text-violet-400',
   },
-  {
-    id: 4,
+  4: {
     titulo: 'Módulo 4: Funções, Objetos e Projeto',
-    aulas: [
-      {
-        id: 'lesson-13',
-        number: 13,
-        title: 'Funções: Parâmetros e return',
-        desc: 'Crie funções reutilizáveis, entenda parâmetros e argumentos e use return para devolver resultados.',
-      },
-      {
-        id: 'lesson-14',
-        number: 14,
-        title: 'Objetos: Chave, Valor e Atualização',
-        desc: 'Agrupe dados nomeados em objetos com chave e valor, acesse com ponto e atualize estados.',
-      },
-      {
-        id: 'lesson-15',
-        number: 15,
-        title: 'Funções Trabalhando com Objetos e Arrays',
-        desc: 'Passe objetos e arrays para funções, aplique regras sobre propriedades e retorne resultados.',
-      },
-      {
-        id: 'lesson-16',
-        number: 16,
-        title: 'Projeto Integrador da Base: Resumo de Pedidos',
-        desc: 'Integre funções, objetos, arrays, loops, condições e lógica para resumir pedidos.',
-      },
-    ],
+    subtitulo: 'Funções, objetos, listas e resumo de pedidos',
+    badge: 'Arquitetura',
+    railGradient: 'from-amber-400 via-orange-400 to-amber-500/25',
+    barGradient: 'from-amber-500 via-orange-400 to-amber-300',
+    glowClass: 'bg-amber-500/14',
+    accentText: 'text-amber-700 dark:text-amber-400',
+    softBg: 'bg-amber-500/10',
+    borderTone: 'border-amber-600/35 dark:border-amber-500/35',
+    nodeIdle:
+      'text-amber-700 dark:text-amber-300 border-amber-500/35 bg-amber-500/8 dark:bg-amber-500/10',
+    cardHover:
+      'hover:border-amber-500/50 hover:shadow-md dark:hover:shadow-amber-950/30',
+    titleHover: 'group-hover:text-amber-700 dark:group-hover:text-amber-400',
   },
-  {
-    id: 5,
+  5: {
     titulo: 'Módulo 5: Construindo a Tela (HTML e CSS)',
-    aulas: [
-      {
-        id: 'lesson-17',
-        number: 17,
-        title: 'O que é HTML: Estrutura e Tags Essenciais',
-        desc: 'Títulos, parágrafos, botões, inputs e listas com tags básicas da web.',
-      },
-      {
-        id: 'lesson-18',
-        number: 18,
-        title: 'Organizando Blocos com div, section e Semântica',
-        desc: 'Como agrupar elementos na página com clareza e estrutura.',
-      },
-      {
-        id: 'lesson-19',
-        number: 19,
-        title: 'Primeiros Passos no CSS: Cores, Fontes e Espaçamento',
-        desc: 'Trabalhe cores, fundos, margens, preenchimento interno e bordas.',
-      },
-      {
-        id: 'lesson-20',
-        number: 20,
-        title: 'Alinhando Elementos com Flexbox',
-        desc: 'Centralize, organize itens lado a lado e monte cards limpos.',
-      },
-    ],
+    subtitulo: 'Tags, semântica, Box Model e Flexbox',
+    badge: 'Visual Web',
+    railGradient: 'from-fuchsia-400 via-pink-400 to-fuchsia-500/25',
+    barGradient: 'from-fuchsia-500 via-pink-400 to-fuchsia-300',
+    glowClass: 'bg-fuchsia-500/14',
+    accentText: 'text-fuchsia-700 dark:text-fuchsia-400',
+    softBg: 'bg-fuchsia-500/10',
+    borderTone: 'border-fuchsia-600/35 dark:border-fuchsia-500/35',
+    nodeIdle:
+      'text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-500/35 bg-fuchsia-500/8 dark:bg-fuchsia-500/10',
+    cardHover:
+      'hover:border-fuchsia-500/50 hover:shadow-md dark:hover:shadow-fuchsia-950/30',
+    titleHover: 'group-hover:text-fuchsia-700 dark:group-hover:text-fuchsia-400',
   },
-  {
-    id: 6,
+  6: {
     titulo: 'Módulo 6: Dando Vida à Página (DOM e Eventos com JS)',
-    aulas: [
-      {
-        id: 'lesson-21',
-        number: 21,
-        title: 'O que é o DOM e Como Selecionar Elementos',
-        desc: 'Entenda a árvore da página e selecione elementos com querySelector.',
-      },
-      {
-        id: 'lesson-22',
-        number: 22,
-        title: 'Reagindo ao Usuário com Eventos',
-        desc: 'Cliques e digitação disparando funções que você já sabe criar.',
-      },
-      {
-        id: 'lesson-23',
-        number: 23,
-        title: 'Mudando Texto, Classes e Estilos na Tela',
-        desc: 'Atualize conteúdos, alterne classes CSS e reaja ao estado da página.',
-      },
-      {
-        id: 'lesson-24',
-        number: 24,
-        title: 'Projeto Web Integrado: Lista ou Card Interativo',
-        desc: 'Junte HTML, CSS, arrays, objetos e eventos em uma mini-interface funcional.',
-      },
-    ],
+    subtitulo: 'Seleção no DOM, eventos, classes e projeto web',
+    badge: 'Interação Real',
+    railGradient: 'from-emerald-400 via-cyan-400 to-sky-400/35',
+    barGradient: 'from-emerald-500 via-cyan-400 to-sky-300',
+    glowClass: 'bg-emerald-500/14',
+    accentText: 'text-emerald-700 dark:text-emerald-400',
+    softBg: 'bg-emerald-500/10',
+    borderTone: 'border-emerald-600/35 dark:border-emerald-500/35',
+    nodeIdle:
+      'text-emerald-700 dark:text-emerald-300 border-emerald-500/35 bg-emerald-500/8 dark:bg-emerald-500/10',
+    cardHover:
+      'hover:border-emerald-500/50 hover:shadow-md dark:hover:shadow-emerald-950/30',
+    titleHover: 'group-hover:text-emerald-700 dark:group-hover:text-emerald-400',
   },
-]
+}
 
-const AVAILABLE_NUMBERS = new Set(aulasData.map((item) => Number(item.numero)))
+interface TrilhaAula {
+  id: string
+  number: number
+  modulo: number
+  title: string
+  desc: string
+  available: boolean
+}
 
-const MODULES = MODULES_BASE.map((mod) => ({
-  ...mod,
-  aulas: mod.aulas.map((lesson) => {
-    const aula = aulasData.find((item) => Number(item.numero) === lesson.number)
-    return aula
-      ? { ...lesson, title: aula.titulo, desc: aula.resumo, available: true }
-      : { ...lesson, available: false }
-  }),
-}))
+interface TrilhaModulo {
+  id: number
+  theme: ModuleTheme
+  aulas: TrilhaAula[]
+}
+
+const MODULES: TrilhaModulo[] = Object.entries(MODULE_META).map(
+  ([modKey, theme]) => {
+    const moduloNum = Number(modKey)
+    const aulasDoModulo = aulasData
+      .filter((item) => Number(item.modulo) === moduloNum)
+      .sort((a, b) => Number(a.numero) - Number(b.numero))
+      .map((item) => ({
+        id: item.id || `lesson-${item.numero}`,
+        number: Number(item.numero),
+        modulo: moduloNum,
+        title: item.titulo,
+        desc: item.resumo,
+        available: Boolean(item.titulo),
+      }))
+
+    return {
+      id: moduloNum,
+      theme,
+      aulas: aulasDoModulo,
+    }
+  }
+)
 
 const ALL_LESSONS = MODULES.flatMap((mod) => mod.aulas)
 
@@ -231,27 +189,17 @@ function clearGuestLessonStorage(totalLessons: number) {
 
 export default function DashboardPage() {
   const [userId, setUserId] = useState<string | null>(null)
-  const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>({})
+  const [completedLessons, setCompletedLessons] = useState<
+    Record<string, boolean>
+  >({})
   const [loading, setLoading] = useState(true)
-  const [isDark, setIsDark] = useState(true)
-  const [modulosAbertos, setModulosAbertos] = useState<Record<number, boolean>>({
-    1: false,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-    6: false,
-  })
+  const { isDark, alternarTema } = useTheme()
+  const [autoOpenedModule, setAutoOpenedModule] = useState<number | null>(null)
+  const [modulosOverride, setModulosOverride] = useState<
+    Record<number, boolean>
+  >({})
 
   const totalLessonsCount = ALL_LESSONS.length
-
-  useLayoutEffect(() => {
-    const salvo = localStorage.getItem(STORAGE_KEY)
-    const escuro = salvo !== 'light'
-    setIsDark(escuro)
-    document.documentElement.classList.toggle('dark', escuro)
-    document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
-  }, [])
 
   const loadProgress = useCallback(
     async (isCancelled: () => boolean) => {
@@ -261,8 +209,11 @@ export default function DashboardPage() {
           error: sessionError,
         } = await supabase.auth.getSession()
 
-        if (sessionError) {
-          console.error('Erro ao obter sessão no dashboard:', sessionError.message)
+        if (sessionError && process.env.NODE_ENV === 'development') {
+          console.error(
+            'Erro ao obter sessão no dashboard:',
+            sessionError.message
+          )
         }
 
         const progressMap: Record<string, boolean> = {}
@@ -273,23 +224,34 @@ export default function DashboardPage() {
 
           const { data, error: progressError } = await supabase
             .from('user_progress')
-            .select('lesson_id, completed')
+            .select('lesson_id')
             .eq('user_id', currentUserId)
 
           if (progressError) {
-            console.error('Erro ao carregar user_progress:', progressError.message)
+            if (process.env.NODE_ENV === 'development') {
+              console.error(
+                'Erro ao carregar user_progress:',
+                progressError.message
+              )
+            }
           } else if (Array.isArray(data)) {
             data.forEach((item) => {
               const key = normalizeLessonKey(item?.lesson_id)
-              if (key && item?.completed === true) {
+              if (key) {
                 progressMap[key] = true
               }
             })
           }
         } else if (typeof window !== 'undefined') {
           for (let i = 1; i <= totalLessonsCount; i++) {
-            if (localStorage.getItem(`codelab_visitante_aula_${i}`) === 'true') {
-              progressMap[`lesson-${i}`] = true
+            try {
+              if (
+                localStorage.getItem(`codelab_visitante_aula_${i}`) === 'true'
+              ) {
+                progressMap[`lesson-${i}`] = true
+              }
+            } catch {
+              // Ignora bloqueio de storage pelo navegador
             }
           }
         }
@@ -298,7 +260,9 @@ export default function DashboardPage() {
         setUserId(currentUserId)
         setCompletedLessons(progressMap)
       } catch (err) {
-        console.error('Erro inesperado ao carregar progresso:', err)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Erro inesperado ao carregar progresso:', err)
+        }
       } finally {
         if (!isCancelled()) {
           setLoading(false)
@@ -311,13 +275,17 @@ export default function DashboardPage() {
   useEffect(() => {
     let cancelled = false
 
-    void loadProgress(() => cancelled)
+    queueMicrotask(() => {
+      if (!cancelled) {
+        void loadProgress(() => cancelled)
+      }
+    })
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
       if (cancelled) return
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_IN') {
         clearGuestLessonStorage(totalLessonsCount)
       }
       void loadProgress(() => cancelled)
@@ -329,242 +297,425 @@ export default function DashboardPage() {
     }
   }, [loadProgress, totalLessonsCount])
 
-  const alternarTema = () => {
-    setIsDark((atual) => {
-      const proximo = !atual
-      localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', proximo)
-      document.documentElement.style.backgroundColor = proximo ? '#030712' : '#fafaf9'
-      return proximo
-    })
-  }
-
-  const toggleModulo = (moduloId: number) => {
-    setModulosAbertos((prev) => ({
-      ...prev,
-      [moduloId]: !prev[moduloId],
-    }))
-  }
-
-  const totalCompletedCount = ALL_LESSONS.filter((l) => completedLessons[l.id]).length
+  const totalCompletedCount = ALL_LESSONS.filter(
+    (l) => completedLessons[l.id]
+  ).length
   const percentualConcluido =
-    totalLessonsCount > 0 ? Math.round((totalCompletedCount / totalLessonsCount) * 100) : 0
+    totalLessonsCount > 0
+      ? Math.round((totalCompletedCount / totalLessonsCount) * 100)
+      : 0
+
+  const completedModulesCount = MODULES.filter(
+    (mod) =>
+      mod.aulas.length > 0 &&
+      mod.aulas.every((lesson) => completedLessons[lesson.id])
+  ).length
 
   const nextLessonToStudy =
     ALL_LESSONS.find((l) => l.available && !completedLessons[l.id]) ||
     ALL_LESSONS.find((l) => l.available) ||
-    ALL_LESSONS[0]
+    ALL_LESSONS[0] ||
+    null
 
-  const cardClasses =
-    'bg-white border-stone-200 text-stone-900 shadow-xs dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-none'
-  const textMutedClasses = 'text-stone-600 dark:text-gray-400'
-  const accentGreenClasses = 'text-emerald-700 dark:text-emerald-400'
-  const accentAmberClasses = 'text-amber-700 dark:text-amber-400'
+  const targetAutoModule =
+    !loading && nextLessonToStudy ? nextLessonToStudy.modulo : null
+
+  useEffect(() => {
+    if (targetAutoModule !== null) {
+      queueMicrotask(() => {
+        setAutoOpenedModule((prev) => prev ?? targetAutoModule)
+      })
+    }
+  }, [targetAutoModule])
+
+  const isModuloAberto = (moduloId: number) => {
+    if (moduloId in modulosOverride) {
+      return Boolean(modulosOverride[moduloId])
+    }
+    if (autoOpenedModule !== null) {
+      return moduloId === autoOpenedModule
+    }
+    return moduloId === 1
+  }
+
+  const toggleModulo = (moduloId: number) => {
+    setModulosOverride((prev) => ({
+      ...prev,
+      [moduloId]: !isModuloAberto(moduloId),
+    }))
+  }
+
+  const textMuted = 'text-stone-600 dark:text-gray-400'
+  const accentGreen = 'text-emerald-700 dark:text-emerald-400'
+  const accentAmber = 'text-amber-700 dark:text-amber-400'
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white selection:bg-emerald-500 selection:text-gray-950">
+    <div className="min-h-screen flex flex-col bg-stone-50 bg-lab-dots text-stone-900 dark:bg-gray-950 dark:text-white selection:bg-emerald-500 selection:text-gray-950">
       <Navbar
         activeTab="trilha"
-        subtitle="Aprenda no seu ritmo"
+        subtitle="Estúdio de Trilha"
         userId={userId}
         isDark={isDark}
         onToggleTheme={alternarTema}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6 pb-10">
-        <section className={`space-y-3.5 border p-4 sm:p-6 rounded-2xl ${cardClasses}`}>
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between gap-2">
-              <span
-                className={`text-[11px] font-semibold tracking-wider uppercase ${accentGreenClasses}`}
-              >
-                Trilha JavaScript • Do Zero à Prática
-              </span>
-              <span
-                suppressHydrationWarning
-                className={`text-xs font-bold tabular-nums ${accentGreenClasses}`}
-              >
-                {loading ? '...' : `${percentualConcluido}%`}
-              </span>
-            </div>
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-6 pb-16">
+        <LabSurface variant="card" className="p-5 sm:p-7 space-y-5">
+          <PageHeaderBanner
+            tone="emerald"
+            badge={`Trilha JavaScript • ${totalLessonsCount} Aulas`}
+            title="Trilha interativa de JavaScript & Web"
+            description="Avance passo a passo no seu ritmo ou pule direto para revisar qualquer aula — todas ficam abertas para você explorar."
+            className="border-0 bg-transparent p-0 sm:p-0 shadow-none dark:bg-transparent"
+            rightSlot={
+              <div className="grid grid-cols-3 gap-2 shrink-0">
+                <div className="press-tactile rounded-2xl px-3 py-2.5 bg-stone-100/90 dark:bg-gray-950/80 border border-stone-200/80 dark:border-gray-800 hover:border-emerald-500/40">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider block ${textMuted}`}
+                  >
+                    Progresso
+                  </span>
+                  <span
+                    suppressHydrationWarning
+                    className={`text-sm sm:text-base font-black tabular-nums ${accentGreen}`}
+                  >
+                    {loading ? '...' : `${percentualConcluido}%`}
+                  </span>
+                </div>
 
-            <h2 className="text-lg sm:text-2xl font-black tracking-tight leading-tight">
-              Aprenda do zero, no seu tempo e sem pressa
-            </h2>
+                <div className="press-tactile rounded-2xl px-3 py-2.5 bg-stone-100/90 dark:bg-gray-950/80 border border-stone-200/80 dark:border-gray-800 hover:border-cyan-500/40">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider block ${textMuted}`}
+                  >
+                    Aulas
+                  </span>
+                  <span
+                    suppressHydrationWarning
+                    className="text-sm sm:text-base font-black tabular-nums"
+                  >
+                    {loading
+                      ? '...'
+                      : `${totalCompletedCount}/${totalLessonsCount}`}
+                  </span>
+                </div>
 
-            <p className="text-xs sm:text-sm leading-relaxed text-stone-700 dark:text-gray-300">
-              Concluídas:{' '}
-              <strong
-                suppressHydrationWarning
-                className={`tabular-nums ${accentGreenClasses}`}
-              >
-                {loading ? '...' : `${totalCompletedCount} de ${totalLessonsCount}`}
-              </strong>{' '}
-              aulas. Todas liberadas para você estudar na ordem que preferir ou revisar quando quiser.
-            </p>
+                <div className="press-tactile rounded-2xl px-3 py-2.5 bg-stone-100/90 dark:bg-gray-950/80 border border-stone-200/80 dark:border-gray-800 hover:border-emerald-500/40">
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider block ${textMuted}`}
+                  >
+                    Módulos
+                  </span>
+                  <span
+                    suppressHydrationWarning
+                    className={`text-sm sm:text-base font-black tabular-nums ${accentGreen}`}
+                  >
+                    {loading
+                      ? '...'
+                      : `${completedModulesCount}/${MODULES.length}`}
+                  </span>
+                </div>
+              </div>
+            }
+          />
 
-            <div className="w-full h-2 rounded-full bg-stone-200 dark:bg-gray-800 overflow-hidden">
-              <div
-                className="h-full bg-emerald-500"
-                style={{ width: `${loading ? 0 : percentualConcluido}%` }}
-              />
-            </div>
+          <div className="relative w-full h-2.5 rounded-full bg-stone-200/90 dark:bg-gray-800/90 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-teal-300 transition-[width] duration-700 ease-out"
+              style={{ width: `${loading ? 0 : percentualConcluido}%` }}
+            />
           </div>
 
           {!loading && nextLessonToStudy && (
-            <div className="pt-1">
-              <Link
-                href={`/dashboard/aula/${nextLessonToStudy.number}`}
-                className="flex items-center justify-between gap-3 p-3.5 border rounded-xl group bg-stone-50 hover:bg-stone-100 border-emerald-600/30 dark:bg-gray-950/80 dark:hover:bg-gray-950 dark:border-emerald-500/30"
-              >
-                <div className="min-w-0">
+            <Link
+              href={`/dashboard/aula/${nextLessonToStudy.number}`}
+              className="relative press-tactile group flex items-center justify-between gap-4 p-4 rounded-2xl border border-emerald-600/35 bg-gradient-to-r from-emerald-500/14 via-cyan-500/8 to-transparent hover:from-emerald-500/20 hover:via-cyan-500/12 dark:border-emerald-500/35 shadow-xs"
+            >
+              <div className="min-w-0 space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
                   <span
                     suppressHydrationWarning
-                    className={`text-[10px] font-bold uppercase tracking-wider block tabular-nums ${accentGreenClasses}`}
+                    className={`text-[10px] font-black uppercase tracking-[0.14em] tabular-nums ${accentGreen}`}
                   >
                     {completedLessons[nextLessonToStudy.id]
                       ? `Revisar • Aula ${nextLessonToStudy.number}`
-                      : `Continuar • Aula ${nextLessonToStudy.number}`}
+                      : `Próxima aula • Aula ${nextLessonToStudy.number}`}
                   </span>
-                  <p
-                    suppressHydrationWarning
-                    className="text-xs sm:text-sm font-bold truncate text-stone-900 group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400"
-                  >
-                    {nextLessonToStudy.title}
-                  </p>
                 </div>
-                <span className="px-3 py-2 bg-emerald-500 text-gray-950 font-extrabold text-xs rounded-lg shrink-0 group-hover:bg-emerald-400">
-                  Continuar →
-                </span>
-              </Link>
-            </div>
-          )}
-        </section>
+                <p
+                  suppressHydrationWarning
+                  className="text-sm sm:text-base font-extrabold truncate text-stone-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors"
+                >
+                  {nextLessonToStudy.title}
+                </p>
+              </div>
 
-        <div className="space-y-4">
+              <span className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 group-hover:from-emerald-400 group-hover:to-teal-300 text-gray-950 font-black text-xs shrink-0 transition-all shadow-xs group-hover:translate-x-0.5">
+                Continuar →
+              </span>
+            </Link>
+          )}
+        </LabSurface>
+
+        <div className="space-y-5">
           {MODULES.map((modulo) => {
-            const modCompletedCount = modulo.aulas.filter((l) => completedLessons[l.id]).length
+            const { theme } = modulo
+            const modCompletedCount = modulo.aulas.filter(
+              (l) => completedLessons[l.id]
+            ).length
             const modTotalCount = modulo.aulas.length
-            const isModCompleted = modCompletedCount === modTotalCount
-            const isOpen = Boolean(modulosAbertos[modulo.id])
+            const isModCompleted =
+              modTotalCount > 0 && modCompletedCount === modTotalCount
+            const isOpen = isModuloAberto(modulo.id)
+            const modPercent =
+              modTotalCount > 0
+                ? Math.round((modCompletedCount / modTotalCount) * 100)
+                : 0
 
             return (
-              <div key={modulo.id} className={`border rounded-2xl overflow-hidden ${cardClasses}`}>
+              <LabSurface
+                key={modulo.id}
+                variant="card"
+                className={`relative overflow-hidden transition-all duration-300 ${
+                  isModCompleted
+                    ? 'border-emerald-600/35 dark:border-emerald-500/35'
+                    : ''
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className={`pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl transition-opacity duration-500 ${theme.glowClass}`}
+                />
+
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => toggleModulo(modulo.id)}
-                  className="w-full p-4 sm:p-5 flex items-center justify-between gap-3 sm:gap-4 text-left cursor-pointer hover:bg-stone-50 dark:hover:bg-gray-800/60"
+                  className="relative w-full p-4 sm:p-6 flex items-center justify-between gap-4 text-left cursor-pointer hover:bg-stone-50/90 dark:hover:bg-gray-800/45 transition-colors"
                 >
-                  <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+                  <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
                     <div
                       suppressHydrationWarning
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs tabular-nums shrink-0 ${
+                      className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-xs sm:text-sm tabular-nums shrink-0 border transition-transform duration-300 ${
                         isModCompleted
-                          ? 'bg-emerald-500 text-gray-950 font-black'
-                          : 'bg-stone-100 text-emerald-700 border border-emerald-600/30 dark:bg-gray-800 dark:text-emerald-400 dark:border-emerald-500/30'
+                          ? 'bg-gradient-to-br from-emerald-500 to-teal-400 text-gray-950 border-emerald-300 shadow-xs'
+                          : theme.nodeIdle
                       }`}
                     >
-                      {isModCompleted ? '✓' : modulo.id}
+                      {isModCompleted ? '✓' : `0${modulo.id}`}
                     </div>
-                    <div className="min-w-0 flex-1">
+
+                    <div className="min-w-0 flex-1 space-y-1.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-sm sm:text-base leading-snug break-words">
-                          {modulo.titulo}
-                        </h3>
-                        <span className="px-2 py-0.5 border text-[10px] font-bold rounded-md bg-emerald-50 text-emerald-700 border-emerald-600/25 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
-                          Todas liberadas
+                        <span
+                          className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${theme.softBg} ${theme.borderTone} ${theme.accentText}`}
+                        >
+                          {theme.badge}
+                        </span>
+                        {isModCompleted && (
+                          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                            Módulo Concluído
+                          </span>
+                        )}
+                        <span
+                          suppressHydrationWarning
+                          className={`text-[11px] font-bold tabular-nums ${textMuted}`}
+                        >
+                          {loading
+                            ? '...'
+                            : `${modCompletedCount}/${modTotalCount} concluídas (${modPercent}%)`}
                         </span>
                       </div>
-                      <p
-                        suppressHydrationWarning
-                        className={`text-xs tabular-nums mt-0.5 ${textMutedClasses}`}
-                      >
-                        {loading ? '...' : `${modCompletedCount} de ${modTotalCount} aulas concluídas`}
+
+                      <h2 className="font-extrabold text-sm sm:text-lg tracking-tight leading-snug">
+                        {theme.titulo}
+                      </h2>
+
+                      <p className={`text-xs truncate ${textMuted}`}>
+                        {theme.subtitulo}
                       </p>
+
+                      <div className="w-full max-w-xs h-1.5 rounded-full bg-stone-200/90 dark:bg-gray-800 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${theme.barGradient} transition-[width] duration-700 ease-out`}
+                          style={{ width: `${loading ? 0 : modPercent}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  <span className={`shrink-0 font-semibold text-xs ${textMutedClasses}`}>
+
+                  <span
+                    className={`shrink-0 text-xs font-bold px-3.5 py-2 rounded-xl border border-stone-200/80 dark:border-gray-800 bg-stone-50 dark:bg-gray-950/70 transition-colors ${textMuted}`}
+                  >
                     {isOpen ? 'Recolher' : 'Abrir'}
                   </span>
                 </button>
 
-                {isOpen && (
-                  <div className="p-3.5 sm:p-5 border-t space-y-2 border-stone-200 bg-stone-50/70 dark:border-gray-800/80 dark:bg-gray-950/40">
-                    {modulo.aulas.map((lesson) => {
-                      const isCompleted = Boolean(completedLessons[lesson.id])
-                      const aulaDisponivel = AVAILABLE_NUMBERS.has(lesson.number)
+                <div
+                  className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                    isOpen ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="relative px-4 sm:px-7 pt-3 pb-7 border-t border-stone-200/80 dark:border-gray-800/80 bg-stone-50/65 dark:bg-gray-950/40">
+                      <div>
+                        {modulo.aulas.map((lesson, idx) => {
+                          const isCompleted = Boolean(
+                            completedLessons[lesson.id]
+                          )
+                          const isCurrent =
+                            !loading &&
+                            nextLessonToStudy?.id === lesson.id &&
+                            !isCompleted
+                          const isLastInModule = idx === modulo.aulas.length - 1
+                          const connectorActive = isCompleted || isCurrent
 
-                      return aulaDisponivel ? (
-                        <Link
-                          key={lesson.id}
-                          href={`/dashboard/aula/${lesson.number}`}
-                          className="p-3 sm:p-3.5 rounded-xl border flex items-center justify-between gap-2.5 sm:gap-3 cursor-pointer group bg-white border-stone-200 hover:border-emerald-600/50 dark:bg-gray-900 dark:border-gray-800 dark:hover:border-emerald-500/50"
-                        >
-                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                          return (
                             <div
-                              suppressHydrationWarning
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs tabular-nums shrink-0 ${
-                                isCompleted
-                                  ? 'bg-emerald-500 text-gray-950 font-black'
-                                  : 'bg-stone-100 text-stone-700 group-hover:bg-stone-200 dark:bg-gray-800 dark:text-gray-300 dark:group-hover:bg-gray-700'
-                              }`}
+                              key={lesson.id}
+                              className="flex items-stretch gap-3.5 sm:gap-5"
                             >
-                              {isCompleted ? '✓' : lesson.number}
+                              <div className="flex flex-col items-center shrink-0 pt-3.5">
+                                <div
+                                  suppressHydrationWarning
+                                  className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center font-black text-xs sm:text-sm tabular-nums border-2 z-10 transition-all duration-200 ${
+                                    isCompleted
+                                      ? 'bg-gradient-to-br from-emerald-500 to-teal-400 text-gray-950 border-emerald-300 shadow-xs'
+                                      : isCurrent
+                                        ? 'bg-gradient-to-br from-emerald-500 to-teal-400 text-gray-950 border-white dark:border-gray-950 ring-4 ring-emerald-500/25 scale-105'
+                                        : lesson.available
+                                          ? `bg-white dark:bg-gray-900 ${theme.nodeIdle}`
+                                          : 'bg-stone-200 text-stone-500 border-stone-300 dark:bg-gray-800 dark:text-gray-500 dark:border-gray-700'
+                                  }`}
+                                >
+                                  {isCompleted
+                                    ? '✓'
+                                    : lesson.available
+                                      ? lesson.number
+                                      : '•'}
+                                </div>
+
+                                {!isLastInModule && (
+                                  <div
+                                    aria-hidden="true"
+                                    className={`w-0.5 flex-1 my-1.5 rounded-full transition-colors duration-300 ${
+                                      connectorActive
+                                        ? `bg-gradient-to-b ${theme.railGradient}`
+                                        : 'bg-stone-300/90 dark:bg-gray-800'
+                                    }`}
+                                  />
+                                )}
+                              </div>
+
+                              <div
+                                className={`flex-1 min-w-0 pt-2.5 ${
+                                  !isLastInModule ? 'pb-4' : ''
+                                }`}
+                              >
+                                {lesson.available ? (
+                                  <div
+                                    className={`press-tactile group rounded-2xl border p-4 sm:p-4.5 transition-all duration-200 ${
+                                      isCurrent
+                                        ? `bg-white dark:bg-gray-900 ${theme.borderTone} shadow-md ring-1 ring-emerald-500/25`
+                                        : isCompleted
+                                          ? 'bg-white/95 dark:bg-gray-900/85 border-emerald-600/25 dark:border-emerald-500/20 hover:border-emerald-500/50 hover:shadow-sm'
+                                          : `bg-white/95 dark:bg-gray-900/80 border-stone-200/90 dark:border-gray-800 ${theme.cardHover}`
+                                    }`}
+                                  >
+                                    <div className="flex items-start justify-between gap-3.5">
+                                      <Link
+                                        href={`/dashboard/aula/${lesson.number}`}
+                                        className="min-w-0 flex-1 space-y-1"
+                                      >
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          {isCurrent && (
+                                            <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md bg-gradient-to-r from-emerald-500 to-teal-400 text-gray-950 shadow-2xs">
+                                              Atual
+                                            </span>
+                                          )}
+                                          <span
+                                            className={`text-[11px] font-bold tabular-nums ${textMuted}`}
+                                          >
+                                            Aula {lesson.number}
+                                          </span>
+                                          {isCompleted && (
+                                            <span
+                                              className={`text-[10px] font-extrabold uppercase tracking-wider ${accentGreen}`}
+                                            >
+                                              • Concluída
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        <h3
+                                          className={`font-extrabold text-sm sm:text-base leading-snug text-stone-900 dark:text-white transition-colors ${theme.titleHover}`}
+                                        >
+                                          {lesson.title}
+                                        </h3>
+
+                                        <p
+                                          className={`text-xs leading-relaxed line-clamp-2 ${textMuted}`}
+                                        >
+                                          {lesson.desc}
+                                        </p>
+                                      </Link>
+
+                                      <div className="flex flex-col items-end justify-between gap-2.5 shrink-0">
+                                        <Link
+                                          href={`/dashboard/aula/${lesson.number}`}
+                                          suppressHydrationWarning
+                                          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 group-hover:translate-x-0.5 ${
+                                            isCurrent
+                                              ? 'bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-gray-950 shadow-2xs'
+                                              : isCompleted
+                                                ? 'bg-emerald-500/12 hover:bg-emerald-500/20 ' +
+                                                  accentGreen
+                                                : 'bg-stone-100 hover:bg-stone-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-stone-800 dark:text-gray-200'
+                                          }`}
+                                        >
+                                          {isCompleted ? 'Revisar' : 'Abrir →'}
+                                        </Link>
+
+                                        <Link
+                                          href={`/desafios/${lesson.number}`}
+                                          className={`text-[11px] font-bold hover:underline transition-opacity ${accentAmber}`}
+                                        >
+                                          Desafio #{lesson.number}
+                                        </Link>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div
+                                    suppressHydrationWarning
+                                    className="rounded-2xl border p-4 opacity-65 bg-stone-100/80 border-stone-200 dark:bg-gray-900/50 dark:border-gray-800/70 flex items-center justify-between gap-3"
+                                  >
+                                    <div className="min-w-0">
+                                      <h3 className="font-bold text-xs sm:text-sm truncate">
+                                        {lesson.title}
+                                      </h3>
+                                      <p
+                                        className={`text-xs truncate ${textMuted}`}
+                                      >
+                                        {lesson.desc}
+                                      </p>
+                                    </div>
+                                    <span
+                                      className={`text-[11px] font-semibold shrink-0 ${textMuted}`}
+                                    >
+                                      Em breve
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-xs sm:text-sm truncate text-stone-900 group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
-                                {lesson.title}
-                              </h4>
-                              <p className={`text-[10px] sm:text-xs truncate ${textMutedClasses}`}>
-                                {lesson.desc}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-                            <span
-                              className={`hidden sm:inline text-[11px] font-bold tabular-nums ${accentAmberClasses}`}
-                            >
-                              {XP_POR_AULA} XP
-                            </span>
-                            <span
-                              suppressHydrationWarning
-                              className={`text-[11px] font-bold ${accentGreenClasses}`}
-                            >
-                              {isCompleted ? 'Revisar →' : 'Iniciar →'}
-                            </span>
-                          </div>
-                        </Link>
-                      ) : (
-                        <div
-                          key={lesson.id}
-                          suppressHydrationWarning
-                          className="w-full p-3 sm:p-3.5 rounded-xl border flex items-center justify-between gap-2.5 sm:gap-3 text-left opacity-70 bg-stone-100/80 border-stone-200 text-stone-500 dark:bg-gray-900/50 dark:border-gray-800/70 dark:text-gray-500"
-                        >
-                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                            <div
-                              suppressHydrationWarning
-                              className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0 bg-stone-200 text-stone-500 dark:bg-gray-800 dark:text-gray-500"
-                            >
-                              {isCompleted ? '✓' : '•'}
-                            </div>
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-xs sm:text-sm truncate">{lesson.title}</h4>
-                              <p className="text-[10px] sm:text-xs truncate">{lesson.desc}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-                            <span className="hidden sm:inline text-[11px] font-semibold tabular-nums">
-                              {XP_POR_AULA} XP
-                            </span>
-                            <span className="text-[11px] font-semibold">Em breve</span>
-                          </div>
-                        </div>
-                      )
-                    })}
+                          )
+                        })}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
+              </LabSurface>
             )
           })}
         </div>

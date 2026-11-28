@@ -1,34 +1,11 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useState } from 'react'
 import Link from 'next/link'
-
-const STORAGE_KEY = 'codelab_tema_aula'
-const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect
+import { useTheme } from '@/hooks/useTheme'
+import { LabSurface } from '@/components/LabSurface'
 
 export default function WelcomePage() {
-  const [isDark, setIsDark] = useState(true)
-
-  useIsomorphicLayoutEffect(() => {
-    const salvo = localStorage.getItem(STORAGE_KEY)
-    const escuro = salvo !== 'light'
-    setIsDark(escuro)
-    document.documentElement.classList.toggle('dark', escuro)
-    document.documentElement.style.backgroundColor = escuro ? '#030712' : '#fafaf9'
-  }, [])
-
-  const alternarTema = () => {
-    setIsDark((atual) => {
-      const proximo = !atual
-      localStorage.setItem(STORAGE_KEY, proximo ? 'dark' : 'light')
-      document.documentElement.classList.toggle('dark', proximo)
-      document.documentElement.style.backgroundColor = proximo ? '#030712' : '#fafaf9'
-      return proximo
-    })
-  }
-
-  const cardClasses =
-    'bg-white border-stone-200 text-stone-900 shadow-xl dark:bg-gray-900 dark:border-gray-800 dark:text-white dark:shadow-2xl'
+  const { isDark, alternarTema } = useTheme()
 
   const btnTemaClasses =
     'bg-stone-100 hover:bg-stone-200 text-stone-700 hover:text-stone-900 border-stone-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white dark:border-gray-800'
@@ -38,8 +15,7 @@ export default function WelcomePage() {
   const accentGreenClasses = 'text-emerald-700 dark:text-emerald-400'
 
   return (
-    <div className="min-h-screen flex flex-col justify-between p-4 selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 text-stone-900 dark:bg-gray-950 dark:text-white">
-      {/* Topo discreto com alternador de tema */}
+    <div className="min-h-screen flex flex-col justify-between p-4 selection:bg-emerald-500 selection:text-gray-950 bg-stone-50 bg-lab-dots text-stone-900 dark:bg-gray-950 dark:text-white">
       <header className="max-w-md w-full mx-auto pt-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="px-2.5 py-1.5 font-bold text-xs rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30">
@@ -54,7 +30,7 @@ export default function WelcomePage() {
           type="button"
           onClick={alternarTema}
           suppressHydrationWarning
-          className={`px-3 py-2 border text-xs font-semibold rounded-xl cursor-pointer ${btnTemaClasses}`}
+          className={`px-3 py-2 border text-xs font-semibold rounded-xl cursor-pointer transition-colors ${btnTemaClasses}`}
           title="Alternar modo claro e escuro"
           aria-label="Alternar modo claro e escuro"
         >
@@ -62,9 +38,11 @@ export default function WelcomePage() {
         </button>
       </header>
 
-      {/* Card Central */}
       <main className="flex-1 flex flex-col items-center justify-center my-auto py-4">
-        <div className={`max-w-md w-full border p-8 rounded-3xl text-center space-y-6 ${cardClasses}`}>
+        <LabSurface
+          variant="card"
+          className="max-w-md w-full p-8 text-center space-y-6 shadow-xl dark:shadow-2xl"
+        >
           <div className="w-16 h-16 border rounded-2xl flex items-center justify-center mx-auto text-2xl font-black bg-emerald-50 border-emerald-600/25 text-emerald-700 dark:bg-emerald-500/20 dark:border-emerald-500/30 dark:text-emerald-400">
             🎉
           </div>
@@ -84,19 +62,19 @@ export default function WelcomePage() {
           <div className="space-y-2.5">
             <Link
               href="/dashboard"
-              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-500/20 block cursor-pointer"
+              className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-xs shadow-lg shadow-emerald-500/20 block cursor-pointer transition-colors"
             >
               Ir para a Trilha ⚡
             </Link>
 
             <Link
               href="/desafios"
-              className={`w-full py-2.5 border font-semibold rounded-xl text-xs block cursor-pointer ${btnTemaClasses}`}
+              className={`w-full py-2.5 border font-semibold rounded-xl text-xs block cursor-pointer transition-colors ${btnTemaClasses}`}
             >
               Explorar Desafios ⚔️
             </Link>
           </div>
-        </div>
+        </LabSurface>
       </main>
 
       <footer className={`max-w-md w-full mx-auto pb-2 text-center text-xs ${textSubtleClasses}`}>

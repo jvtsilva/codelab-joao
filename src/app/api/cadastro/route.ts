@@ -1,100 +1,136 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { isAllowedOrigin, isValidEmail, sanitizePlainText } from '@/lib/security'
+import { checkRateLimit } from '@/lib/rateLimit'
+import { NO_STORE_HEADERS } from '@/lib/apiAuth'
+import { getPublicEnv, getServerEnv } from '@/lib/env'
+import { logEvent, toPublicErrorMessage } from '@/lib/logger'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const MAX_PASSWORD_LENGTH = 128
 
-const supabaseServer = supabaseServiceRoleKey
-  ? createClient(supabaseUrl, supabaseServiceRoleKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
-    })
-  : null
+function jsonNoStore(data: unknown, status = 200) {
+  return NextResponse.json(data, {
+    status,
+    headers: NO_STORE_HEADERS,
+  })
+}
 
-const MAX_CADASTROS_POR_HORA = 3
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-
-function getClientIp(request: Request): string {
-  const realIp = request.headers.get('x-real-ip')?.trim()
-  if (realIp) return realIp
-
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  if (forwardedFor) {
-    const parts = forwardedFor
-      .split(',')
-      .map((part) => part.trim())
-      .filter(Boolean)
-    if (parts.length > 0) return parts[parts.length - 1]
-  }
-
-  return '127.0.0.1'
+function isStrongPassword(password: string): boolean {
+  return (
+    password.length >= 8 &&
+    password.length <= MAX_PASSWORD_LENGTH &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password)
+  )
 }
 
 export async function POST(request: Request) {
   try {
-    if (!supabaseUrl || !supabaseServer) {
-      console.error('Variáveis do Supabase (URL ou SERVICE_ROLE_KEY) ausentes no servidor.')
+    if (!isAllowedOrigin(request)) {
+      return jsonNoStore({ error: 'Origem da requisição não permitida.' }, 403)
+    }
+
+    const { supabaseUrl, supabaseAnonKey } = getPublicEnv()
+    const { supabaseServiceRoleKey } = getServerEnv()
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const adminClient = createClient<any, 'public', any>(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+
+    const rate = await checkRateLimit(adminClient, request, {
+      action: 'signup',
+      limit: 8,
+      windowSeconds: 900,
+    })
+
+    if (!rate.allowed) {
       return NextResponse.json(
-        { error: 'Erro interno na configuração do servidor.' },
-        { status: 500 }
+        { error: 'Muitas tentativas de cadastro. Aguarde alguns minutos e tente novamente.' },
+        {
+          status: 429,
+          headers: {
+            ...NO_STORE_HEADERS,
+            'Retry-After': String(rate.retryAfterSeconds),
+          },
+        }
       )
     }
 
     const body = await request.json().catch(() => null)
-    const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
-    const password = typeof body?.password === 'string' ? body.password : ''
-    const token = typeof body?.token === 'string' ? body.token.trim() : ''
+    if (!body || typeof body !== 'object') {
+      return jsonNoStore({ error: 'Dados de cadastro inválidos.' }, 400)
+    }
 
-    if (!EMAIL_REGEX.test(email) || password.length < 8 || !token) {
-      return NextResponse.json(
-        { error: 'Dados inválidos ou verificação de segurança pendente.' },
-        { status: 400 }
+    const raw = body as Record<string, unknown>
+    const fullName = sanitizePlainText(raw.fullName ?? raw.full_name ?? raw.name ?? '', 80)
+    const email = sanitizePlainText(raw.email ?? '', 160).toLowerCase()
+    const password = typeof raw.password === 'string' ? raw.password : ''
+
+    if (fullName.length < 2) {
+      return jsonNoStore({ error: 'Informe seu nome com pelo menos 2 caracteres.' }, 400)
+    }
+
+    if (!isValidEmail(email)) {
+      return jsonNoStore({ error: 'Informe um e-mail válido.' }, 400)
+    }
+
+    if (!isStrongPassword(password)) {
+      return jsonNoStore(
+        {
+          error:
+            'A senha deve ter entre 8 e 128 caracteres, incluindo maiúscula, número e caractere especial.',
+        },
+        400
       )
     }
 
-    const ip = getClientIp(request)
-    const umaHoraAtras = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
 
-    // 1. Consulta tentativas do IP na última 1 hora
-    const { count, error: selectError } = await supabaseServer
-      .from('ip_rate_limit')
-      .select('*', { count: 'exact', head: true })
-      .eq('ip', ip)
-      .gte('created_at', umaHoraAtras)
+    const { data, error } = await authClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+      },
+    })
 
-    if (selectError) {
-      console.error('Erro ao consultar ip_rate_limit:', selectError.message)
-      return NextResponse.json(
-        { error: 'Erro interno no servidor.' },
-        { status: 500 }
+    if (error) {
+      logEvent('warn', 'signup_failed', { code: error.code ?? 'auth_error' })
+      return jsonNoStore(
+        { error: toPublicErrorMessage(error, 'Não foi possível concluir o cadastro.') },
+        400
       )
     }
 
-    if ((count ?? 0) >= MAX_CADASTROS_POR_HORA) {
-      return NextResponse.json(
-        { error: 'Muitas tentativas a partir deste IP. Tente novamente mais tarde.' },
-        { status: 429 }
-      )
-    }
+    logEvent('info', 'signup_succeeded', {
+      hasUser: Boolean(data.user?.id),
+      needsEmailConfirmation: !data.session,
+    })
 
-    // 2. Registra tentativa do IP na tabela ip_rate_limit
-    const { error: insertError } = await supabaseServer
-      .from('ip_rate_limit')
-      .insert([{ ip }])
-
-    if (insertError) {
-      console.error('Erro ao registrar IP em ip_rate_limit:', insertError.message)
-      return NextResponse.json(
-        { error: 'Erro interno no servidor.' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (err: unknown) {
-    console.error('Erro inesperado em POST /api/cadastro:', err)
-    return NextResponse.json(
-      { error: 'Erro interno no servidor.' },
-      { status: 500 }
+    return jsonNoStore(
+      {
+        success: true,
+        needsEmailConfirmation: !data.session,
+        message: data.session
+          ? 'Cadastro concluído com sucesso.'
+          : 'Cadastro realizado. Verifique seu e-mail para confirmar a conta.',
+      },
+      201
     )
+  } catch (err) {
+    logEvent('error', 'signup_unexpected_error', {
+      error: err instanceof Error ? err.message : 'unknown',
+    })
+    return jsonNoStore({ error: 'Erro interno ao processar o cadastro.' }, 500)
   }
+}
+
+export async function GET() {
+  return jsonNoStore({ error: 'Método não permitido.' }, 405)
 }

@@ -1,6 +1,6 @@
 export interface Profile {
   id: string
-  email: string
+  email?: string
   full_name: string | null
   xp: number
   streak: number

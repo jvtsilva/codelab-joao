@@ -2,39 +2,48 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+type NavTab =
+  | 'home'
+  | 'trilha'
+  | 'desafios'
+  | 'playground'
+  | 'conta'
+  | 'aula'
+  | 'medalhas'
+  | 'contato'
+  | 'painel'
+
 interface NavbarProps {
-  activeTab?:
-    | 'trilha'
-    | 'desafios'
-    | 'playground'
-    | 'conta'
-    | 'aula'
-    | 'ranking'
-    | 'medalhas'
-    | 'contato'
-    | 'painel'
+  activeTab?: NavTab
   subtitle?: string
   lessonTitle?: string
   userId?: string | null
-  userXp?: number
   isDark?: boolean
   onToggleTheme?: () => void
 }
 
-function clearLocalSessionData() {
-  if (typeof window === 'undefined') return
-  try {
-    localStorage.removeItem('codelab_user_xp')
-  } catch {
-    // Ignora bloqueio de storage pelo navegador
+function resolveActiveTab(pathname: string | null, explicitTab?: NavTab): NavTab | 'outro' {
+  if (pathname) {
+    if (pathname === '/') return 'home'
+    if (pathname.startsWith('/dashboard/aula')) return 'aula'
+    if (pathname.startsWith('/dashboard')) return 'trilha'
+    if (pathname.startsWith('/desafios')) return 'desafios'
+    if (pathname.startsWith('/playground')) return 'playground'
+    if (pathname.startsWith('/medalhas')) return 'medalhas'
+    if (pathname.startsWith('/contato')) return 'contato'
+    if (pathname.startsWith('/painel')) return 'painel'
+    if (pathname.startsWith('/login') || pathname.startsWith('/cadastro')) return 'conta'
+    return explicitTab ?? 'outro'
   }
+
+  return explicitTab ?? 'trilha'
 }
 
 export function Navbar({
-  activeTab = 'trilha',
+  activeTab,
   subtitle = 'Aprenda no seu ritmo',
   lessonTitle,
   userId,
@@ -42,8 +51,11 @@ export function Navbar({
   onToggleTheme,
 }: NavbarProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+
+  const currentTab = resolveActiveTab(pathname, activeTab)
 
   const handleLogout = async () => {
     if (signingOut) return
@@ -52,9 +64,10 @@ export function Navbar({
     try {
       await supabase.auth.signOut()
     } catch (err) {
-      console.error('Erro ao encerrar sessão:', err)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Erro ao encerrar sessão:', err)
+      }
     } finally {
-      clearLocalSessionData()
       window.location.href = '/'
     }
   }
@@ -69,42 +82,43 @@ export function Navbar({
     setMenuOpen(false)
   }
 
-  const isTrilhaAtiva = activeTab === 'trilha' || activeTab === 'aula'
+  const isTrilhaAtiva = currentTab === 'trilha' || currentTab === 'aula'
+  const brandHref = currentTab === 'home' ? '/' : '/dashboard'
 
   const navBtnClasses =
-    'bg-stone-100 hover:bg-stone-200 text-stone-800 border-stone-300 dark:bg-gray-900 dark:hover:bg-gray-800 dark:text-gray-200 dark:border-gray-800'
+    'press-tactile bg-white hover:bg-[#F1EFEA] text-[#18181B] border-[#E7E5E4] dark:bg-[#121821] dark:hover:bg-[#0E131A] dark:text-[#F1F5F9] dark:border-[#1E293B] transition-colors'
   const activeNavBtnClasses =
-    'bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30'
+    'bg-[#047857]/10 text-[#047857] border-[#047857]/30 dark:bg-[#34D399]/10 dark:text-[#34D399] dark:border-[#34D399]/30'
   const mobileItemClasses =
-    'bg-stone-50 border-stone-200 text-stone-700 dark:bg-gray-950 dark:border-gray-800 dark:text-gray-300'
+    'bg-[#F1EFEA] border-[#E7E5E4] text-[#18181B] dark:bg-[#0E131A] dark:border-[#1E293B] dark:text-[#F1F5F9]'
 
   return (
-    <header className="relative border-b border-stone-200 dark:border-gray-800 bg-white/95 dark:bg-gray-950/95 backdrop-blur sticky top-0 z-50 py-2.5 sm:py-3">
+    <header className="relative border-b border-[#E7E5E4] dark:border-[#1E293B] bg-[#F8F7F4]/95 dark:bg-[#0B0F14]/95 backdrop-blur sticky top-0 z-50 py-2.5 sm:py-3">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Link
-            href="/dashboard"
+            href={brandHref}
             onClick={() => setMenuOpen(false)}
-            className="px-2 py-1 font-bold text-xs rounded-lg shrink-0 border bg-emerald-50 text-emerald-700 border-emerald-600/30 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30"
+            className="px-2 py-1 font-mono font-semibold text-xs rounded-lg shrink-0 border bg-[#047857]/10 text-[#047857] border-[#047857]/25 dark:bg-[#34D399]/10 dark:text-[#34D399] dark:border-[#34D399]/25"
           >
             JS
           </Link>
           <div className="min-w-0">
-            <h1 className="font-bold text-sm sm:text-base tracking-wide truncate flex items-center gap-1.5">
+            <p className="font-extrabold text-sm sm:text-base tracking-tight truncate flex items-center gap-1.5">
               <span>Codelab</span>
               {lessonTitle && (
-                <span className="hidden lg:inline text-xs font-normal truncate text-stone-500 dark:text-gray-400">
+                <span className="hidden lg:inline text-xs font-normal truncate text-[#57534E] dark:text-[#94A3B8]">
                   - {lessonTitle}
                 </span>
               )}
               {subtitle && (
-                <span className="hidden sm:inline text-xs font-normal truncate text-stone-500 dark:text-gray-400">
+                <span className="hidden sm:inline text-xs font-normal truncate text-[#57534E] dark:text-[#94A3B8]">
                   {lessonTitle ? '' : subtitle}
                 </span>
               )}
-            </h1>
+            </p>
             {subtitle && (
-              <p className="sm:hidden text-[11px] leading-tight truncate text-stone-500 dark:text-gray-400">
+              <p className="sm:hidden text-[11px] leading-tight truncate text-[#57534E] dark:text-[#94A3B8]">
                 {subtitle}
               </p>
             )}
@@ -124,7 +138,7 @@ export function Navbar({
           <Link
             href="/desafios"
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'desafios' ? activeNavBtnClasses : navBtnClasses
+              currentTab === 'desafios' ? activeNavBtnClasses : navBtnClasses
             }`}
           >
             Desafios
@@ -132,24 +146,16 @@ export function Navbar({
           <Link
             href="/playground"
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'playground' ? activeNavBtnClasses : navBtnClasses
+              currentTab === 'playground' ? activeNavBtnClasses : navBtnClasses
             }`}
           >
             Playground
           </Link>
           <Link
-            href="/ranking"
-            className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'ranking' ? activeNavBtnClasses : navBtnClasses
-            }`}
-          >
-            Ranking
-          </Link>
-          <Link
             href="/medalhas"
             onClick={handleProtectedNav}
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'medalhas' ? activeNavBtnClasses : navBtnClasses
+              currentTab === 'medalhas' ? activeNavBtnClasses : navBtnClasses
             }`}
           >
             Medalhas
@@ -157,7 +163,7 @@ export function Navbar({
           <Link
             href="/contato"
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'contato' ? activeNavBtnClasses : navBtnClasses
+              currentTab === 'contato' ? activeNavBtnClasses : navBtnClasses
             }`}
           >
             Contato
@@ -166,7 +172,7 @@ export function Navbar({
             href="/painel"
             onClick={handleProtectedNav}
             className={`px-3 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${
-              activeTab === 'painel' ? activeNavBtnClasses : navBtnClasses
+              currentTab === 'painel' ? activeNavBtnClasses : navBtnClasses
             }`}
           >
             Painel
@@ -185,27 +191,27 @@ export function Navbar({
           )}
 
           {userId ? (
-            <div className="flex items-center gap-2 pl-2 border-l border-stone-200 dark:border-gray-800">
+            <div className="flex items-center gap-2 pl-2 border-l border-[#E7E5E4] dark:border-[#1E293B]">
               <button
                 type="button"
                 disabled={signingOut}
                 onClick={() => void handleLogout()}
-                className="px-3.5 py-2 border rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap disabled:opacity-60 bg-red-50 text-red-700 border-red-600/30 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/30"
+                className="press-tactile px-3.5 py-2 border rounded-xl text-xs font-semibold cursor-pointer whitespace-nowrap disabled:opacity-60 bg-[#B91C1C]/10 text-[#B91C1C] border-[#B91C1C]/25 dark:bg-[#F87171]/10 dark:text-[#F87171] dark:border-[#F87171]/25 transition-colors"
               >
                 {signingOut ? 'Saindo...' : 'Sair'}
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 pl-2 border-l border-stone-200 dark:border-gray-800">
+            <div className="flex items-center gap-2 pl-2 border-l border-[#E7E5E4] dark:border-[#1E293B]">
               <Link
                 href="/login"
-                className={`px-3.5 py-2 border rounded-xl text-xs whitespace-nowrap ${navBtnClasses}`}
+                className={`px-3.5 py-2 border rounded-xl text-xs font-semibold whitespace-nowrap ${navBtnClasses}`}
               >
                 Entrar
               </Link>
               <Link
                 href="/cadastro"
-                className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-extrabold rounded-xl text-xs whitespace-nowrap"
+                className="press-tactile px-3.5 py-2 bg-[#047857] hover:bg-[#065F46] dark:bg-[#34D399] dark:hover:bg-[#6EE7B7] text-white dark:text-[#0B0F14] font-extrabold rounded-xl text-xs whitespace-nowrap transition-colors"
               >
                 Criar Conta
               </Link>
@@ -233,7 +239,7 @@ export function Navbar({
             onClick={() => setMenuOpen((prev) => !prev)}
             aria-expanded={menuOpen}
             aria-label={menuOpen ? 'Fechar Menu' : 'Abrir Menu'}
-            className={`px-3 py-2 border rounded-xl font-bold text-xs cursor-pointer ${navBtnClasses} text-emerald-700 dark:text-emerald-400`}
+            className={`px-3 py-2 border rounded-xl font-bold text-xs cursor-pointer ${navBtnClasses} text-[#047857] dark:text-[#34D399]`}
           >
             {menuOpen ? 'Fechar' : 'Menu'}
           </button>
@@ -242,7 +248,7 @@ export function Navbar({
 
       {/* Menu Mobile */}
       {menuOpen && (
-        <div className="md:hidden absolute top-full left-0 right-0 border-b p-4 space-y-2 z-50 shadow-2xl bg-white border-stone-200 dark:bg-gray-900 dark:border-gray-800">
+        <div className="md:hidden absolute top-full left-0 right-0 border-b p-4 space-y-2 z-50 shadow-2xl bg-white border-[#E7E5E4] dark:bg-[#121821] dark:border-[#1E293B]">
           <Link
             href="/dashboard"
             onClick={() => setMenuOpen(false)}
@@ -256,7 +262,7 @@ export function Navbar({
             href="/desafios"
             onClick={() => setMenuOpen(false)}
             className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
-              activeTab === 'desafios' ? activeNavBtnClasses : mobileItemClasses
+              currentTab === 'desafios' ? activeNavBtnClasses : mobileItemClasses
             }`}
           >
             Desafios Práticos
@@ -265,25 +271,16 @@ export function Navbar({
             href="/playground"
             onClick={() => setMenuOpen(false)}
             className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
-              activeTab === 'playground' ? activeNavBtnClasses : mobileItemClasses
+              currentTab === 'playground' ? activeNavBtnClasses : mobileItemClasses
             }`}
           >
             Playground
           </Link>
           <Link
-            href="/ranking"
-            onClick={() => setMenuOpen(false)}
-            className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
-              activeTab === 'ranking' ? activeNavBtnClasses : mobileItemClasses
-            }`}
-          >
-            Ranking
-          </Link>
-          <Link
             href="/medalhas"
             onClick={handleProtectedNav}
             className={`block px-4 py-3 border rounded-xl text-xs font-semibold ${
-              activeTab === 'medalhas' ? activeNavBtnClasses : mobileItemClasses
+              currentTab === 'medalhas' ? activeNavBtnClasses : mobileItemClasses
             }`}
           >
             Medalhas
@@ -292,7 +289,7 @@ export function Navbar({
             href="/contato"
             onClick={() => setMenuOpen(false)}
             className={`block px-4 py-3 border rounded-xl text-xs font-medium ${
-              activeTab === 'contato' ? activeNavBtnClasses : mobileItemClasses
+              currentTab === 'contato' ? activeNavBtnClasses : mobileItemClasses
             }`}
           >
             Contato
@@ -301,7 +298,7 @@ export function Navbar({
             href="/painel"
             onClick={handleProtectedNav}
             className={`block px-4 py-3 border rounded-xl text-xs font-medium ${
-              activeTab === 'painel' ? activeNavBtnClasses : mobileItemClasses
+              currentTab === 'painel' ? activeNavBtnClasses : mobileItemClasses
             }`}
           >
             Meu Painel
@@ -311,7 +308,7 @@ export function Navbar({
               type="button"
               disabled={signingOut}
               onClick={() => void handleLogout()}
-              className="w-full text-left px-4 py-3 border rounded-xl text-xs font-medium cursor-pointer disabled:opacity-60 bg-red-50 border-red-600/25 text-red-700 dark:bg-red-500/10 dark:border-red-500/25 dark:text-red-400"
+              className="w-full text-left px-4 py-3 border rounded-xl text-xs font-medium cursor-pointer disabled:opacity-60 bg-[#B91C1C]/10 border-[#B91C1C]/25 text-[#B91C1C] dark:bg-[#F87171]/10 dark:border-[#F87171]/25 dark:text-[#F87171]"
             >
               {signingOut ? 'Saindo...' : 'Sair da Conta'}
             </button>
@@ -327,7 +324,7 @@ export function Navbar({
               <Link
                 href="/cadastro"
                 onClick={() => setMenuOpen(false)}
-                className="text-center px-4 py-3 bg-emerald-500 text-gray-950 rounded-xl text-xs font-extrabold"
+                className="text-center px-4 py-3 bg-[#047857] hover:bg-[#065F46] dark:bg-[#34D399] dark:hover:bg-[#6EE7B7] text-white dark:text-[#0B0F14] rounded-xl text-xs font-extrabold transition-colors"
               >
                 Criar Conta
               </Link>

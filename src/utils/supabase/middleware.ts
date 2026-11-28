@@ -38,7 +38,9 @@ export async function updateSession(request: NextRequest) {
     // Valida e renova a sessão via servidor quando houver token válido
     await supabase.auth.getUser()
   } catch (err) {
-    console.error('Erro ao atualizar sessão no middleware:', err)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Erro ao atualizar sessão no middleware:', err)
+    }
   }
 
   return supabaseResponse

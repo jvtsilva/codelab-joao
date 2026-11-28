@@ -2,29 +2,120 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
+  --font-display: var(--font-display), var(--font-sans), Arial, sans-serif;
   --font-sans: var(--font-sans), Arial, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+
+  --color-canvas-light: #F8F7F4;
+  --color-canvas-dark: #0B0F14;
+  --color-surface-light: #FFFFFF;
+  --color-surface-dark: #121821;
+  --color-border-light: #E7E5E4;
+  --color-border-dark: #1E293B;
+  --color-ink-light: #18181B;
+  --color-ink-dark: #F1F5F9;
+  --color-muted-light: #57534E;
+  --color-muted-dark: #94A3B8;
+  --color-accent-light: #047857;
+  --color-accent-dark: #34D399;
+  --color-warn-light: #B45309;
+  --color-warn-dark: #FBBF24;
 }
 
 @layer base {
   html {
+    scroll-behavior: smooth;
     color-scheme: light;
-    background-color: #fafaf9;
   }
 
   html.dark {
     color-scheme: dark;
-    background-color: #030712;
   }
 
-  html,
   body {
+    background-color: #F8F7F4;
+    color: #18181B;
     font-family: var(--font-sans);
-    min-height: 100vh;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    transition: background-color 150ms ease, color 150ms ease;
   }
 
-  code,
-  pre {
+  html.dark body {
+    background-color: #0B0F14;
+    color: #F1F5F9;
+  }
+
+  input,
+  textarea,
+  select {
+    color: inherit;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+  }
+
+  code, pre, kbd, samp {
     font-family: var(--font-mono);
   }
+
+  :focus-visible {
+    outline: 2px solid #047857;
+    outline-offset: 2px;
+  }
+
+  html.dark :focus-visible {
+    outline-color: #34D399;
+  }
+}
+
+@layer utilities {
+  .bg-lab-dots {
+    background-image: radial-gradient(rgba(24, 24, 27, 0.08) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  html.dark .bg-lab-dots {
+    background-image: radial-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .press-tactile {
+    transition: transform 120ms ease, background-color 150ms ease, border-color 150ms ease;
+  }
+
+  .press-tactile:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Scrollbar discreta */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(120, 113, 108, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 113, 108, 0.55);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45);
 }

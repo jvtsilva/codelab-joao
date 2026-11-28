@@ -1,58 +1,53 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import { NO_STORE_HEADERS } from '@/lib/apiAuth'
+import { getPublicEnv } from '@/lib/env'
+import { logEvent } from '@/lib/logger'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+function sanitizeNextPath(rawNext: string | null): string {
+  if (!rawNext) return '/painel'
+  const trimmed = rawNext.trim()
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) {
+    return '/painel'
+  }
+  return trimmed
+}
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
-  const errorParam = requestUrl.searchParams.get('error')
-
-  if (errorParam) {
-    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
-  }
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Variáveis públicas do Supabase ausentes na rota /auth/callback.')
-    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
-  }
-
-  if (!code) {
-    return NextResponse.redirect(new URL('/login', requestUrl.origin))
-  }
+  const code = requestUrl.searchParams.get('code')?.trim() ?? ''
+  const nextPath = sanitizeNextPath(requestUrl.searchParams.get('next'))
 
   try {
-    const cookieStore = await cookies()
+    if (!code) {
+      return NextResponse.redirect(new URL('/login?erro=codigo_ausente', requestUrl.origin), {
+        headers: NO_STORE_HEADERS,
+      })
+    }
 
-    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch {
-            // Ignora falhas de escrita fora de contexto mutável de cookies
-          }
-        },
-      },
+    const { supabaseUrl, supabaseAnonKey } = getPublicEnv()
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
     })
 
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (error) {
-      console.error('Erro ao trocar código por sessão:', error.message)
-      return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
+      logEvent('warn', 'auth_callback_exchange_failed', { code: error.code ?? 'auth_error' })
+      return NextResponse.redirect(new URL('/login?erro=sessao_invalida', requestUrl.origin), {
+        headers: NO_STORE_HEADERS,
+      })
     }
 
-    return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+    return NextResponse.redirect(new URL(nextPath, requestUrl.origin), {
+      headers: NO_STORE_HEADERS,
+    })
   } catch (err) {
-    console.error('Erro inesperado na rota /auth/callback:', err)
-    return NextResponse.redirect(new URL('/login?error=auth-failed', requestUrl.origin))
+    logEvent('error', 'auth_callback_unexpected_error', {
+      error: err instanceof Error ? err.message : 'unknown',
+    })
+    return NextResponse.redirect(new URL('/login?erro=erro_interno', requestUrl.origin), {
+      headers: NO_STORE_HEADERS,
+    })
   }
 }

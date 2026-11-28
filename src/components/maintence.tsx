@@ -37,14 +37,14 @@ export default function MaintenancePage() {
             Modo Manutenção • Codelab João
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Refatorando a Matrix<span aria-hidden="true">{pontos}</span>
+            Atualizando a plataforma<span aria-hidden="true">{pontos}</span>
           </h1>
           <p className="text-xs sm:text-sm text-gray-400 leading-relaxed max-w-sm mx-auto">
-            Estamos no <strong className="text-gray-200">Modo Martelo</strong> ajustando a arquitetura, limpando o código e preparando a melhor experiência de programação do zero absoluto.
+            Estamos aplicando melhorias e preparando novidades para deixar sua experiência de aprendizado ainda melhor.
           </p>
         </div>
 
-        {/* Terminal ilustrativo */}
+        {/* Painel ilustrativo de status */}
         <div className="bg-[#010204] border border-gray-800/80 rounded-2xl p-4 text-left font-mono text-[11px] text-emerald-400 space-y-1.5 shadow-inner">
           <div
             aria-hidden="true"
@@ -55,12 +55,12 @@ export default function MaintenancePage() {
               <span className="w-2 h-2 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2 h-2 rounded-full bg-emerald-500/80 inline-block" />
             </span>
-            <span>system_status.sh</span>
+            <span>status</span>
           </div>
-          <p className="text-gray-500">&gt; git checkout -b feature/masterclass</p>
-          <p className="text-gray-300">&gt; Compilando novas rotas e desafios...</p>
+          <p className="text-gray-400">&gt; Aplicando melhorias na plataforma...</p>
+          <p className="text-gray-300">&gt; Sincronizando aulas e desafios...</p>
           <p className="text-emerald-400 font-bold">
-            &gt; Status: Servidor em atualização. Volte em breve. 🚀
+            &gt; Plataforma em atualização. Volte em breve. 🚀
           </p>
         </div>
 
